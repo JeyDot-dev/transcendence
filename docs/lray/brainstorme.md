@@ -349,7 +349,7 @@ def index(request):
 
 C'est la vue la plus simple que nous pouvons faire. Pour pouvoir l'appeler, nous devons la mapper à un URL. Pour se faire, nous avons besoin d'un URLconf.
 
-Pour créer un URLconf dans le répertoire polls, il faut créer un fichier qui se nomme *urls.py*. Le répertoire polls de maintenant resemblé à ceci :
+Pour créer un URLconf dans le répertoire polls, il faut créer un fichier qui se nomme *urls.py*. Le répertoire polls de maintenant ressemblé à ceci :
 
 ```text
 polls
@@ -376,7 +376,7 @@ urlpatterns = [
 ]
 ```
 
-L'étape suivante est de faire pointer l'URLconf principal vers notre module *polls.urls*. Dans le fichier *djangoTuto/urls.py* ajouter un import vers *django.urls.include* et inserer un *include()* dans la liste *urlpatterns* pour avoir comme résultat :
+L'étape suivante est de faire pointer l'URLconf principal vers notre module *polls.urls*. Dans le fichier *djangoTuto/urls.py* ajouter un import vers *django.urls.include* et insérer un *include()* dans la liste *urlpatterns* pour avoir comme résultat :
 
 ```python
 from django.contrib import admin
