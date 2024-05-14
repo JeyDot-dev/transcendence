@@ -235,7 +235,7 @@ $> django-admin startproject <project_name>
 
 Cette commande va créer un dossier <project_name> qui contiendra la configuration initiale de notre projet Django. Pour ce tutoriel, je vais appeler mon projet Django de la même manière de que le repos Git, "djangoTuto".
 
-```bash
+```text
 (djangoTuto-env) ➜  djangoTuto git:(main) ✗ ls
 djangoTuto  djangoTuto-env
 (djangoTuto-env) ➜  djangoTuto git:(main) ✗ tree djangoTuto
@@ -257,4 +257,139 @@ djangoTuto
 - Le fichier **djangoTuto/__init__.py** est un fichier vide qui indique à Django que le répertoire doit être considéré comme un Package Python.
 - Le fichier **djangoTuto/settings.py** contient les configurations de notre projet Django. Plus d'information [ici](https://docs.djangoproject.com/en/5.0/topics/settings/).
 - Le fichier **djangoTuto/urls.py** contient les différents urls de notre projet ainsi que les actions qui leurs sont liée. Plus d'informations [ici](https://docs.djangoproject.com/en/5.0/topics/http/urls/).
--
+- Le fichier **djangoTuto/asgi.py** est un point d'entrée pour que les serveur web compatible ASGI puissent servir le projet.
+- Le fichier **djangoTuto/wsgi.py** est un point d'entrée pour que les serveur web compatible WSGI puissent servir le projet.
+
+
+### Serveur de développement
+
+Maintenant que nous avons vu comment se composait la configuration de base d'un projet Django, nous allons pouvoir vérifié qu'il fonctionne. Pour se faire, nous allons lancer le projet avec le serveur de développement intégrer :
+
+```text
+$> python manage.py runserver
+```
+
+```text
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+
+You have 18 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): admin, auth, contenttypes, sessions.
+Run 'python manage.py migrate' to apply them.
+May 14, 2024 - 20:08:30
+Django version 5.0.6, using settings 'djangoTuto.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+```
+
+> Pour le moment, nous pouvons ignorer les warnings à propos des migrations. Cela concerne la base de donnée que nous verrons plus loin dans le tutoriel
+
+Nous venons de démarrer le projet sur le serveur de développement ! Se serveur est très pratique durant la création du projet mais il ne doit surtout pas être utilisé en production !
+
+Maintenant que le serveur est en route, si vous vous rendez sur l'URL `http://127.0.0.1:8000` vous devriez voir une page avec un rocket qui vous informe que l'installation c'est bien déroulée.
+
+Par défaut, *runserver* utilise le port 8000, il est possible de spécifié un autre port et même un autre host lors de l'appel du programme :
+
+```text
+$> python manage.py runserver 3000
+```
+
+```text
+$> python manage.py runserver 0.0.0.0:4242
+```
+
+[Doc - Django runserver](https://docs.djangoproject.com/en/5.0/ref/django-admin/#django-admin-runserver)
+
+### Création de l'app de sondage
+
+Maintenant que l'environnement (le projet) est configuré, nous allons pouvoir nous mettre au travail.
+
+Chaque application que nous écrivons pour Django consiste en un package Python qui suit certaine convention. Django est fourni avec un utilitaire qui génère automatiquement l'architecture de répertoire basique pour une app, afin de pouvoir se concentrer sur l'écriture du code plutôt que sur des taches ennuyeuses.
+
+> La différence entre un projet et une app ? Une app est une application web qui fait quelque chose, par exemple: un blog, une base de donnée d'enregistrement public ou une petite app de sondage. Une projet et une collection de configurations et d'apps pour un site web particulier. Un projet peut contenir une multitude d'apps et une apps peut être dans une multitude de projet.
+
+Votre apps peut vivre n'importe ou dans le Python path ([info](https://docs.python.org/3/tutorial/modules.html#tut-searchpath)). Dans ce tutoriel, nous allons créer notre app de sondage dans le même répertoire que *manage.py* comme cela, elle pourra être importée comme son propre module de haut niveau plutôt que comme un submodule de *djangoTuto*.
+
+```text
+$> python manage.py startapp polls
+```
+
+Cette commande à pour effet de créer un répertoire *polls* qui se comporte comme cela :
+
+```text
+(djangoTuto-env) ➜  djangoTuto git:(main) ✗ ls
+db.sqlite3  djangoTuto  manage.py  polls
+(djangoTuto-env) ➜  djangoTuto git:(main) ✗ tree polls
+polls
+├── __init__.py
+├── admin.py
+├── apps.py
+├── migrations
+│   └── __init__.py
+├── models.py
+├── tests.py
+└── views.py
+
+1 directory, 7 files
+```
+
+Cette structure de répertoire va contenir notre application de sondage.
+
+### Écrire notre première vue
+
+Nous allons écrire notre première vue. Pour se faire, nous allons travailler sur le fichier *polls/view.py* et ajouter le code suivant :
+
+```python
+from django.http import HttpResponse
+
+def index(request):
+	return HttpResponse("Index de /polls/")
+```
+
+C'est la vue la plus simple que nous pouvons faire. Pour pouvoir l'appeler, nous devons la mapper à un URL. Pour se faire, nous avons besoin d'un URLconf.
+
+Pour créer un URLconf dans le répertoire polls, il faut créer un fichier qui se nomme *urls.py*. Le répertoire polls de maintenant resemblé à ceci :
+
+```text
+polls
+├── __init__.py
+├── admin.py
+├── apps.py
+├── migrations
+│   └── __init__.py
+├── models.py
+├── tests.py
+├── urls.py
+└── views.py
+```
+
+Dans le fichier *polls/urls.py* ajouter le code suivant :
+
+```python
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+	path("", view.index, name="index"),
+]
+```
+
+L'étape suivante est de faire pointer l'URLconf principal vers notre module *polls.urls*. Dans le fichier *djangoTuto/urls.py* ajouter un import vers *django.urls.include* et inserer un *include()* dans la liste *urlpatterns* pour avoir comme résultat :
+
+```python
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+	path('polls/', include("polls.urls")),
+	path('admin/', admin.site.urls),
+]
+```
+
+La fonction *include()* permet de référencer d'autre URLconf. Chaque fois que Django tombe sur un *include()*, il retire la partie de l'URL qui a matché le *path()* et envoyé se qui reste après dans l'URL à l'URLconf qui à été inclus.
+
+> Chaque fois que nous devons inclure une urlpatterns il faut utiliser *include()*. La seul exception est *admin.site.urls*
+
+Maintenant que nous avons câblé nos URLs, nous pouvons vérifié en relancent le serveur de test et en se rendant sur la page `http://localhost:8000/polls/`.
