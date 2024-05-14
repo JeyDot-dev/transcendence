@@ -147,3 +147,114 @@ class CustomUser(models.Model):
 Cette exemple définit une class *CustomUser* qui comporte un champ *first_name* ainsi qu'un champ *last_name*. Dans la base de donnée, l'*ORM* va créer une table nommé *customuser* avec deux champ *VARCHAR* de taille 30. Lorsque nous demandons à l'*ORM* de nous retourner les informations sur un utilisateur, il va nous retourner des instances de *CustomUser* peuplée avec les information reçue depuis la base de donnée.
 
 Vu que l'*ORM* fait l'abstraction entre notre application et la base de données, il est très facile de faire une configuration de dev qui va interagir avec une base SQLite local et une configuration de prod qui va interroger la base de données Postgres de production.
+
+### Installation
+
+- [Doc - Django install](https://docs.djangoproject.com/en/5.0/intro/install/)
+
+Afin de pouvoir installer *Django*, il faut absolument avoir Python d'installer ainsi que pip.
+
+Si tous les prérequis sont installé, activez l'environnement virtuel est utiliser la commande suivante afin d'installer Django :
+
+```bash
+$> python -m pip install Django
+```
+
+Pour vérifié que l'installation de Django c'est bien déroulé, nous pouvons lancer l’interpréteur Python (`python`) et constater que nous avons la bonne version installé :
+
+```python
+>>> import django
+>>> print(django.get_version())
+5.0.6
+```
+
+Si vous voyez un numéro de version, c'est que l'installation est complète.
+
+Vous pouvez aussi directement utiliser la commande suivante :
+
+```text
+$> python -m django --version
+
+5.0.6
+```
+
+#### Python
+
+vous devez absolument avoir python d'installer sur votre système afin de pouvoir utiliser Django.
+
+[Ici](https://docs.djangoproject.com/en/5.0/faq/install/#faq-python-version-support) il y a la liste des version de python supporté par Django et ici la [page de téléchargement de Python](https://www.python.org/downloads/)
+
+#### Pip
+
+Si vous n'avez pas *pip* d'installer sur votre distribution, le plus facile est d'installer [standalone pip installer](https://pip.pypa.io/en/latest/installation/)
+
+#### venv
+
+- [Doc - Python venv](https://docs.python.org/3/tutorial/venv.html)
+
+*venv* est un outil intégré a Python afin de créer des environnement virtuel isolé pour les projet Python. Il permet de gérer les dépendances de projets Python plus efficacement et plus proprement.
+
+Grâce à *venv*, nous allons pouvons installer des modules Python dans l'environnement virtuel et il ne seront disponible nul par ailleurs. Nous n'allons donc pas polluer notre environnent principal ni l'environnent des autres projets.
+
+Pour créer un environnement virtuel, il faut se rendre à la racine de notre projet et utiliser la commande `python3 -m venv <envname>`.
+
+Si vous avez le message suivant, procéder à l'installation avec `apt install python<version>-venv`
+
+```text
+The virtual environment was not created successfully because ensurepip is not
+available.  On Debian/Ubuntu systems, you need to install the python3-venv
+package using the following command.
+
+    apt install python3.10-venv
+
+You may need to use sudo with that command.  After installing the python3-venv
+package, recreate your virtual environment.
+
+Failing command: /home/luca/Git/djangoTuto/djangoTuto/bin/python3
+```
+
+Si la création du nouvel environment virtuel c'est dérouler correctement, vous devriez voir un dossier portant le nom de l’environnement à la racine du projet.
+
+Maintenant que nous avons créer notre environnement de travail virtuel, nous devons l'activé afin de pouvoir travail avec. L'activer signifie "se connecter à". Pour se faire, nous allons utiliser la commande `source <env_name>/bin/activate`. Maintenant, vous devriez voir votre prompte changer pour notifié que vous êtes bien à l'intérieur de l'environnement virtuel.
+
+Pour quitter l'environnement, il suffit d'entré la commande `deactivate`.
+
+Pour installer des modules dans l’environnement, il suffit de s'y connecter et d'installer le module normalement via pip.
+
+### Création d'un projet
+
+- [Tutoriel - Django](https://docs.djangoproject.com/en/5.0/intro/tutorial01/)
+
+Maintenant que Django est installé, nous allons pouvoir créer un projet. Afin de découvrir Django et d'avoir une guide line, je vais suivre et détailler le tutoriel de la documentation officiel.
+
+Nous allons donc pouvoir créer notre premier projet Django avec la commande suivante :
+
+```text
+$> django-admin startproject <project_name>
+```
+
+Cette commande va créer un dossier <project_name> qui contiendra la configuration initiale de notre projet Django. Pour ce tutoriel, je vais appeler mon projet Django de la même manière de que le repos Git, "djangoTuto".
+
+```bash
+(djangoTuto-env) ➜  djangoTuto git:(main) ✗ ls
+djangoTuto  djangoTuto-env
+(djangoTuto-env) ➜  djangoTuto git:(main) ✗ tree djangoTuto
+djangoTuto
+├── djangoTuto
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+└── manage.py
+
+1 directory, 6 files
+```
+
+- Le dossier **djangoTuto/** est le répertoire root de notre application. Nous pouvons le renommer comme nous voulons, cela n'a aucune importance pour Django.
+- Le fichier **manage.py** est un utilitaire en ligne de commande qui permet d'interagir avec notre projet Django. Plus d'informations [ici](https://docs.djangoproject.com/en/5.0/ref/django-admin/).
+- Le dossier **djangoTuto/djangoTuto** est le dossier pour le module Python actuel de notre application. Sont nom est le nom du projet et ne doit pas être modifié.
+- Le fichier **djangoTuto/__init__.py** est un fichier vide qui indique à Django que le répertoire doit être considéré comme un Package Python.
+- Le fichier **djangoTuto/settings.py** contient les configurations de notre projet Django. Plus d'information [ici](https://docs.djangoproject.com/en/5.0/topics/settings/).
+- Le fichier **djangoTuto/urls.py** contient les différents urls de notre projet ainsi que les actions qui leurs sont liée. Plus d'informations [ici](https://docs.djangoproject.com/en/5.0/topics/http/urls/).
+-
