@@ -125,3 +125,25 @@ Le modules qui traite les *actions de l'utilisateur* et qui coordonne le *modèl
 |DELETE|`http://localhost/users/<int:user_id>/`|Demande au contrôleur *users* de supprimer l'utilisateur à qui correspond *user_id*.|
 
 ### ORM
+
+- [ORM - Wikipédia](https://fr.wikipedia.org/wiki/Mapping_objet-relationnel)
+
+*ORM* (**O**bject-**R**elational **M**apping) est un type de programme informatique qui fait l'interface entre un programme et une base de donnée relationnelle pour simuler une base de données orientée objet. Ce programme créer des correspondances entre un schéma de base de donnée est une classe dans l'application.
+
+L'*ORM* permet donc de connecté notre application Django à n'importe quel base de donnée relationnel facilement est rapidement. La définition de nos tables ainsi que ces champs en base de données sont créer en fonction de classe qui hérite de models.
+
+```python
+from django.db import models
+
+class CustomUser(models.Model):
+	first_name = models.CharField(max_length=30)
+	last_name = models.CharField(max_length=30)
+
+	def __str__(self):
+		return f"{self.first_name} {self.last_name}"
+
+```
+
+Cette exemple définit une class *CustomUser* qui comporte un champ *first_name* ainsi qu'un champ *last_name*. Dans la base de donnée, l'*ORM* va créer une table nommé *customuser* avec deux champ *VARCHAR* de taille 30. Lorsque nous demandons à l'*ORM* de nous retourner les informations sur un utilisateur, il va nous retourner des instances de *CustomUser* peuplée avec les information reçue depuis la base de donnée.
+
+Vu que l'*ORM* fait l'abstraction entre notre application et la base de données, il est très facile de faire une configuration de dev qui va interagir avec une base SQLite local et une configuration de prod qui va interroger la base de données Postgres de production.
