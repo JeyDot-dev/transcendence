@@ -204,8 +204,37 @@ function playersCollisionDetection(){
 	}
 }
 
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function trueAiPlayer(level){ //level 1 to 100 (100 is smart, 1 is dumb)
+	let brain = getRandomInt(0, 100);
+	let trueOpenentPos = opponent.y + (opponent.height / 2)
+
+	// resetP2
+	if (trueOpenentPos == ball.y)
+	{
+		keys.p2.up = false;
+		keys.p2.down = false;
+		return; // it appen I promess
+	}
+
+	if (trueOpenentPos > ball.y && level > brain)
+		keys.p2.up = true
+	else
+		keys.p2.up = false
+
+	if (trueOpenentPos < ball.y)
+		keys.p2.down = true
+	else
+		keys.p2.down = false
+}
 
 function physics(){
+	trueAiPlayer(50) //level 1 to 100 (100 is smart, 1 is dumb)
 	handlePlayersMovement();
 	moveBall();
 	wallCollisionDetection();
@@ -215,6 +244,7 @@ function physics(){
 	// let opponentLevel = 0.1;
 	// opponent.y += (ball.y - (opponent.y + opponent.height / 2)) * opponentLevel;
 }
+
 function resetBall(){
 	ball.x = (canvas.width / 2) - 5;
 	ball.y = canvas.height / 2;
