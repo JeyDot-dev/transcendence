@@ -10,7 +10,7 @@ app.use(express.static(path.join(__dirname, 'test_pongjs')));
 
 // Define routes
 app.get('/', (req, res) => {
-	res.send(200).sendFile(path.join(__dirname, 'test_pongjs', 'index.html'));
+	res.status(200).sendFile(path.join(__dirname, 'test_pongjs', 'pong.html'));
 });
 
 // Start the server

@@ -2,10 +2,26 @@
 <html>
 <head>
 	<title>Hello World</title>
+	<link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="pong.css">
+	<link rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css"> <!-- .min = Short version, without useless characters (spaces, tabs, etc...) -->
+	<meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Mandatory for responsive design -->
 </head>
 <body>
 	<h1>Hello, World!</h1>
+
+	<div id="pong">
+		<canvas id="gameCanvas" width="800" height="400"></canvas>
+		<div id="gameOver">
+			<h1>Game Over</h1>
+			<button id="playAgain">Play Again</button>
+
+			<div id="score">
+				<h2>Score: <span id="scoreValue">0</span></h2>
+			</div>
+		</div>
+	</div>
+	<script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="pong.js"></script>
 </body>
 </html>
