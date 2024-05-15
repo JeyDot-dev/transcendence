@@ -393,3 +393,413 @@ La fonction *include()* permet de référencer d'autre URLconf. Chaque fois que 
 > Chaque fois que nous devons inclure une urlpatterns il faut utiliser *include()*. La seul exception est *admin.site.urls*
 
 Maintenant que nous avons câblé nos URLs, nous pouvons vérifié en relancent le serveur de test et en se rendant sur la page `http://localhost:8000/polls/`.
+
+### Configurer la base de donnée
+
+Nous allons continuer par aller jeter un oeil au fichier *djangoTuto/settings.py*. C'est un module Python qui contient les configurations de notre projet.
+
+Par défaut, la configuration utilise *SQLite* comme base de donnée. Cela est pratique pour le développement car c'est une base de données relationnel qui est stockée dans un seul fichier en local. En plus de cela, *SQLite* est inclus dans Python, donc il n'y a rien de plus à installer afin de pouvoir utiliser la base de données. Par contre, dès la mise en production du projet, si nous avons besoin de changer de base de données pour quelque chose de plus scalable (par exemple: *Postgres*), nous pouvons le faire en changent simplement de configuration dans ce fichier *settings.py*.
+
+Si nous voulons changer de base de données, nous devons installer le bon [database bindings](https://docs.djangoproject.com/en/5.0/topics/install/#database-installation) et changer la clé dans **DATABASE 'default'** pour matché avec la base de données que nous désirons :
+
+- **ENGINE** - soit : `django.db.backends.sqlite3`, `django.db.backends.postgresql`, `django.db.backends.mysql`, `django.db.backends.oracle`. Vous trouverez [ici](https://docs.djangoproject.com/en/5.0/ref/databases/#third-party-notes) la liste des base de données supportée.
+- **NAME** - Le nom de la base de données. Si nous avons sélectionner *SQLite*, la base de données est un chemin vers un fichier.
+
+Si vous utilisez autre chose que *SQLite*, des paramètres supplémentaires peuvent être fournis, comme: *PASSWORD* et *HOST*. [Ici](https://docs.djangoproject.com/en/5.0/ref/settings/#std-setting-DATABASES), il y a la liste de toutes les configurations possibles.
+
+Maintenant que nous sommes dans le fichier *settings.py*, nous pouvons profité pour set correctement *TIME_ZONE*.
+
+Il faut aussi noté la présence de la configuration **INSTALLED_APPS** dans ce fichier. Cette configuration regroupe le nom de toutes les applications qui sont active dans notre projet Django. Les apps peuvent être utilisée dans une multitude de projets et nous pouvons les empaqueter et les distribuer afin qu'elles soient utilisées par d'autre projet.
+
+Par défaut, **INSTALLED_APPS** contient les application suivantes:
+
+- **django.contrib.admin** - Le site d'administration que nous verrons plus loin.
+- **django.contrib.auth** - Un système d'authentification.
+- **django.contrib.contenttypes** - Un framework pour les types de contenu.
+- **django.contrib.sessions** - Un framework pour les sessions.
+- **django.contrib.messages** - Un framework pour les messages.
+- **django.contrib.staticfiles** - Un framework pour la gestion des fichiers statique.
+
+Ces apps sont inclue par défaut pour ajouter du confort les cas commun.
+
+Certaines de ces applicatrions on besoin d'au moins une table dans la base de données afin de pouvoir fonctionner. C'est pour cela que nous avons des warnings de migrations à chaque fois que nous lançons le serveur de dev. Nous allons corriger cela :
+
+```text
+$> python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying sessions.0001_initial... OK
+```
+
+La commande **migrate** regarde la configration **INSTALLED_APPS** et crée toutes les tables en base de données qui ne serai pas présente et qui sont requise. Elle crée ces table grâce à la base de données configurée dans le fichier *tutoDjango/settings.py*.
+
+> Afin d'afficher le contenu de la base de donnée *SQLite*, j'ai installé *sqlitebrowser*
+>
+> `$> apt instal sqlitebrowser`
+
+Voici le contenu de notre base de données une fois que la migration a été éffectuée:
+
+![contenu de la base de donnée](assets/sqlite_content.PNG)
+
+Nous pouvons donc constater que nous avons 11 table qui on été créer par Django.
+
+```text
+$> python manage.py runserver
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+May 15, 2024 - 13:51:07
+Django version 5.0.6, using settings 'djangoTuto.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+```
+
+Nous pouvons aussi constater que lors du lancement du server de developpement, nous n'avons plus de warning !
+
+### Création de modèle
+
+Maintenant que nous avons découvertcomment fonctionne la base de donnée et comment nous pouvons faire nos migration, nous allons pouvoir créer le modèle pour notre application de sondage.
+
+Pour notre application, nous allons avoir besoin de créer deux modèles: *Question* et *Choice*. Une *Question* est composée d'une question et d'une date de publication. Un *Choice* est composer de deux champs: le texte du choix ainsi que le nombre de votes. Chaque *Choice* est assosié avec une *Question*.
+
+Ces conceptes sont représenter par des classes Python. Editez le fichier *polls/models.py* pour qu'il ressemble a ceci:
+
+```python
+from django.db import models
+
+
+class Question(models.Model):
+	question_text = models.CharField(max_length=200)
+	pub_date = models.DateTimeField("date published")
+
+class Choice(models.Model):
+	question = models.ForeignKey(Question, on_delete=models.CASCADE)
+	choice_text = models.CharField(max_length=200)
+	votes = models.IntegerField(default=0)
+```
+
+Ici, nous créeons deux classe qui hérite de la classe *django.db.models.Model*. Chaque modèle est composé d'attributs de classe, chaqun représente un champs de ce modèle.
+
+Chaque champ est représenté par une instance de la classe *Field*, par exemple *CharField* pour un champ de charactère et *DateTimeField* pour un champs datetime. Ceci permet de dire à Django de quel type de donnée est chaque champ.
+
+Le nom de chaque instance de *Field* (par exemple: *question_text* ou *pub_date*) et le nom du champ dans un format machine-friendly. Nous allons utiliser cette valeur dans notre code Python et la base de donnée va l'utiliser pour le nom du champ dans la base de donnée.
+
+Certaines classes *Field* demande des arguments. Par exemple, *CharField*, demande le paramètre *max_length*. Cette information n'est pas utilisée seulement pour le champ en base de données mais aussi pour la validation.
+
+Une classe *Field* peut aussi demander des paramètres optionels. Par exemple, nous avons définit le champ *votes* à 0 par défaut. Ceci était optionel.
+
+Finallement, nous devons aussi noté que nous avons créer une relation en utilisant une *ForeignKey*. Ceci dit à Django que chaque *Choice* est en relation avec une seul *Question*. Django support toute les relations courantes des base de données relationnel: many-to-many, many-to-one et one-to-one.
+
+### Activer un modèle
+
+Maintenant que nous avons créer nos modèles, Django est capable de :
+
+- Créer un schéma de base de donnée (*CREATE TABLE*) pour cette application.
+- Créer un API d'accès à la base de donnée Python pour accéder à nos objets *Question* et *Choice*.
+
+Mais pour commencer, nous devons dire à notre projet que notre application de sondage est installé.
+
+Pour inclure notre app dans notre projet, ne devons ajouter une référence dans la configuration *INSTALLED_APPS* dans le fichier *djangoTuto/settings.py*. La classe *PollsConfig* est le fichier *polls/apps.py*, donc, son chemin est *polls.apps.PollsConfig*. Nous devons éditer le fichier *djangoTuto/settings.py* et ajouter le chemin vers notre app dans *INSTALLED_APPS*.
+
+```python
+INSTALLED_APPS = [
+	'polls.apps.PollsConfig',
+	'django.contrib.admin',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+]
+```
+
+Maintenant que Django sait comment inclure notre application de sondage dans notre projet, nous devons procéder à la migration pour ajouter nos nouveaux modèles à la base de données :
+
+```
+$> python manage.py makemigrations polls
+Migrations for 'polls':
+  polls/migrations/0001_initial.py
+    - Create model Question
+    - Create model Choice
+```
+
+La commande *makemigrations* permet de demande à Django de créer une nouvelle migration avec les nouvelles informations que nous avons mis dans nos modèles. A ce stade, Django n'a pas encore appliquer les changement dans la base de données, il a simplement créer le fichier qui permet d'appliquer ces modifications.
+
+```
+$> cat polls/migrations/0001_initial.py
+# Generated by Django 5.0.6 on 2024-05-15 14:52
+
+import django.db.models.deletion
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = [
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='Question',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('question_text', models.CharField(max_length=200)),
+                ('pub_date', models.DateTimeField(verbose_name='date published')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Choice',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('choice_text', models.CharField(max_length=200)),
+                ('votes', models.IntegerField(default=0)),
+                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='polls.question')),
+            ],
+        ),
+    ]
+```
+
+Ce fichier décrit la migration et peut être éditer avant d'être appliquer, mais il ne contient pas directement les requêtes SQL qui seront exécuté durant la migration. Pour voir le SQL qui sera exécuté, nous pouvons utiliser la commande *sqlmigrate*.
+
+```text
+$> python manage.py sqlmigrate polls 0001
+BEGIN;
+--
+-- Create model Question
+--
+CREATE TABLE "polls_question" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "question_text" varchar(200) NOT NULL, "pub_date" datetime NOT NULL);
+--
+-- Create model Choice
+--
+CREATE TABLE "polls_choice" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "choice_text" varchar(200) NOT NULL, "votes" integer NOT NULL, "question_id" bigint NOT NULL REFERENCES "polls_question" ("id") DEFERRABLE INITIALLY DEFERRED);
+CREATE INDEX "polls_choice_question_id_c5b4b260" ON "polls_choice" ("question_id");
+COMMIT;
+```
+
+Le résultat de cette commande varie en fonction de la base de données qui est configurer dans le fichier *djangoTuto/settings.py*.
+
+Si vous avez modifier votre migration à la main et que vous voulez vous assurez qu'elle est valide avant de l'appliquer, vous pouvez utiliser la commande *check*.
+
+```text
+$> python manage.py check
+System check identified no issues (0 silenced).
+```
+
+Maitnenant que nous avons généré notre migration pour que notre base de données refléte les informations de nos nouveaux modèle, nous devons, comme tout à l'heure, utiliser la commande *migrate* afin d'appliquer notre nouvelle migration.
+
+```text
+$> python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, polls, sessions
+Running migrations:
+  Applying polls.0001_initial... OK
+```
+
+![contenu de la base de donnée après migration](assets/sqlite_content_polls.PNG)
+
+La commande *migrate* prend toute les migrations en attente est les applique sur la base de données. Cela est pratique car nous pouvons créer nos propre migration afin de, par exemple, ajouter des données de test dans notre base de données de développement. Nous pouvons envoyer ces migration au d'autre développeur qui pourront les appliquer à leur environnement de développement.
+
+### Jouer avec l'API
+
+- [Doc - Django API](https://docs.djangoproject.com/en/5.0/topics/db/queries/)
+
+Nous allons maintenant utiliser l'outil en ligne de commande que Django nous mette à disposition afin de jouer avec l'API que Django met en place pour nous.
+
+```text
+$> python manage.py shell
+```
+
+Nous utilisons cette commande plutôt que de simplement utiliser la commande `python` car *manage.py* set la variable d'environnement *DJANGO_SETTINGS_MODULE* donnt a Python le chemin pour importer le fichier *djangoTuto/settings.py*
+
+Importer nos modèles:
+
+```python
+>>> from polls.models import Choice, Question
+```
+
+Afficher les question afin de constater qu'il n'y en a pas.
+
+```python
+>>> Question.objects.all()
+<QuerySet []>
+```
+
+Créer une nouvelle *Question*:
+
+```python
+>>> from django.utils import timezone
+>>> q = Question(question_text="La forme ?", pub_date=timezone.now())
+```
+
+Sauvegarder la nouvelle question dans la base de données:
+
+```python
+>>> q.save()
+```
+
+![Contenu de la table polls_question](assets/sqlite_first_question.PNG)
+
+Maitenant que nous avons enregistrer notre questions dans la base de données, la question a un ID.
+
+```python
+>>> q.id
+1
+```
+
+Nous pouvons accéder au champs du modèle via les attributs Python:
+
+```text
+>>> q.question_text
+'La forme ?'
+>>> q.pub_date
+datetime.datetime(2024, 5, 15, 15, 22, 24, 440362, tzinfo=datetime.timezone.utc)
+```
+
+Nous pouvons modifier les attribut de notre question:
+
+```python
+>>> q.question_text = "La forme ???"
+>>> q.save()
+```
+
+![Contenu de la table polls_question après update](assets/sqlite_first_question_update.PNG)
+
+Nous pouvons afficher toutes les questions dans la base de donnée:
+
+```text
+>>> Question.objects.all()
+<QuerySet [<Question: Question object (1)>]>
+```
+
+Nous avons ici un problème, quand nous affichons notre liste d'objet, nous voyons que notre objet se nomme *<Question: Question object (1)>* . Cette représentation n'aide vraiment pas la compréhention. Nous allons corriger ceci en éditant le modèle de notre application de sondage et en ajoiutante la méthode *__str__()* pour les *Question* ainsi que les *Choice*.
+
+```python
+from django.db import models
+
+class Question(models.Model):
+	question_text = models.CharField(max_length=200)
+	pub_date = models.DateTimeField("date published")
+
+	def __str__(self):
+		return self.question_text
+
+class Choice(models.Model):
+	question = models.ForeignKey(Question, on_delete=models.CASCADE)
+	choice_text = models.CharField(max_length=200)
+	votes = models.IntegerField(default=0)
+
+	def __str__(self):
+		return self.choice_text
+```
+
+Il est important de définir *__str__()*, pas seulement pour rendre les choses plus lisible pour un humain mais aussi car cette information est utiliser par la page d'administration qui est automatiquement générée par Django.
+
+Nous allons maintenant ajouter une méthode personalisé à note modèle:
+
+```python
+import datetime
+
+from django.db import models
+from django.utils import timezone
+
+class Question(models.Model):
+	question_text = models.CharField(max_length=200)
+	pub_date = models.DateTimeField("date published")
+
+	def __str__(self):
+		return self.question_text
+
+	# Nouvelle méthode
+	def was_published_recently(self):
+		return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
+
+class Choice(models.Model):
+	question = models.ForeignKey(Question, on_delete=models.CASCADE)
+	choice_text = models.CharField(max_length=200)
+	votes = models.IntegerField(default=0)
+
+	def __str__(self):
+		return self.choice_text
+
+```
+
+Vous pouvez maintenant sauvegardez et relancer le shell:
+
+```text
+$> python manage.py shell
+```
+Afficher toute les *Question* en base de données:
+
+```python
+>>> Question.objects.all()
+<QuerySet [<Question: La forme ???>]>
+```
+
+Nous pouvons constater que maintenant, lorsque nous affichons une *Question* c'est son *question_text* qui est affiché.
+
+Nous pouvons aussi essayer notre nouvelle méthode:
+
+```python
+>>> from polls.models import Choice, Question
+>>> q = Question.objects.get(pk=1)
+>>> q.was_published_recently()
+True
+```
+
+### Introduction à l'administration Django
+
+Lorsque nous créons un modèle, Django crée pour nous des vue qui permet d'administrer ce modèle, cela nous fait gagner beaucoup de temps.
+
+La première étape afin d'accéder à cette administration est de créer un administrateur:
+
+```text
+$> python manage.py createsuperuser
+Username (leave blank to use 'luca'): admin
+Email address: admin@mail.com
+Password:
+Password (again):
+Superuser created successfully.
+```
+
+Maintenant que nous avons créer un superuser, nous pouvons relancer le server de test et nous rendre à l'adresse `http://localhost:8000/admin/`. Vous devriez arriver sur cette page
+
+![login page](assets/admin_login_page.PNG)
+
+Vous pouvez vous connecter avec les informations que vous avez fourni lors de la création du superuser.
+
+La nouvelle page est une interface qui a été générer automatiquement par Django. Pour le moment, nous ne pouvons gérer que les utilisateur est le groupe (cela est fournit par *django.contrib.auth*)
+
+### Ajouter notre application à l'administration
+
+Pour le moment, nous ne voyons pas notre app *polls* sur l'administration. Pour se fait, nous devons éditer le fichier *polls/admin.py* :
+
+```python
+from django.contrib import admin
+
+from .models import Question
+
+admin.site.register(Question)
+```
+
+Maintnant, vous devriez voir la gestion des *Question* dans l'administration.
