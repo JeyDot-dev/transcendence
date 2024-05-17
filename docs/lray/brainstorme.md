@@ -803,3 +803,218 @@ admin.site.register(Question)
 ```
 
 Maintnant, vous devriez voir la gestion des *Question* dans l'administration.
+
+
+### Ajoutons plus de vues
+
+Nous allons maintenant ajouter plus de vue à notre appliquation de sondage. Ces vues seront un peu différentes car elle prennent des arguments.
+
+```python
+from django.http import HttpResponse
+
+def index(request):
+	return HttpResponse("Index de /polls/")
+
+def detail(request, question_id):
+	return HttpResponse("Question #%s" % question_id)
+
+def results(request, question_id):
+	return HttpResponse("Result of question #%s" % question_id)
+
+def vote(request, question_id):
+	return HttpResponse("Voting on question #%s" % question_id)
+
+```
+
+Nous devons maitenant définir des URLs afin de pouvoir joindre nos nouvelles vues.
+
+```python
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+	path("", views.index, name="index"),
+	path("<int:question_id>/", views.detail, name="detail"),
+	path("<int:question_id>/results/", views.results, name="results"),
+	path("<int:question_id>/vote/", views.vote, name="vote"),
+]
+```
+
+Si vous lancez le sereur et que vous vous rendez sur les URLs que nous vennons de définir vous pourrez constater que nos nouvelles vues s'affiche correctement et qu'elle prennent bien en compte l'ID passé dans l'URL.
+
+### Écrire des vues qui servent à quelque chose
+
+Chaque vues sont résponsable de mettre en place au moins deux chose, retourner une *HttpResponse* avec le résultat de la page ou une erreur, comme par exemple *Http404*. A par ces deux point, vous pouvez rajouter se que vous voulez  à vos vues.
+
+Notre vue peu lire des enregistrements depuis la base de données, ou pas. Elle peu utiliser un sysème de template comme celui qui est fourni par Django, ou un autre. Elle peu générer des PDF, générer de l'XML, créer une archive ZIP, tous se que nous voulons et en utilisant n'importe quelle bibliothèque Python que nous voulons.
+
+La seul chose que Django veut, c'est une *HttpResponse* ou une exception.
+
+Nous allons démontrer tout ceci en modifiant la vue index() que nous avons créer afin qu'elle affiche nos question.
+
+```python
+from django.http import HttpResponse
+
+# Nous importons notre modèle directement dans la vue
+from .models import Question
+
+# Depuis notre vue, nous pouvons manipuler le modèle Question
+def index(request):
+	latest_question_list = Question.objects.order_by("-pub_date")[:5]
+	output = ", ".join([q.question_text for q in latest_question_list])
+	return HttpResponse(output)
+
+def detail(request, question_id):
+	return HttpResponse("Question #%s" % question_id)
+
+def results(request, question_id):
+	return HttpResponse("Result of question #%s" % question_id)
+
+def vote(request, question_id):
+	return HttpResponse("Voting on question #%s" % question_id)
+
+```
+
+Comme vous pouvez le constatez en appelant la vue *index()* depuis votre navigateur, nous affichons bien les *Question* que nous avons dans la base de données.
+
+Nous avons quand même un problème, notre le rendu de notre vues est hardcodée dans le fichier Python, cela fait que chaque fois que nous voulons faire une modification graphique, nous devons modifié notre vue. Pour parer à ce problème, nous allons utiliser le moteur de template de Django afin de séparer le design et le code Python.
+
+La première choses à faire est de créer un répertoire *templates* dans le répertoire *pools*. Django va regarder à cet endroit pour trouver des templates.
+
+Dans le fichier *djangoTuto/settings.py*, la configuration *TEMPLATES* décrit comment Django doit rendre un template. Par défaut, l'option *APP_DIR* est set a true, se qui fait que Django va chercher dans toutes les applications listées dans *INSTALLED_APPS*.
+
+Dans le dossier *templates* que nous vennons de créer, nous allons devoir créer un sous répertoire qui se nomme la même chose que notre app (*polls*) et dans ce répertoire, créer un fichier qui se nomme *index.html*.
+
+Dans ce nouveau fichier, nous allons pouvoir mettre nos templates.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Index</title>
+</head>
+<body>
+{% if latest_question_list %}
+	<ulc
+	{% for question in latest_question_list  %}
+		<li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>
+	{% endfor %}
+	</ul>
+{% else %}
+	<p>No polls are available.</p>
+{% endif %}
+</body>
+</html>
+
+```
+
+Nous devons maintenant, mettre à jour notre vue afin qu'elle utilise notre template.
+
+
+```python
+from django.http import HttpResponse
+from django.template import loader
+
+from .models import Question
+
+def index(request):
+	latest_question_list = Question.objects.order_by("-pub_date")[:5]
+	template = loader.get_template("polls/index.html")
+	context = {
+		"latest_question_list": latest_question_list,
+	}
+	return HttpResponse(template.render(context, request))
+
+def detail(request, question_id):
+	return HttpResponse("Question #%s" % question_id)
+
+def results(request, question_id):
+	return HttpResponse("Result of question #%s" % question_id)
+
+def vote(request, question_id):
+	return HttpResponse("Voting on question #%s" % question_id)
+```
+
+Ce code load le template qui s'appel *polls/index.html* et le passe au contexte. Le contexte est un dictionnaire qui map les noms de templates à des objets Python.
+
+Si le template ainsi que la vue sont correcte, vous devriez voir les changement sur votre navigateur !
+
+### Le raccourci render()
+
+C'est une schéma que nous allons beaucoup reproduire, load un template, replir un contexte et retourner une *HttpResponse* avec comme résultat de rendre un template. Django fournit un raccourci. Voici notre vue *index()* ré-écrite avec cette méthode:
+
+```python
+from django.http import HttpResponse
+from django.shortcuts import render
+
+from .models import Question
+
+def index(request):
+	latest_question_list = Question.objects.order_by("-pub_date")[:5]
+	context = {"latest_question_list": latest_question_list}
+	return render(request, "polls/index.html", context)
+
+def detail(request, question_id):
+	return HttpResponse("Question #%s" % question_id)
+
+def results(request, question_id):
+	return HttpResponse("Result of question #%s" % question_id)
+
+def vote(request, question_id):
+	return HttpResponse("Voting on question #%s" % question_id)
+
+```
+
+La fonction *render()* prend comme première argument la *request*, le nom du *template* ainsi que le *context* (qui est optionel) et retourne une *HttpResponse*.
+
+### Lever des erreurs 404
+
+Nous allons nous attqué a la vue *detail()*, elle va nous permetre de voir comment nous pouvons gérer les exceptions dans nos applications.
+
+```python
+from django.http import HttpResponse, Http404
+from django.shortcuts import render
+
+from .models import Question
+
+def index(request):
+	latest_question_list = Question.objects.order_by("-pub_date")[:5]
+	context = {"latest_question_list": latest_question_list}
+	return render(request, "polls/index.html", context)
+
+def detail(request, question_id):
+	try:
+		question = Question.objects.get(pk=question_id)
+	except Question.DoesNotExist:
+		raise Http404("Question does not exist")
+	return render(request, "pools/detail.html", {"question": question})
+
+def results(request, question_id):
+	return HttpResponse("Result of question #%s" % question_id)
+
+def vote(request, question_id):
+	return HttpResponse("Voting on question #%s" % question_id)
+```
+
+Notre nouvelles vue *detail()* qui se charge d'afficher les informations sur un sondage en particulier retourne désormait une erreur 404 si le sondage demandé n'existe pas.
+
+Nous devons maitentant créer le template *polls/detail.html*.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Detail</title>
+</head>
+<body>
+	{{ question }}
+</body>
+</html>
+```
+
+Ce template est très simple, mais il fait le job. Nous pouvons constater que l'affichage n'a pas changer, mais maintenant, si nous demandons le détail sur un id de Question qui n'existe pas, nous avons une erreur 404 !
