@@ -1,0 +1,45 @@
+* {
+	font-family: Lato, Arial, Helvetica, sans-serif;
+}
+
+/* Reset default styles */
+body, h1, p {
+	margin: 0;
+	padding: 0;
+}
+
+/* Style the heading */
+h1 {
+	font-size: 24px;
+	margin-bottom: 20px;
+}
+
+/* Style the paragraph */
+p {
+	font-size: 16px;
+	color: #666;
+	line-height: 1.5;
+}
+
+#gameCanvas {
+	width: 100%;
+	height: 100%;
+}
+
+#pong{
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+#gameOver {
+	color: white;
+	position: absolute;
+	display: none; /*Change to flex*/
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	top: 40%;
+	left: 50%;
+	z-index: 1;
+}

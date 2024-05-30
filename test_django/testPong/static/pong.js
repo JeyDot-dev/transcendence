@@ -2,6 +2,15 @@ const canvas = document.getElementById('gameCanvas');
 
 const ctx = canvas.getContext('2d');
 
+window.addEventListener('resize', resizeCanvas, false);
+
+function resizeCanvas() {
+    canvas.width = canvas.parentElement.offsetWidth;
+	canvas.height = canvas.parentElement.offsetHeight;
+}
+
+resizeCanvas();
+
 var keys = {
 	p1: {
 		up: false,
@@ -56,11 +65,13 @@ var keys = {
 	});
 }
 
+const ballSize = canvas.height / 100
+
 // Create the ball "Object" (not actually an object in JS, but a dictionary)
 const ball = {
-	x: (canvas.width / 2) - 5, // -5 to make it centered cause itself
-	y: canvas.height / 2,
-	size: 10,
+	x: (canvas.width / 2) - (ballSize / 2), // -(ballSize / 2) to make it centered cause itself
+	y: canvas.height / 2 - (ballSize / 2),
+	size: ballSize,
 	speed: 1,
 	velocityX: 0,
 	velocityY: 0,
@@ -70,9 +81,10 @@ const ball = {
 // Create the player "Object" (same here)
 const player = {
 	x: 0,
-	y: (canvas.height - 100) / 2,
-	width: 10,
-	height: 100,
+	y: canvas.height / 2 - (ballSize * 10),
+	width: ballSize * 2,
+	height: ballSize * 20,
+	speed: ballSize * 2,
 	color: 'WHITE',
 	score: 0
 };
@@ -80,9 +92,10 @@ const player = {
 // Create the opponent "Object" (same here)
 const opponent = {
 	x: canvas.width - 10,
-	y: (canvas.height - 100) / 2,
-	width: 10,
-	height: 100,
+	y: canvas.height / 2 - (ballSize * 10),
+	width: ballSize * 2,
+	height: ballSize * 20,
+	speed: ballSize * 2,
 	color: 'WHITE',
 	score: 0
 };
@@ -123,9 +136,21 @@ function drawOpponent() {
 
 // Draw the ball
 function drawBall() {
-	ctx.fillStyle = ball.color;
-	ctx.fillRect(ball.x, ball.y, ball.size, ball.size);
-	ctx.fill();
+	ctx.shadowColor = 'rgba(255, 255, 255, 1)';
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Dessiner la balle
+    ctx.fillStyle = ball.color;
+    ctx.fillRect(ball.x, ball.y, ball.size, ball.size);
+    ctx.fill();
+
+    // Réinitialiser les propriétés de l'ombre
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 }
 
 function clearCanvas() {
@@ -153,15 +178,15 @@ function render() {
 
 function handlePlayersMovement() {
 	if (keys.p1.up && player.y > 0) {
-		player.y -= 7;
+		player.y -= player.speed;
 	} else if (keys.p1.down && player.y < canvas.height - player.height) {
-		player.y += 7;
+		player.y += player.speed;
 	}
 
 	if (keys.p2.up && opponent.y > 0) {
-		opponent.y -= 7;
+		opponent.y -= opponent.speed;
 	} else if (keys.p2.down && opponent.y < canvas.height - opponent.height) {
-		opponent.y += 7;
+		opponent.y += opponent.speed;
 	}
 }
 
@@ -208,6 +233,7 @@ function getRandomInt(min, max) {
 }
 
 function trueAiPlayer(level){ //level 1 to 100 (100 is smart, 1 is dumb)
+	if (ball.velocityX == 0) return
 	let brain = getRandomInt(0, 100);
 	let trueOpenentPos = opponent.y + (opponent.height / 2)
 
@@ -276,3 +302,7 @@ function game() {
 // Start the game
 const framePerSecond = 60;
 setInterval(game, 1000 / framePerSecond); // 1000ms / 60fps = 16.6666666667ms per frame
+
+document.addEventListener('DOMContentLoaded', function() {
+    resizeCanvas();
+});
