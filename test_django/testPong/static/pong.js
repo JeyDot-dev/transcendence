@@ -65,7 +65,7 @@ var keys = {
 	});
 }
 
-const ballSize = canvas.height / 100
+const ballSize = canvas.height / 50
 
 // Create the ball "Object" (not actually an object in JS, but a dictionary)
 const ball = {
@@ -137,7 +137,7 @@ function drawOpponent() {
 // Draw the ball
 function drawBall() {
 	ctx.shadowColor = 'rgba(255, 255, 255, 1)';
-    ctx.shadowBlur = 15;
+    ctx.shadowBlur = 10;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
