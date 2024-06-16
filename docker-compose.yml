@@ -1,0 +1,42 @@
+name:     transcendance
+
+services:
+  
+  db:
+    container_name: postgres
+    image:          postgres:16.3-bookworm
+    restart:        always
+
+    volumes:
+        - postgres_data:/var/lib/postgresql/data
+
+    environment: #To change to secrets
+                    POSTGRES_DB: ${DB_NAME}
+                    POSTGRES_USER: ${DB_USER} 
+                    POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+        - backend
+
+  django:
+    container_name: django
+    build:          django
+    restart:        always
+
+    volumes:
+      - ./django/project:/project
+    ports:
+      - "80:8000"
+    environment:
+      DEBUG:        'true'
+      DB_NAME:      ${DB_NAME}
+      DB_USER:      ${DB_USER}
+      DB_PASSWORD:  ${DB_PASSWORD}
+      DB_HOST:      db
+      DB_PORT:      ${DB_PORT}
+
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:

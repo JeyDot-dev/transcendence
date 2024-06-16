@@ -1,9 +1,13 @@
 FROM    python:3.12.4-bookworm
-COPY    requirements.txt /etc/
-RUN     pip3 install -r requirements.txt --no-cache-dir
 
-WORKDIR /app
+COPY    requirements.txt /etc/
+COPY    script.sh /etc/
+COPY    project/. /project
+
+RUN     chmod +x /etc/script.sh
+RUN     pip3 install -r /etc/requirements.txt --no-cache-dir
+
+WORKDIR /project
 EXPOSE  8000
-COPY    app/. /app
-ENTRYPOINT ["python3"]
-CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+ENTRYPOINT ["/etc/script.sh"]
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
