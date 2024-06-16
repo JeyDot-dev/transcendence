@@ -1,6 +1,7 @@
 FROM    python:3.12.4-bookworm
 
 COPY    requirements.txt /etc/
+COPY    settings.py /etc/
 COPY    script.sh /etc/
 COPY    project/. /project
 
