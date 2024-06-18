@@ -257,7 +257,7 @@ function trueAiPlayer(level){ //level 1 to 100 (100 is smart, 1 is dumb)
 }
 
 function physics() {
-	trueAiPlayer(100) //level 1 to 100 (100 is smart, 1 is dumb)
+	// trueAiPlayer(100) //level 1 to 100 (100 is smart, 1 is dumb)
 	handlePlayersMovement();
 	moveBall();
 	wallCollisionDetection();

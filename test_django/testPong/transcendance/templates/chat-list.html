@@ -1,0 +1,86 @@
+{% extends "base.html" %} {% block title %} Home Page {% endblock %}
+{% block content %}
+<style>
+	/* Style for the chat list */
+	* {
+		font-family: "Lato", Arial, sans-serif;
+	}
+	.chat-list {
+		width: 300px;
+		height: 400px;
+		border: 1px solid #ccc;
+		overflow-y: scroll;
+		padding: 10px;
+	}
+
+	/* Style for each chat message */
+	.chat-message {
+		margin-bottom: 10px;
+		padding: 5px;
+		background-color: #f2f2f2;
+		border-radius: 5px;
+	}
+
+	/* Style for the sender's name */
+	.sender-name {
+		font-weight: bold;
+	}
+
+	/* Style for the message content */
+	.message-content {
+		margin-top: 5px;
+	}
+
+	/* Style for the chat list item */
+	.chat-list-item {
+		display: flex;
+		align-items: center;
+		margin-bottom: 10px;
+		cursor: pointer;
+	}
+
+	/* Style for the user icon */
+	.user-icon {
+		position: relative;
+		width: 50px;
+		height: 50px;
+		border-radius: 20%;
+		margin-right: 10px;
+	}
+
+	/* Style for the preview chat */
+	.previewChat {
+		flex: 1;
+	}
+
+	/* Style for the sender's name */
+	.sender-name {
+		font-weight: bold;
+	}
+
+	/* Style for the preview last message */
+	.previewLastMessage {
+		margin-top: 5px;
+	}
+
+	/* Style for the user status */
+	.user-status {
+		position: absolute;
+		font-size: 20px;
+		top: 10px;
+		right: 0;
+	}
+
+	/* Style for the user profile picture */
+	.user-pp {
+		position: relative;
+	}
+
+</style>
+
+<div class="chat-list">
+	{% for message in messages %}
+		{% include "chat-list-item.html" %}
+	{% endfor %}
+</div>
+{% endblock %}
