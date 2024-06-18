@@ -9,5 +9,6 @@ if [[ ! -e /project/manage.py ]]; then
 else
 	echo "Django project already exists."
 fi
+mv /etc/settings.py /project/project/settings.py
 
 exec "$@"
