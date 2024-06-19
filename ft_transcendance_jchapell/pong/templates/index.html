@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}
+	<h1>ft_transcendance</h1>
+{% endblock %}
+
+{% block content %}
+<div style="width: 1280px; height: 720px">
+	{% include "pong.html"%}
+</div>
+	{% include "uiButtons/menuButton.html" %}
+	{% include "uiButtons/accountButton.html" %}
+	{% include "uiButtons/chatButton.html" %}
+{% endblock %}
+
+{% block footer %}
+	<footer>
+		<h3> ft_transcendance 42</h3>
+		<h3> proudly made in 2024 by Jchapell </h3>
+	</footer>
+{% endblock %}
