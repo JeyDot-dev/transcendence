@@ -6,7 +6,8 @@ const navigateTo = url => {
 const router = async () => {
 	const routes = [
 		{ path: "/", view: "/api/home/" },
-		{ path: "/game", view: "/api/game/" },
+		{ path: "/pong", view: "/api/pong/" },
+		{ path: "/pong/game", view: "/api/pong/game/" },
 		{ path: "/about", view: "/api/about/" },
 		{ path: "/test", view: "/api/test/" }
 	];
