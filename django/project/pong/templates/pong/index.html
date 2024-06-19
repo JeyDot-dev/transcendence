@@ -1,0 +1,100 @@
+<!-- pong/templates/pong/index.html -->
+<!-- <!DOCTYPE html> -->
+<!-- <html lang="en"> -->
+<!-- <head> -->
+<!--     <meta charset="UTF-8"> -->
+<!--     <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+<!--     <title>Pong Game</title> -->
+<!--     <style> -->
+<!--         canvas { -->
+<!--             display: block; -->
+<!--             margin: 0 auto; -->
+<!--             background: #000; -->
+<!--         } -->
+<!--     </style> -->
+<!-- </head> -->
+<!-- <body> -->
+    <canvas id="pongCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('pongCanvas');
+        const context = canvas.getContext('2d');
+
+        const paddleWidth = 10, paddleHeight = 100, ballRadius = 10;
+        let playerY = (canvas.height - paddleHeight) / 2;
+
+        const socket = new WebSocket('ws://' + window.location.host + '/ws/pong/');
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            playerY = data.playerY;
+            playerScore = data.playerScore;
+            aiScore = data.aiScore;
+            draw(data.ballX, data.playerX, data.aiX, data.ballY, data.aiY);
+        };
+
+        function draw(ballX, playerX, aiX, ballY, aiY) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawRect(playerX, playerY, paddleWidth, paddleHeight, '#fff');
+            drawRect(aiX, aiY, paddleWidth, paddleHeight, '#fff');
+            drawCircle(ballX, ballY, ballRadius, '#fff');
+            drawScores(playerScore, aiScore);
+        }
+
+        function drawRect(x, y, width, height, color) {
+            context.fillStyle = color;
+            context.fillRect(x, y, width, height);
+        }
+
+        function drawCircle(x, y, radius, color) {
+            context.fillStyle = color;
+            context.beginPath();
+            context.arc(x, y, radius, 0, Math.PI * 2, false);
+            context.closePath();
+            context.fill();
+        }
+        function drawScores(playerScore, aiScore) {
+            context.fillStyle = '#fff';
+            context.font = '30px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+
+            // Dessiner le score du joueur à gauche
+            context.fillText(playerScore, canvas.width / 4, 30);
+
+            // Dessiner le score de l'IA à droite
+            context.fillText(aiScore, (canvas.width / 4) * 3, 30);
+        }
+        function movePlayer(event) {
+        let mouseY;
+        if (event.type === 'mousemove') {
+            const rect = canvas.getBoundingClientRect();
+            mouseY = event.clientY - rect.top - paddleHeight / 2;
+        } else if (event.type === 'keydown') {
+            const key = event.keyCode;
+            if (key === 38) { // Touche flèche haut
+                playerY -= 10; // Déplacer vers le haut
+            } else if (key === 40) { // Touche flèche bas
+                playerY += 10; // Déplacer vers le bas
+            }
+            mouseY = playerY; // Utilise la position Y actuelle du joueur
+        }
+        // Assurez-vous que la position du joueur reste dans les limites du canvas
+        if (mouseY < 0) {
+            playerY = 0;
+        } else if (mouseY + paddleHeight > canvas.height) {
+            playerY = canvas.height - paddleHeight;
+        } else {
+            playerY = mouseY;
+        }
+
+        // Envoyer la nouvelle position du joueur au serveur via WebSocket
+        socket.send(JSON.stringify({
+            'playerY': playerY
+        }));
+    }
+    canvas.addEventListener('mousemove', movePlayer);
+    document.addEventListener('keydown', movePlayer);
+
+    </script>
+<!-- </body> -->
+<!-- </html> -->

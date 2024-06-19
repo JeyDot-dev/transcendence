@@ -1,0 +1,148 @@
+body {
+	font-family: sans-serif;
+}
+
+nav {
+	height: 6vh;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 2.5rem;
+	background-color: #333;
+	color: #f2f2f2;
+}
+
+nav .title {
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+nav a {
+	font-size: 1.2rem;
+	text-decoration: none;
+	color: #f2f2f2;
+}
+
+nav a:hover {
+	text-decoration: underline;
+}
+
+main {
+	min-height: 89vh;
+	padding: 1vh 5vw;
+
+}
+
+footer {
+	height: 3vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #333;
+	color: #f2f2f2;
+	font-size: 0.8rem;
+	font-style: italic;
+}
+
+footer:hover {
+	text-decoration: dotted red underline 2px;
+}
+
+h1 {
+	padding-bottom: 1rem;
+	font-size: 2rem;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+h2 {
+	padding-bottom: 1rem;
+	font-size: 1.8rem;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+h3 {
+	padding-bottom: 1rem;
+	font-size: 1.6rem;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+h4 {
+	padding-bottom: 1rem;
+	font-size: 1.4rem;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+h5 {
+	padding-bottom: 1rem;
+	font-size: 1.2rem;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+h6 {
+	padding-bottom: 1rem;
+	font-size: 1rem;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+p {
+	padding-bottom: 1rem;
+}
+
+b,
+strong {
+	font-weight: bold;
+}
+
+i {
+	font-style: italic;
+}
+
+a {
+	text-decoration: none;
+	color: blue;
+}
+
+a:hover {
+	text-decoration: dotted underline;
+}
+
+ul {
+	list-style-type: disc;
+	padding-left: 1rem;
+}
+
+ul li {
+	line-height: 1.2;
+}
+
+ul li ul {
+	list-style-type: circle;
+}
+
+
+ol {
+	counter-reset: item;
+	list-style-type: none;
+}
+
+ol li {
+	display: block;
+}
+
+ol li:before {
+	content: counters(item, ".") ". ";
+	counter-increment: item;
+	line-height: 1.2;
+}
+
+ol ol {
+	counter-reset: item;
+	list-style-type: none;
+	padding-left: 1rem;
+}
