@@ -1,21 +1,5 @@
     {% load static %}
-<!--
-  <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong Game</title>
-    <style>
-        canvas {
-            display: block;
-            margin: 0 auto;
-            background: #000;
-        }
-    </style>
-</head>
-<body>
-  -->
+  <h1>Pong Game</h1>
     <canvas id="pongCanvas" width="800" height="400"></canvas>
     <script>
 const canvas = document.getElementById('pongCanvas');
@@ -44,9 +28,9 @@ socket.onmessage = function (e) {
 
 function draw(ballX, playerX, aiX, ballY, aiY, playerScore, aiScore) {
     context.clearRect(0, 0, canvas.width, canvas.height);
-    drawRect(playerX, playerY, paddleWidth, paddleHeight, '#fff');
-    drawRect(aiX, aiY, paddleWidth, paddleHeight, '#fff');
-    drawCircle(ballX, ballY, ballRadius, '#fff');
+    drawRect(playerX, playerY, paddleWidth, paddleHeight, '#6C5D84');
+    drawRect(aiX, aiY, paddleWidth, paddleHeight, '#6C5D84');
+    drawCircle(ballX, ballY, ballRadius, '#6C5D84');
     drawScores(playerScore, aiScore);
     drawGameID(gameId);
 }
@@ -65,7 +49,7 @@ function drawCircle(x, y, radius, color) {
 }
 
 function drawScores(playerScore, aiScore) {
-    context.fillStyle = '#fff';
+    context.fillStyle = '#6C5D84';
     context.font = '30px Arial';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
@@ -74,7 +58,7 @@ function drawScores(playerScore, aiScore) {
 }
 
 function drawGameID(gameId) {
-    context.fillStyle = '#fff';
+    context.fillStyle = '#6C5D84';
     context.font = '20px Arial';
     context.textAlign = 'center';
     context.textBaseline = 'bottom';
@@ -129,7 +113,3 @@ function generateUUID() {
 }
     </script>
     <!-- <script src="{% static 'pong/pongCanvas.js' %}"></script> -->
-<!--
-  </body>
-</html>
--->

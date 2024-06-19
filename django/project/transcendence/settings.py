@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-47+cfy5ik+#v4zze7ww3aq-mmw=mq_ju$5tl1w+#p$ad)_e&os
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["transcendance.jjorge.ch"]
+ALLOWED_HOSTS = ["transcendence.jjorge.ch", "195.15.214.88"]
 
 
 # Application definition
@@ -138,6 +138,7 @@ STATIC_URL = "static/"
 # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
     BASE_DIR / "static",
+    BASE_DIR / "pong/static/pong",
 ]
 
 
