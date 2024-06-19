@@ -1,5 +1,5 @@
 const menuButton = document.querySelector('#menuButton');
-const chatButton = document.querySelector('#chatButton');
+const chatButton = document.querySelector('#chatIcon');
 const accountButton = document.querySelector('#accountButton');
 
 let active = {
@@ -35,8 +35,10 @@ chatButton.addEventListener('click', function() {
 function toggleChat() {
 	if (active.chat) {
 		chatButton.removeAttribute('style');
+		document.getElementById('chatBox').style.display = 'none';
 		return
 	}
+	document.getElementById('chatBox').style.display = 'block';
 	chatButton.style.width = '30%';
 	chatButton.style.height = '50%';
 	chatButton.style.bottom = '0';

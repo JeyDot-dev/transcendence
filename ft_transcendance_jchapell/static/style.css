@@ -97,21 +97,19 @@ footer {
 	top: 5vh;
 }
 
-.chatBox {
+#chatBox {
+	display: none;
 	width: 400px;
 	margin: 0 auto;
-	border: solid 1px #ccc;
 	border-radius: 5px;
 	overflow: hidden;
   }
-.chatContainer {
-	height: 400px;
+#chatContainer {
+	height: 300px;
 	overflow: auto;
-	transform: rotate(180deg);
 	direction: rtl;
 }
 .chatContainer .chatMessage {
-	border-bottom: solid 1px #ccc;
 	padding: 20px;
 	transform: rotate(180deg);
 	direction: ltr;
@@ -119,8 +117,9 @@ footer {
 
 .chatMessage {
 	display: flex;
-	align-items: center;
+	align-items: flex-end;
 	color: black;
+	margin-top: 5px;
 }
 
 .chatMessage img {
@@ -137,4 +136,12 @@ footer {
 .receiver {
 	text-align: left;
 	font-weight: normal;
+}
+
+#senderMessage {
+	width: 80%;
+	padding: 10px;
+	border: none;
+	border-radius: 5px;
+	font-size: 16px;
 }
