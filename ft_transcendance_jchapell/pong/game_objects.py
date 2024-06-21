@@ -1,10 +1,11 @@
 class Paddle:
 	def __init__(self, x, color):
 		self.x = x
-		self.y = 0
+		self.y = 216
 		self.color = color # (r, g, b)
 		self.speed = 1
 		self.bounce = 1
+		self.keys = { "up": 0, "down": 0 }
 
 	def move(self, dy):
 		self.y += dy
@@ -37,6 +38,17 @@ class Game:
 		self.ball = ball
 		self.score = [0, 0]
 		self.timer = 0
+	
+	def physics(self):
+		for player in self.players:
+			if player.keys["up"] == 1:
+				player.move(-player.speed)
+			elif player.keys["down"] == 1:
+				player.move(player.speed)
+			if player.y < 0:
+				player.y = 0
+			elif player.y > 432:
+				player.y = 432
 
 class Tournament:
 	def __init__(self, id, games):
