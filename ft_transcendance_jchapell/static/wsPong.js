@@ -56,47 +56,47 @@ ws.onmessage = function(e) {
 // Handle the player input:
 {
 	document.addEventListener('keydown', function(e) {
-		let message = {
+		let message_form = {
 			type: 'player_keydown',
-			message: "pouet"
+			message: "unknown"
 		}
 		switch (e.key) {
 			case 'w':
-				message = "p1_up";
+				message_form.message = "p1_up";
 				break;
 			case 's':
-				message = "p1_down";
+				message_form.message = "p1_down";
 				break;
 			case 'ArrowUp':
-				message = "p2_up";
+				message_form.message = "p2_up";
 				break;
 			case 'ArrowDown':
-				message = "p2_down";
+				message_form.message = "p2_down";
 				break;
 		}
-		ws.send(JSON.stringify(message));
+		ws.send(JSON.stringify(message_form));
 	});
 
 	document.addEventListener('keyup', function(e) {
-		let message = {
+		let message_form = {
 			type: 'player_keyup',
-			message: "pouet"
+			message: "unknown"
 		}
 		switch (e.key) {
 			case 'w':
-				message = "p1_up";
+				message_form.message = "p1_up";
 				break;
 			case 's':
-				message = "p1_down";
+				message_form.message = "p1_down";
 				break;
 			case 'ArrowUp':
-				message = "p2_up";
+				message_form.message = "p2_up";
 				break;
 			case 'ArrowDown':
-				message = "p2_down";
+				message_form.message = "p2_down";
 				break;
 		}
-		ws.send(JSON.stringify(message));
+		ws.send(JSON.stringify(message_form));
 	});
 }
 
