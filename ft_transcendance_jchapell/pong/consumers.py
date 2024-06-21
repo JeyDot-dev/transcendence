@@ -1,6 +1,7 @@
 import json
 import random
 import string
+import threading
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .game_objects import Ball, Paddle, Game
@@ -13,9 +14,9 @@ class PongConsumer(WebsocketConsumer):
 		self.game = get_game(self.party)
 
 		if self.game is None:
-			self.game = Game(self.party, [Paddle(0, (255, 255, 255))], Ball(0, 0, (255, 255, 255)))
+			self.game = Game(self.party, [Paddle(0, (255, 255, 255))], Ball(360, 560, (255, 255, 255)))
 			games.append(self.game)
-			#asyncio.ensure_future(self.game.physics())
+			threading.Thread(target=self.game.physics).start()
 		else:
 			self.game.players.append(Paddle(0, (255, 255, 255)))
 
@@ -36,7 +37,6 @@ class PongConsumer(WebsocketConsumer):
 				'event': text_data_json
 			}
 		)
-		self.send(text_data=json.dumps(build_response(self.game)))
 
 	def input_message(self, event):
 		handle_key(self.game, event["event"])

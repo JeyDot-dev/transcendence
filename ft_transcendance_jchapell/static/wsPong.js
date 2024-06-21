@@ -76,9 +76,11 @@ ws.onmessage = function(e) {
 			player.y = game.players[0].y;
 			player.score = game.score[0];
 
-			opponent.x = game.players[1].x;
-			opponent.y = game.players[1].x;
-			opponent.score = game.score[1];
+			if (game.players.length > 1) {
+				opponent.x = game.players[1].x;
+				opponent.y = game.players[1].x;
+				opponent.score = game.score[1];
+			}
 
 			ball.x = game.ball.x;
 			ball.y = game.ball.y;

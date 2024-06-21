@@ -1,3 +1,6 @@
+from time import sleep
+
+
 class Paddle:
 	def __init__(self, x, color):
 		self.x = x
@@ -40,15 +43,17 @@ class Game:
 		self.timer = 0
 	
 	def physics(self):
-		for player in self.players:
-			if player.keys["up"] == 1:
-				player.move(-player.speed)
-			elif player.keys["down"] == 1:
-				player.move(player.speed)
-			if player.y < 0:
-				player.y = 0
-			elif player.y > 432:
-				player.y = 432
+		while True:
+			sleep(0.01)
+			for player in self.players:
+				if player.keys["up"] == 1:
+					player.move(-player.speed)
+				elif player.keys["down"] == 1:
+					player.move(player.speed)
+				if player.y < 0:
+					player.y = 0
+				elif player.y > 432:
+					player.y = 432
 
 class Tournament:
 	def __init__(self, id, games):
