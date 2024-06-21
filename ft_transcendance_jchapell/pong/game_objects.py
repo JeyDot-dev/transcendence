@@ -12,12 +12,12 @@ class Paddle:
 	def get_position(self):
 		return (self.x, self.y)
 
-
 class Ball:
 	def __init__(self, x, y, color):
 		self.x = x
 		self.y = y
 		self.speed = 0.5
+		self.bounce = 1
 		self.color = color
 	
 	def move(self, dx, dy):
@@ -31,10 +31,10 @@ class Ball:
 		self.speed += speed
 
 class Game:
-	def __init__(self, id, players):
+	def __init__(self, id, players, ball):
 		self.id = id
 		self.players = players # il faut que ça soit une array de la class Paddle
-		self.ball = Ball(0, 0, (255, 255, 255))
+		self.ball = ball
 		self.score = [0, 0]
 		self.timer = 0
 

@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+	'channels',
 	'daphne',
 
     'django.contrib.admin',
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
 	'pong',
+	'chat'
 ]
 
 ASGI_APPLICATION = 'ft_transcendance_jchapell.asgi.application'

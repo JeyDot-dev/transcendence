@@ -1,47 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-{
-	document.addEventListener('keydown', function(e) {
-		switch (e.key) {
-			case 'w':
-				keys.p1.up = true;
-				break;
-			case 's':
-				keys.p1.down = true;
-				break;
-			case 'ArrowUp':
-				keys.p2.up = true;
-				break;
-			case 'ArrowDown':
-				keys.p2.down = true;
-				break;
-			case 'Enter':
-				startGame();
-				break;
-			case 'Backspace':
-				stopGame();
-				break;
-		}
-	});
-
-	document.addEventListener('keyup', function(e) {
-		switch (e.key) {
-			case 'w':
-				keys.p1.up = false;
-				break;
-			case 's':
-				keys.p1.down = false;
-				break;
-			case 'ArrowUp':
-				keys.p2.up = false;
-				break;
-			case 'ArrowDown':
-				keys.p2.down = false;
-				break;
-		}
-	});
-}
 
 const ballSize = canvas.height / 50
 
@@ -87,20 +46,60 @@ const net = {
 	color: 'WHITE'
 };
 
-const ws = new WebSocket(`ws://${window.location.host}/ws/pong/`);
+const ws = new WebSocket(`ws://${window.location.host}/ws/pong/1234/`);
 
-function generateUUID() {
-    var d = new Date().getTime();
-    var d2 = (performance && performance.now && (performance.now() * 1000)) || 0;
-	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16;
-        if (d > 0) {
-            r = (d + r) % 16 | 0;
-            d = Math.floor(d / 16);
-        } else {
-            r = (d2 + r) % 16 | 0;
-            d2 = Math.floor(d2 / 16);
-        }
-        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
+ws.onmessage = function(e) {
+	console.log(e);
+	// drawBall(e.message);
 }
+
+// Handle the player input:
+{
+	document.addEventListener('keydown', function(e) {
+		let message = {
+			type: 'player_keydown',
+			message: "pouet"
+		}
+		switch (e.key) {
+			case 'w':
+				message = "p1_up";
+				break;
+			case 's':
+				message = "p1_down";
+				break;
+			case 'ArrowUp':
+				message = "p2_up";
+				break;
+			case 'ArrowDown':
+				message = "p2_down";
+				break;
+		}
+		ws.send(JSON.stringify(message));
+	});
+
+	document.addEventListener('keyup', function(e) {
+		let message = {
+			type: 'player_keyup',
+			message: "pouet"
+		}
+		switch (e.key) {
+			case 'w':
+				message = "p1_up";
+				break;
+			case 's':
+				message = "p1_down";
+				break;
+			case 'ArrowUp':
+				message = "p2_up";
+				break;
+			case 'ArrowDown':
+				message = "p2_down";
+				break;
+		}
+		ws.send(JSON.stringify(message));
+	});
+}
+
+// setInterval(function() {
+// 	console.log('pouet')
+// }, 1000 / 60); // 60 FPS
