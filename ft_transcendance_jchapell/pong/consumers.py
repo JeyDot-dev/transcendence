@@ -2,6 +2,7 @@ import json
 import random
 import string
 import threading
+from time import sleep
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .game_objects import Ball, Paddle, Game
@@ -14,11 +15,13 @@ class PongConsumer(WebsocketConsumer):
 		self.game = get_game(self.party)
 
 		if self.game is None:
-			self.game = Game(self.party, [Paddle(0, (255, 255, 255))], Ball(360, 560, (255, 255, 255)))
+			self.game = Game(self.party, [Paddle(0, (255, 255, 255))], Ball(560, 360, (255, 255, 255)))
 			games.append(self.game)
 			threading.Thread(target=self.game.physics).start()
 		else:
-			self.game.players.append(Paddle(0, (255, 255, 255)))
+			self.game.players.append(Paddle(560, (255, 255, 255)))
+		
+		threading.Thread(target=self.game_update).start()
 
 		async_to_sync(self.channel_layer.group_add)(
 			self.party,
@@ -27,22 +30,23 @@ class PongConsumer(WebsocketConsumer):
 
 		self.accept()
 		
+	def game_update(self):
+		while True:
+			async_to_sync(self.channel_layer.group_send)(
+				self.party,
+				build_response(self.game)
+			)
+
+	def game_state(self, event):
+		self.send(text_data=json.dumps(event))
+
 	def receive(self, text_data=None, bytes_data=None):
 		text_data_json = json.loads(text_data)
-
-		async_to_sync(self.channel_layer.group_send)(
-			self.party,
-			{
-				'type': 'input_message',
-				'event': text_data_json
-			}
-		)
+		self.input_message(text_data_json)
 
 	def input_message(self, event):
-		handle_key(self.game, event["event"])
-
-		self.send(text_data=json.dumps(build_response(self.game)))
-
+		handle_key(self.game, event)
+		
 	def disconnect(self, close_code):
 		if len(self.game.players) == 0:
 			games.remove(self.game)

@@ -63,12 +63,10 @@ const net = {
 	color: 'WHITE'
 };
 
-//const ws = new WebSocket(`ws://${window.location.host}/ws/pong/${game_id}/`);
-
 ws.onmessage = function(e) {
 	let data = JSON.parse(e.data);
 	let game = data.game;
-	console.log(game);
+
 
 	switch (data.type) {
 		case "game_state":
@@ -84,6 +82,7 @@ ws.onmessage = function(e) {
 
 			ball.x = game.ball.x;
 			ball.y = game.ball.y;
+			console.log(game.ball.x, game.ball.y);
 			break;
 	}
 }
@@ -109,7 +108,8 @@ ws.onmessage = function(e) {
 				message_form.message = "p2_down";
 				break;
 		}
-		ws.send(JSON.stringify(message_form));
+		if (ws.readyState === ws.OPEN)
+			ws.send(JSON.stringify(message_form));
 	});
 
 	document.addEventListener('keyup', function(e) {
@@ -131,7 +131,8 @@ ws.onmessage = function(e) {
 				message_form.message = "p2_down";
 				break;
 		}
-		ws.send(JSON.stringify(message_form));
+		if (ws.readyState === ws.OPEN)
+			ws.send(JSON.stringify(message_form));
 	});
 }
 

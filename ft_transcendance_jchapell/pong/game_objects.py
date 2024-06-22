@@ -23,16 +23,32 @@ class Ball:
 		self.speed = 0.5
 		self.bounce = 1
 		self.color = color
-	
-	def move(self, dx, dy):
-		self.x += dx
-		self.y += dy
 
 	def get_position(self):
 		return (self.x, self.y)
 
 	def add_speed(self, speed):
 		self.speed += speed
+	
+	def reset(self):
+		self.x = 560
+		self.y = 360
+		self.speed = 0.5
+	
+	def collision(self, paddle):
+		
+		if self.x == 0:
+			self.reset()
+		if self.x == 1280:
+			self.reset()
+	
+	def physics(self, paddles):
+		self.x += self.speed
+		self.y += self.speed
+
+		for paddle in paddles:
+			self.collision(paddle)
+		sleep(0.01)
 
 class Game:
 	def __init__(self, id, players, ball):
@@ -54,6 +70,8 @@ class Game:
 					player.y = 0
 				elif player.y > 432:
 					player.y = 432
+			self.ball.physics(self.players)
+			
 
 class Tournament:
 	def __init__(self, id, games):
