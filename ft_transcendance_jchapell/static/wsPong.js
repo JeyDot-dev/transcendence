@@ -3,14 +3,22 @@ const ctx = canvas.getContext('2d');
 
 window.addEventListener('resize', resizeCanvas, false);
 
+let ballSize = canvas.height / 50
+
 function resizeCanvas() {
-    canvas.width = canvas.parentElement.offsetWidth;
-	canvas.height = canvas.parentElement.offsetHeight;
+	// let ratio = 16/9;
+    
+	// canvas.width = (window.innerWidth / 2) * ratio;
+	// canvas.height = (window.innerWidth / 2);
+	
+	// ballSize = canvas.height / 50;
+	// console.log(canvas.width, canvas.height);
+	canvas.width = 1280;
+	canvas.height = 720;
+	ballSize = canvas.height / 50;
 }
 
 resizeCanvas();
-
-const ballSize = canvas.height / 50
 
 let game_id = "1234";
 
@@ -33,7 +41,7 @@ const ball = {
 };
 
 // Create the player "Object" (same here)
-const player = {
+let player = {
 	x: 0,
 	y: canvas.height / 2 - (ballSize * 10),
 	width: ballSize * 2,
@@ -44,7 +52,7 @@ const player = {
 };
 
 // Create the opponent "Object" (Use as a template)
-const opponent = {
+let opponent = {
 	x: canvas.width - (ballSize * 2),
 	y: canvas.height / 2 - (ballSize * 10),
 	width: ballSize * 2,
@@ -67,7 +75,6 @@ ws.onmessage = function(e) {
 	let data = JSON.parse(e.data);
 	let game = data.game;
 
-
 	switch (data.type) {
 		case "game_state":
 			player.x = game.players[0].x;
@@ -82,7 +89,6 @@ ws.onmessage = function(e) {
 
 			ball.x = game.ball.x;
 			ball.y = game.ball.y;
-			console.log(game.ball.x, game.ball.y);
 			break;
 	}
 }
