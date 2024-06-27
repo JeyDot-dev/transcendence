@@ -1,4 +1,4 @@
-name:     transcendance
+name:     transcendence
 
 services:
   
@@ -14,21 +14,54 @@ services:
   #   networks:
   #     - elastic_network
   #   restart:        always
-  # nginx:
-  #   container_name: nginx
-  #   images:         nginx:1.27.0
-  #   restart:        always
-  #
-  #   healthcheck:
-  #     test:         ["CMD", "curl", "-f", "http://localhost"]
-  #     interval:     1m30s
-  #     timeout:      10s
-  #     retries:      3
+  nginx:
+    container_name: nginx
+    image:         nginx:1.27.0
+    restart:        always
+
+    healthcheck:
+      test:         ["CMD", "curl", "-f", "http://localhost"]
+      interval:     1m30s
+      timeout:      10s
+      retries:      3
+    depends_on:
+      - gunicorn
+      - daphne
+
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./django/project:/project
+    command: ["nginx", "-g", "daemon off;"]
+    # command: [nginx-debug, '-g', 'daemon off;']
+    networks:
+        - backend
+        - frontend
     
+  redis:
+    container_name: redis
+    image:          redis:7.2.5
+    restart:        always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    networks:
+        - backend
+    command: ["redis-server", "--loglevel", "debug"]
+
   db:
     container_name: postgres
     image:          postgres:16.3-bookworm
     restart:        always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U${DB_USER} -d${DB_NAME}"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
     volumes:
         - postgres_data:/var/lib/postgresql/data
@@ -39,40 +72,63 @@ services:
                     POSTGRES_PASSWORD: ${DB_PASSWORD}
     networks:
         - backend
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U${DB_USER} -d${DB_NAME}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  django:
-    container_name: django
-    build:          django
+      # NO NEED FOR DJANGO CONTAINER IN PRODUCTION
+  # django:
+  #   container_name: django
+  #   build:          django
+  #   restart:        always
+  #
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8000"]
+  #     interval: 1m30s
+  #     timeout: 10s
+  #     retries: 3
+  #   volumes:
+  #     - ./django/project:/project
+  #   environment:
+  #     DEBUG:        'true'
+  #     DB_NAME:      ${DB_NAME}
+  #     DB_USER:      ${DB_USER}
+  #     DB_PASSWORD:  ${DB_PASSWORD}
+  #     DB_HOST:      db
+  #     DB_PORT:      ${DB_PORT}
+  #
+  #   networks:
+  #       - backend
+  #       - frontend
+  daphne:
+    container_name: daphne
+    build:          daphne
     restart:        always
-
     depends_on:
       db:
         condition: service_healthy
-
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
+      redis:
+        condition:  service_started
     volumes:
       - ./django/project:/project
-    ports:
-      - "80:8000"
-    environment:
-      DEBUG:        'true'
-      DB_NAME:      ${DB_NAME}
-      DB_USER:      ${DB_USER}
-      DB_PASSWORD:  ${DB_PASSWORD}
-      DB_HOST:      db
-      DB_PORT:      ${DB_PORT}
-
     networks:
         - backend
+        - frontend
+
+  gunicorn:
+    container_name: gunicorn
+    build:          gunicorn
+    restart:        always
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./django/project:/project
+    networks:
+        - backend
+        - frontend
+
 
 
 
@@ -83,4 +139,5 @@ volumes:
 
 networks:
   backend:
+  frontend:
   # elastic_network:
