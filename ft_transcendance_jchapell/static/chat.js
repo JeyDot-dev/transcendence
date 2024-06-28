@@ -1,8 +1,15 @@
 const senderMessage = document.getElementById('senderMessage');
 
-let url = `ws//${window.location.host}/ws/chat/`;
+let url = `ws://${window.location.host}/ws/chat/1234/`;
 
 const chatSocket = new WebSocket(url);
+
+chatSocket.onopen = function(e) {
+	console.log('Chat socket open');
+	chatSocket.send(JSON.stringify({
+		'message': 'Hello'
+	}));
+}
 
 chatSocket.onmessage = function(e) {
 	const data = JSON.parse(e.data);
@@ -18,10 +25,14 @@ document.getElementById('sendButton').addEventListener('click', function() {
 	if (senderMessage.value == '') {
 		return
 	}
-	console.log('send message')
-	chatSocket.send(JSON.stringify({
-		'message': senderMessage.value
-	}));
+	console.log('try: send message');
+	try {
+		chatSocket.send(JSON.stringify({
+			'message': senderMessage.value
+		}));
+	} catch (error) {
+		console.log("Erreur de chat: ", error);
+	}
 	senderMessage.value = '';
 });
 
