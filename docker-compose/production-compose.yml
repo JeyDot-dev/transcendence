@@ -31,8 +31,8 @@ services:
     ports:
       - 80:80
     volumes:
-      - ./nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./django/project:/project
+      - ../containers/nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../project:/project
     command: ["nginx", "-g", "daemon off;"]
     # command: [nginx-debug, '-g', 'daemon off;']
     networks:
@@ -73,37 +73,9 @@ services:
     networks:
         - backend
 
-      # NO NEED FOR DJANGO CONTAINER IN PRODUCTION
-  # django:
-  #   container_name: django
-  #   build:          django
-  #   restart:        always
-  #
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:8000"]
-  #     interval: 1m30s
-  #     timeout: 10s
-  #     retries: 3
-  #   volumes:
-  #     - ./django/project:/project
-  #   environment:
-  #     DEBUG:        'true'
-  #     DB_NAME:      ${DB_NAME}
-  #     DB_USER:      ${DB_USER}
-  #     DB_PASSWORD:  ${DB_PASSWORD}
-  #     DB_HOST:      db
-  #     DB_PORT:      ${DB_PORT}
-  #
-  #   networks:
-  #       - backend
-  #       - frontend
   daphne:
     container_name: daphne
-    build:          daphne
+    build:          ../containers/daphne
     restart:        always
     depends_on:
       db:
@@ -111,7 +83,7 @@ services:
       redis:
         condition:  service_started
     volumes:
-      - ./django/project:/project
+      - ../project:/project
     networks:
         - backend
         - frontend
@@ -124,13 +96,13 @@ services:
 
   gunicorn:
     container_name: gunicorn
-    build:          gunicorn
+    build:          ../containers/gunicorn
     restart:        always
     depends_on:
       db:
         condition: service_healthy
     volumes:
-      - ./django/project:/project
+      - ../project:/project
     networks:
         - backend
         - frontend

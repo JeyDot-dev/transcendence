@@ -1,0 +1,62 @@
+name:     transcendence
+
+services:
+  
+  db:
+    container_name: postgres
+    image:          postgres:16.3-bookworm
+    restart:        always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U${DB_USER} -d${DB_NAME}"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    volumes:
+        - postgres_data:/var/lib/postgresql/data
+
+    environment: #To change to secrets
+                    POSTGRES_DB: ${DB_NAME}
+                    POSTGRES_USER: ${DB_USER} 
+                    POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+        - backend
+
+  django:
+    container_name: django
+    build:          ../containers/django
+    restart:        always
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ../project:/project
+    environment:
+      DEBUG:        'true'
+      DB_NAME:      ${DB_NAME}
+      DB_USER:      ${DB_USER}
+      DB_PASSWORD:  ${DB_PASSWORD}
+      DB_HOST:      db
+      DB_PORT:      ${DB_PORT}
+
+    ports:
+        - 80:8000
+    networks:
+        - backend
+
+
+volumes:
+  postgres_data:
+  # elastic_data:
+
+
+networks:
+  backend:
