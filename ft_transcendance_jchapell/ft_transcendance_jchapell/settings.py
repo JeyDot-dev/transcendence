@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-	'chat'
+	'pong',
+	'chat',
 ]
 
 ASGI_APPLICATION = 'ft_transcendance_jchapell.asgi.application'

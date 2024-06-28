@@ -19,7 +19,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 		# if self.game is None: 
 		self.game = Game(self.party, [Paddle(0, (255, 255, 255))], Ball(560, 360, (255, 255, 255)))
 		games.append(self.game)
-		asyncio.create_task(self.game.physics())
+		# asyncio.create_task(self.game.physics())
 		# else:
 		# 	await self.game.players.append(Paddle(560, (255, 255, 255)))
 		
@@ -28,38 +28,46 @@ class PongConsumer(AsyncWebsocketConsumer):
 			self.channel_name
 			)
 
-		asyncio.create_task(self.game_update())
-
-		
-	async def game_update(self):
-		while True:
-			print("game_update")
-			sleep(0.01)
-			await self.channel_layer.group_send (
-				self.party,
-				await build_response(self.game)
-			)
-
-	async def game_state(self, event):
-		await self.send(text_data=json.dumps(event))
+		# asyncio.create_task(self.game_update())
 
 	async def receive(self, text_data=None, bytes_data=None):
 		text_data_json = json.loads(text_data)
-		await self.input_message(text_data_json)
 
-	async def input_message(self, event):
-		await handle_key(self.game, event)
+		print(text_data_json)
+
+		# await self.input_message(text_data_json)
+	
+	async def chat_message(self, event):
+		message = event['message']
+
+		print(message)
+
+	# async def game_update(self):
+	# 	while True:
+	# 		print("game_update")
+	# 		sleep(0.01)
+	# 		await self.channel_layer.group_send (
+	# 			self.party,
+	# 			await build_response(self.game)
+	# 		)
+
+	# async def game_state(self, event):
+	# 	await self.send(text_data=json.dumps(event))
+
+
+	# async def input_message(self, event):
+	# 	await handle_key(self.game, event)
 		
-	async def disconnect(self, close_code):
-		if len(self.game.players) == 0:
-			games.remove(self.game)
-		else:
-			self.game.players.pop(-1)
+	# async def disconnect(self, close_code):
+	# 	if len(self.game.players) == 0:
+	# 		games.remove(self.game)
+	# 	else:
+	# 		self.game.players.pop(-1)
 
-		await self.channel_layer.group_discard (
-			self.party,
-			self.channel_name
-		)
+	# 	await self.channel_layer.group_discard (
+	# 		self.party,
+	# 		self.channel_name
+	# 	)
 
 
 async def get_game(game_id):
@@ -88,12 +96,6 @@ async def handle_key(game, movement):
 			game.players[1].keys["up"] = 0
 		elif movement["message"] == "p2_down":
 			game.players[1].keys["down"] = 0
-
-def generateId():
-	res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-	while res in games:
-		res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-	return res
 
 async def build_response(game):
 	return {

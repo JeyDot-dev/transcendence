@@ -20,14 +20,13 @@ function resizeCanvas() {
 
 resizeCanvas();
 
-let game_id = "1234";
-
 let ws = new WebSocket(`ws://${window.location.host}/ws/pong/${game_id}/`);
 
-document.getElementById('game_id').addEventListener('change', function() {
-	game_id = document.getElementById('game_id').value;
+function updateWebsocketId() {
+	ws.close();
 	ws = new WebSocket(`ws://${window.location.host}/ws/pong/${game_id}/`);
-});
+}
+
 
 // Create the ball "Object" (not actually an object in JS, but a dictionary)
 const ball = {
