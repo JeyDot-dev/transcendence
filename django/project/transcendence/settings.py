@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-47+cfy5ik+#v4zze7ww3aq-mmw=mq_ju$5tl1w+#p$ad)_e&os
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["transcendence.jjorge.ch", "195.15.214.88"]
+ALLOWED_HOSTS = ["transcendence.jjorge.ch", "195.15.214.88", "localhost"]
 
 
 # Application definition
@@ -52,6 +52,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+	"transcendence.middleware.FetchOnlyMiddleware",
 ]
 
 ROOT_URLCONF = "transcendence.urls"
