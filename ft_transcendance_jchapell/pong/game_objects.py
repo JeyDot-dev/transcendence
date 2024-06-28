@@ -66,7 +66,7 @@ class Ball:
 			score[0] += 1
 			self.reset()
 	
-	def physics(self, paddles, score):
+	async def physics(self, paddles, score):
 		self.wall_collision(score)
 
 		for paddle in paddles:
@@ -85,7 +85,7 @@ class Game:
 		self.score = [0, 0]
 		self.timer = 0
 	
-	def physics(self):
+	async def physics(self):
 		while True:
 			sleep(0.01)
 			for player in self.players:
@@ -97,7 +97,7 @@ class Game:
 					player.y = 0
 				elif player.y > 432:
 					player.y = 432
-			self.ball.physics(self.players, self.score)
+			await self.ball.physics(self.players, self.score)
 			
 
 class Tournament:

@@ -41,17 +41,26 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-	'pong',
-	'chat'
+	'chat',
 ]
 
 ASGI_APPLICATION = 'ft_transcendance_jchapell.asgi.application'
 
 CHANNEL_LAYERS = {
 	'default': {
-		'BACKEND': 'channels.layers.InMemoryChannelLayer' #Testing purposes ONLY (change to Redis in production please <3)
+		'BACKEND': 'channels.layers.InMemoryChannelLayer'
 	}
 }
+
+# For production:
+# CHANNEL_LAYERS = {
+# 	'default': {
+# 		'BACKEND': 'channels_redis.core.RedisChannelLayer',
+# 		'CONFIG': {
+# 			"hosts": [('127.0.0.1', 6379)],
+# 		}
+# 	}
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

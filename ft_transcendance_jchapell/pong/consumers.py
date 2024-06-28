@@ -2,71 +2,74 @@ import json
 import random
 import string
 import threading
+import asyncio
 from time import sleep
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
 from .game_objects import Ball, Paddle, Game
 
 games = []
 
-class PongConsumer(WebsocketConsumer):
-	def connect(self):
+class PongConsumer(AsyncWebsocketConsumer):
+	async def connect(self):
+		await self.accept()
 		self.party = self.scope['url_route']['kwargs']['game_id']
 		self.game = get_game(self.party)
 
-		if self.game is None:
-			self.game = Game(self.party, [Paddle(0, (255, 255, 255))], Ball(560, 360, (255, 255, 255)))
-			games.append(self.game)
-			threading.Thread(target=self.game.physics).start()
-		else:
-			self.game.players.append(Paddle(560, (255, 255, 255)))
+		# if self.game is None: 
+		self.game = Game(self.party, [Paddle(0, (255, 255, 255))], Ball(560, 360, (255, 255, 255)))
+		games.append(self.game)
+		asyncio.create_task(self.game.physics())
+		# else:
+		# 	await self.game.players.append(Paddle(560, (255, 255, 255)))
 		
-		threading.Thread(target=self.game_update).start()
-
-		async_to_sync(self.channel_layer.group_add)(
+		await self.channel_layer.group_add (
 			self.party,
 			self.channel_name
 			)
 
-		self.accept()
+		asyncio.create_task(self.game_update())
+
 		
-	def game_update(self):
+	async def game_update(self):
 		while True:
-			async_to_sync(self.channel_layer.group_send)(
+			print("game_update")
+			sleep(0.01)
+			await self.channel_layer.group_send (
 				self.party,
-				build_response(self.game)
+				await build_response(self.game)
 			)
 
-	def game_state(self, event):
-		self.send(text_data=json.dumps(event))
+	async def game_state(self, event):
+		await self.send(text_data=json.dumps(event))
 
-	def receive(self, text_data=None, bytes_data=None):
+	async def receive(self, text_data=None, bytes_data=None):
 		text_data_json = json.loads(text_data)
-		self.input_message(text_data_json)
+		await self.input_message(text_data_json)
 
-	def input_message(self, event):
-		handle_key(self.game, event)
+	async def input_message(self, event):
+		await handle_key(self.game, event)
 		
-	def disconnect(self, close_code):
+	async def disconnect(self, close_code):
 		if len(self.game.players) == 0:
 			games.remove(self.game)
 		else:
 			self.game.players.pop(-1)
 
-		async_to_sync(self.channel_layer.group_discard)(
+		await self.channel_layer.group_discard (
 			self.party,
 			self.channel_name
 		)
 
 
-def get_game(game_id):
+async def get_game(game_id):
 	for game in games:
 		if game.id == game_id:
 			return game
 	return None
 
 # Awful but fonctionnal: TODO
-def handle_key(game, movement):
+async def handle_key(game, movement):
 	if movement["type"] == "player_keydown":
 		if movement["message"] == "p1_up":
 			game.players[0].keys["up"] = 1
@@ -92,7 +95,7 @@ def generateId():
 		res = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 	return res
 
-def build_response(game):
+async def build_response(game):
 	return {
 		'type': 'game_state',
 		'game': {
