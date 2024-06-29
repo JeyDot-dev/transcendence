@@ -15,7 +15,7 @@ dev-clean:
 	-docker compose -f docker-compose/dev-compose.yml down
 dev-fclean: dev-clean
 	-docker rmi --force $$(docker images -q "transcendence*")
-	-docker volume transcendence_elastic_data transcendence_postgres_data --force
+	-docker volume rm transcendence_elastic_data transcendence_postgres_data --force
 dev-re: dev-clean
 	docker compose -f docker-compose/dev-compose.yml up --build
 dev-fre: dev-fclean
@@ -29,7 +29,7 @@ prod-clean:
 	-docker compose -f docker-compose/production-compose.yml down
 prod-fclean: prod-clean
 	-docker rmi --force $$(docker images -q "transcendence*")
-	-docker volume transcendence_elastic_data transcendence_postgres_data --force
+	-docker volume rm transcendence_elastic_data transcendence_postgres_data --force
 
 prod-re: prod-clean
 	docker compose -f docker-compose/production-compose.yml up --build
