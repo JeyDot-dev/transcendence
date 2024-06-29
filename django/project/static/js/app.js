@@ -18,8 +18,6 @@ const router = async () => {
 		? location.pathname.slice(0, -1)
 		: location.pathname;
 
-	console.log("path: ", path);
-
 	//Définit les match potentiel
 	const potentialMatches = routes.map(route => {
 		return {
