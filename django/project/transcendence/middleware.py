@@ -4,7 +4,6 @@ class FetchOnlyMiddleware:
 	def __init__(self, get_response):
 		self.get_response = get_response
 		self.restricted_paths = [
-			'/pong/game/'
 		]
 
 	def __call__(self, request):
