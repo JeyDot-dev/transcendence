@@ -12,12 +12,12 @@ const router = async () => {
 		{ path: "/about", view: "/api/about/" },
 		{ path: "/test", view: "/api/test/" }
 	];
-  
+
 	//Gérer le / à la fin de l'URL
 	const path = location.pathname.endsWith("/") && location.pathname.length > 1
 		? location.pathname.slice(0, -1)
 		: location.pathname;
-  
+
 	//Définit les match potentiel
 	const potentialMatches = routes.map(route => {
 		return {
@@ -27,7 +27,7 @@ const router = async () => {
 	});
 	//Cherche le match
 	let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
-  
+
 	//Si il n'y a pas de match, utiliser la route par défaut
 	if (!match) {
 		match = {
@@ -36,8 +36,12 @@ const router = async () => {
 		};
 	}
 
-	//Téléchargement est injection du contenu
-	const html = await fetch(match.route.view).then(response => response.text());
+	// Téléchargement et injection du contenu
+	const html = await fetch(match.route.view, {
+		headers: {
+			'X-Requested-With': 'XMLHttpRequest'
+		}
+	}).then(response => response.text());
 	const mainElement = document.querySelector("main");
 	mainElement.innerHTML = html;
 
