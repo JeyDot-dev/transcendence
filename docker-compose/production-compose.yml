@@ -1,0 +1,127 @@
+name:     transcendence
+
+services:
+  
+  # elastic-search:
+  #   container_name:   "elasticsearch"
+  #   image:            elasticsearch:8.14.1
+  #   environment:
+  #     - discovery.type=single-node
+  #   volumes:
+  #     - elastic_data:/usr/share/elasticsearch/data
+  #   ports:
+  #     - 9200:9200
+  #   networks:
+  #     - elastic_network
+  #   restart:        always
+  nginx:
+    container_name: nginx
+    image:         nginx:1.27.0
+    restart:        always
+
+    healthcheck:
+      test:         ["CMD", "curl", "-f", "http://localhost"]
+      interval:     1m30s
+      timeout:      10s
+      retries:      3
+    depends_on:
+      - gunicorn
+      - daphne
+
+    ports:
+      - 80:80
+    volumes:
+      - ../containers/nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../project:/project
+    command: ["nginx", "-g", "daemon off;"]
+    # command: [nginx-debug, '-g', 'daemon off;']
+    networks:
+        - backend
+        - frontend
+    
+  redis:
+    container_name: redis
+    image:          redis:7.2.5
+    restart:        always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    networks:
+        - backend
+    command: ["redis-server", "--loglevel", "debug"]
+
+  db:
+    container_name: postgres
+    image:          postgres:16.3-bookworm
+    restart:        always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U${DB_USER} -d${DB_NAME}"]
+      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    volumes:
+        - postgres_data:/var/lib/postgresql/data
+
+    environment: #To change to secrets
+                    POSTGRES_DB: ${DB_NAME}
+                    POSTGRES_USER: ${DB_USER} 
+                    POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+        - backend
+
+  daphne:
+    container_name: daphne
+    build:          ../containers/daphne
+    restart:        always
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition:  service_started
+    volumes:
+      - ../project:/project
+    networks:
+        - backend
+        - frontend
+    environment:
+      DB_NAME:      ${DB_NAME}
+      DB_USER:      ${DB_USER}
+      DB_PASSWORD:  ${DB_PASSWORD}
+      DB_HOST:      db
+      DB_PORT:      ${DB_PORT}
+
+  gunicorn:
+    container_name: gunicorn
+    build:          ../containers/gunicorn
+    restart:        always
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ../project:/project
+    networks:
+        - backend
+        - frontend
+    environment:
+      DB_NAME:      ${DB_NAME}
+      DB_USER:      ${DB_USER}
+      DB_PASSWORD:  ${DB_PASSWORD}
+      DB_HOST:      db
+      DB_PORT:      ${DB_PORT}
+
+
+
+
+volumes:
+  postgres_data:
+  # elastic_data:
+
+
+networks:
+  backend:
+  frontend:
+  # elastic_network:
