@@ -1,21 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tournament: {{ tournament.name }}</title>
-</head>
-<body>
-    <h1>Registerd Players</h1>
-    <ul>
-        {% for player in tournament.players.all %}
-        <li>{{ player.name }}</li>
-        {% endfor %}
-    </ul>
-    <h2>New Player</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">add Player</button>
-    </form>
-    <a href="{% url 'startTournament' tournament.id %}" class="button">Start Tournament</a>
-</body>
-</html>
+<h1>Registerd Players</h1>
+<ul>
+    {% for player in tournament.players.all %}
+    <li>{{ player.name }}</li>
+    {% endfor %}
+</ul>
+<h2>New Player</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">add Player</button>
+</form>
+<a href="{% url 'startTournament' tournament.id %}" class="button">Start Tournament</a>

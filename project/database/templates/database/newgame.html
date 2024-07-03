@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>New Game</title>
-</head>
-<body>
-    <h1>Start a New Game</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Start Game</button>
-    </form>
-</body>
-</html>
+<h1>Start a New Game</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Start Game</button>
+</form>
