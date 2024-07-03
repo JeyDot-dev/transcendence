@@ -25,7 +25,9 @@ services:
 
   django:
     container_name: django
-    build:          ../containers/django
+    build:
+      dockerfile:     ../containers/django/Dockerfile
+      context:        ../containers 
     restart:        always
 
     depends_on:
@@ -40,12 +42,15 @@ services:
     volumes:
       - ../project:/project
     environment:
-      DEBUG:        'true'
-      DB_NAME:      ${DB_NAME}
-      DB_USER:      ${DB_USER}
-      DB_PASSWORD:  ${DB_PASSWORD}
-      DB_HOST:      db
-      DB_PORT:      ${DB_PORT}
+      DEBUG:          'true'
+      DB_NAME:        ${DB_NAME}
+      DB_USER:        ${DB_USER}
+      DB_PASSWORD:    ${DB_PASSWORD}
+      DB_HOST:        db
+      DB_PORT:        ${DB_PORT}
+      SUPER_USER:     ${SUPER_USER}
+      SUPER_MAIL:     ${SUPER_MAIL}
+      SUPER_PASSWORD: ${SUPER_PASSWORD}
 
     ports:
         - 80:8000
