@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "database.apps.DatabaseConfig",
     "channels",
     "pong",
 ]
@@ -52,7 +53,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-	"transcendence.middleware.FetchOnlyMiddleware",
+    "transcendence.middleware.FetchOnlyMiddleware",
 ]
 
 ROOT_URLCONF = "transcendence.urls"
