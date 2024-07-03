@@ -4,40 +4,12 @@ const navigateTo = url => {
 };
 
 const router = async () => {
-	//Définition des routes
-	const routes = [
-		{ path: "/", view: "/api/home/" },
-		{ path: "/pong", view: "/api/pong/" },
-		{ path: "/pong/game", view: "/api/pong/game/" },
-		{ path: "/about", view: "/api/about/" },
-		{ path: "/test", view: "/api/test/" }
-	];
-
-	//Gérer le / à la fin de l'URL
-	const path = location.pathname.endsWith("/") && location.pathname.length > 1
-		? location.pathname.slice(0, -1)
-		: location.pathname;
-
-	//Définit les match potentiel
-	const potentialMatches = routes.map(route => {
-		return {
-			route: route,
-			isMatch: path === route.path
-		};
-	});
-	//Cherche le match
-	let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
-
-	//Si il n'y a pas de match, utiliser la route par défaut
-	if (!match) {
-		match = {
-			route: routes[0],
-			isMatch: true
-		};
-	}
-
-	// Téléchargement et injection du contenu
-	const html = await fetch(match.route.view, {
+    const url = location.pathname;
+    let finalUrl = "api/home";
+    if (url !== "/") {
+        finalUrl = "api" + url + "/";
+    }
+	const html = await fetch(finalUrl, {
 		headers: {
 			'X-Requested-With': 'XMLHttpRequest'
 		}

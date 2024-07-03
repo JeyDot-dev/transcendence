@@ -1,13 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>New Tournament</title>
-</head>
-<body>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Next</button>
-    </form>
-</body>
-</html>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Next</button>
+</form>

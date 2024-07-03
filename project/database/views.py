@@ -24,7 +24,7 @@ def play(request, game_id):
         if game.points1 >= 5 or game.points2 >= 5 :
             return redirect('winner', game_id=game.id)
         return redirect('play', game_id=game.id)
-    return render(request, 'database\play.html', {'game': game})
+    return render(request, 'database/play.html', {'game': game})
 
 def winner(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
@@ -35,7 +35,7 @@ def winner(request, game_id):
     game.winner.save()
     game.looser.save()
     game.winner.matchesWon = F("matchesWon") + 1
-    response = render(request, 'database\winner.html', {'game': game})
+    response = render(request, 'database/winner.html', {'game': game})
     game.winner.save()
     game.looser.save()
     if game.tournament:
@@ -46,7 +46,7 @@ def winner(request, game_id):
 def tournamentWinner(request, t_id):
     tourny = get_object_or_404(Tournament, pk=t_id)
     tourny.winner = tourny.players.get(is_winner=True)
-    return render(request, 'database\Tournamentwinner.html', {'tournament': tourny})
+    return render(request, 'database/Tournamentwinner.html', {'tournament': tourny})
 
 
 def newGame(request):
@@ -62,7 +62,7 @@ def newGame(request):
         player2.save()
         game = Game.objects.create(player1=player1, player2=player2)
         return redirect("play", game_id = game.id)
-    return render(request, 'database/newGame.html', {'form': form})
+    return render(request, 'database/newgame.html', {'form': form})
 
 
 def newTournament(request):

@@ -1,28 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Game Winner</title>
-</head>
-<body>
-    <h1>Winner: {{ game.winner.name }}</h1>
-    <p>Final Score:</p>
-    <p>{{ game.player1.name }}: {{ game.points1 }}</p>
-    <p>{{ game.player2.name }}: {{ game.points2 }}</p>
-    {% if game.tournament %}
-    <ul>
-        {% for game in game.tournament.games.all %}
-        <li>{{ game }} : 
-            {% if game.is_played %}
-                {{ game.winner.name }}
-            {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
-        <a href="{% url 'play' game.next_game %}" class="button">Next Game</a>
-    {% else %}
-        <a href="{% url 'newGame' %}" class="button">Start New Game</a>
-    {% endif %}
-    
-    
-</body>
-</html>
+<h1>Winner: {{ game.winner.name }}</h1>
+<p>Final Score:</p>
+<p>{{ game.player1.name }}: {{ game.points1 }}</p>
+<p>{{ game.player2.name }}: {{ game.points2 }}</p>
+{% if game.tournament %}
+<ul>
+    {% for game in game.tournament.games.all %}
+    <li>{{ game }} : 
+        {% if game.is_played %}
+            {{ game.winner.name }}
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+    <a href="{% url 'play' game.next_game %}" class="button">Next Game</a>
+{% else %}
+    <a href="{% url 'newGame' %}" class="button">Start New Game</a>
+{% endif %}
