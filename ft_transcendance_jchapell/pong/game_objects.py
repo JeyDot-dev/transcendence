@@ -52,7 +52,6 @@ class Ball:
 		self.vel_x = -self.vel_x
 		self.add_speed(1)
 		return True
-
 	
 	def wall_collision(self, score):
 		if self.y <= 0:
