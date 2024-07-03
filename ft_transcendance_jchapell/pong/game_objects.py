@@ -1,6 +1,5 @@
 from time import sleep
 
-
 class Paddle:
 	def __init__(self, x, color):
 		self.x = x
@@ -87,6 +86,7 @@ class Game:
 	
 	async def physics(self):
 		while True:
+			print("zizi")
 			sleep(0.01)
 			for player in self.players:
 				if player.keys["up"] == 1:
