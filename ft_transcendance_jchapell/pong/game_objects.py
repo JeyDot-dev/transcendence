@@ -63,7 +63,7 @@ class Ball:
 		if self.x <= 0:
 			score[1] += 1
 			self.reset()
-		elif self.x >= 1266:
+		elif self.x >= 1280:
 			score[0] += 1
 			self.reset()
 	
@@ -85,10 +85,11 @@ class Game:
 		self.ball = ball
 		self.score = [0, 0]
 		self.timer = 0
+		self.running = False
 	
 	async def physics(self):
-		while True:
-			await asyncio.sleep(0.01)
+		while self.running:
+			await asyncio.sleep(0)
 			for player in self.players:
 				if player.keys["up"] == 1:
 					player.move(-player.speed)
@@ -98,7 +99,7 @@ class Game:
 					player.y = 0
 				elif player.y > 432:
 					player.y = 432
-			# await self.ball.physics(self.players, self.score)
+			await self.ball.physics(self.players, self.score)
 			
 
 class Tournament:

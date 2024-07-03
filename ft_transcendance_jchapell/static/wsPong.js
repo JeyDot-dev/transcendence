@@ -62,11 +62,9 @@ ws.onmessage = function(e) {
 			render(game);
 			break;
 		case "init":
-			console.log("my id: ", data.message.id);
 			my_id = data.message.id;
 			break;
 		case "new_player":
-			console.log("new player: ", data.message);
 			break;
 	}
 }
@@ -156,7 +154,7 @@ function drawPaddles(paddles) {
 }
 
 // Draw the ball
-function drawBall() {
+function drawBall(ball) {
 	ctx.shadowColor = 'rgba(255, 255, 255, 1)';
     ctx.shadowBlur = 10;
     ctx.shadowOffsetX = 0;
@@ -193,5 +191,5 @@ function render(game) {
 	drawPaddles(game.players);
 
 	// Finally, draw the ball
-	drawBall();
+	drawBall(game.ball);
 }

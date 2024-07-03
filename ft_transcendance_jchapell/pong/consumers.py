@@ -110,7 +110,7 @@ async def new_player(game):
 
 async def game_update(consumer):
 	while True:
-		await asyncio.sleep(0.01)
+		await asyncio.sleep(0)
 		await consumer.channel_layer.group_send (
 			consumer.party,
 			await build_response(consumer.game)
