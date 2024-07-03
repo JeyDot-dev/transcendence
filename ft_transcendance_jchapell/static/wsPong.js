@@ -182,8 +182,8 @@ function render(game) {
 
 	// Draw the net & the scores
 	drawNet();
-	drawScore(canvas.width / 4, canvas.height / 6, 0);
-	drawScore(3 * canvas.width / 4, canvas.height / 6, 0);
+	drawScore(canvas.width / 4, canvas.height / 6, game.score[0]);
+	drawScore(3 * canvas.width / 4, canvas.height / 6, game.score[1]);
 
 	drawScore(canvas.width / 2, canvas.height, game_id);
 

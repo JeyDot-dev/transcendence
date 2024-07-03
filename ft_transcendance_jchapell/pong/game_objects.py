@@ -8,7 +8,7 @@ class Paddle:
 		self.y = 216
 		self.width = 28
 		self.color = color # (r, g, b)
-		self.speed = 1
+		self.speed = 15
 		self.bounce = 1
 		self.keys = { "up": 0, "down": 0 }
 
@@ -22,7 +22,7 @@ class Ball:
 	def __init__(self, x, y, color):
 		self.x = x
 		self.y = y
-		self.speed = 5
+		self.speed = 10
 		self.vel_x = -1
 		self.vel_y = 1
 		self.bounce = 1
@@ -36,47 +36,52 @@ class Ball:
 		self.speed += speed
 	
 	def reset(self):
-		self.x = 560
-		self.y = 360
-		self.speed = 5
+		self.x = 1280 / 2 - self.size / 2
+		self.y = 720 / 2  - self.size / 2
+		self.speed = 10
 	
 	def collision(self, paddle):
-		# if self.x + self.size >= paddle.x + paddle.width and self.y >= paddle.y and self.y <= paddle.y + (14*20):
-		# 	self.x += paddle.width * self.vel_x
-		# 	self.vel_x = -self.vel_x
-		# 	self.add_speed(1)
 		paddle_x, paddle_y = paddle.get_position()
-		if self.x <= paddle_x + paddle.width:
-			if self.y + self.size >= paddle_y and self.y <= paddle_y + (14*20):
-				self.x = (paddle_x + paddle.width) * self.vel_x
-				self.vel_x = -self.vel_x
-				self.add_speed(1)
+		if self.vel_x > 0 and paddle_x < 1280 / 2: return False
+		elif self.vel_x < 0 and paddle_x > 1280 / 2: return False
+
+		if self.x > paddle_x + paddle.width or self.x + self.size < paddle_x: return False # Ball is not in the same x range as the paddle
+		if self.y + self.size < paddle_y or self.y > paddle_y + 432: return False # Ball is not in the same y range as the paddle
+
+		self.x = paddle_x + paddle.width + 1 if self.vel_x < 0 else paddle_x - self.size - 1
+		self.vel_x = -self.vel_x
+		self.add_speed(1)
+		return True
+
 	
 	def wall_collision(self, score):
 		if self.y <= 0:
 			self.y = 1
 			self.vel_y = -self.vel_y
-		elif self.y >= 706:
-			self.y = 705
+			return True
+		elif self.y >= 720 - self.size:
+			self.y = 720 - self.size - 1
 			self.vel_y = -self.vel_y
+			return True
 		
 		if self.x <= 0:
 			score[1] += 1
 			self.reset()
+			return True
 		elif self.x >= 1280:
 			score[0] += 1
 			self.reset()
+			return True
+		return False
 	
 	async def physics(self, paddles, score):
-		self.wall_collision(score)
-
-		for paddle in paddles:
-			self.collision(paddle)
+		if not self.wall_collision(score):
+			for paddle in paddles:
+				if self.collision(paddle):
+					break
 
 		self.x += self.speed * self.vel_x
 		self.y += self.speed * self.vel_y
-
-		sleep(0.01)
 
 class Game:
 	def __init__(self, id, players, ball):
@@ -85,11 +90,13 @@ class Game:
 		self.ball = ball
 		self.score = [0, 0]
 		self.timer = 0
-		self.running = False
+		self.running = True
 	
 	async def physics(self):
+		while not self.running:
+			await asyncio.sleep(1)
 		while self.running:
-			await asyncio.sleep(0)
+			await asyncio.sleep(60 / 1000)
 			for player in self.players:
 				if player.keys["up"] == 1:
 					player.move(-player.speed)
