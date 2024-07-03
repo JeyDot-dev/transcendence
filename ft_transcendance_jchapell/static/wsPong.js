@@ -5,6 +5,8 @@ window.addEventListener('resize', resizeCanvas, false);
 
 let ballSize = canvas.height / 50
 
+let my_id = -1;
+
 function resizeCanvas() {
 	// let ratio = 16/9;
     
@@ -53,11 +55,18 @@ ws.onopen = function() {
 
 ws.onmessage = function(e) {
 	let data = JSON.parse(e.data);
-	let game = data.game;
+	let game = data.game ? data.game : data;
 
 	switch (data.type) {
 		case "game_state":
 			render(game);
+			break;
+		case "init":
+			console.log("my id: ", data.message.id);
+			my_id = data.message.id;
+			break;
+		case "new_player":
+			console.log("new player: ", data.message);
 			break;
 	}
 }
@@ -66,12 +75,13 @@ ws.onmessage = function(e) {
 {
 	let pressedKeys = [];
 	document.addEventListener('keydown', function(e) {
+		if (my_id == -1) return;
 		if (pressedKeys.includes(e.key)) return;
 		pressedKeys.push(e.key);
 		let message_form = {
 			type: 'keydown',
 			key: "unknown",
-			player_id: 0
+			player_id: my_id
 		}
 		switch (e.key) {
 			case 'w':
@@ -92,12 +102,13 @@ ws.onmessage = function(e) {
 	});
 
 	document.addEventListener('keyup', function(e) {
+		if (my_id == -1) return;
 		if (!pressedKeys.includes(e.key)) return;
 		pressedKeys = pressedKeys.filter(key => key !== e.key);
 		let message_form = {
 			type: 'keyup',
 			key: "unknown",
-			player_id: 0
+			player_id: my_id
 		}
 		switch (e.key) {
 			case 'w':
