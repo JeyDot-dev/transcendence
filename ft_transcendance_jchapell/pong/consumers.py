@@ -30,6 +30,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 					'id': 0
 				}
 			}))
+			asyncio.create_task(self.game.physics())
+			asyncio.create_task(game_update(self))
 		else:
 			await new_player(self)
 			await self.send(text_data=json.dumps({
@@ -38,9 +40,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 					'id': self.game.players.index(self.game.players[-1])
 				}
 			}))
-		
-
-		# asyncio.create_task(self.game_update())
 
 	async def receive(self, text_data=None, bytes_data=None):
 		text_data_json = json.loads(text_data)
@@ -55,17 +54,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 		print("new_player")
 		print("Game player count:" + str(len(self.game.players)))
 
-	# async def game_update(self):
-	# 	while True:
-	# 		print("game_update")
-	# 		sleep(0.01)
-	# 		await self.channel_layer.group_send (
-	# 			self.party,
-	# 			await build_response(self.game)
-	# 		)
 
-	# async def game_state(self, event):
-	# 	await self.send(text_data=json.dumps(event))
+	async def game_state(self, event):
+		await self.send(text_data=json.dumps(event))
 
 
 	# async def input_message(self, event):
@@ -81,7 +72,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 				self.party,
 				self.channel_name
 			)
-
 
 def get_game(game_id):
 	for game in games:
@@ -108,7 +98,7 @@ async def build_response(game):
 	}
 
 async def new_player(game):
-	new_x_pos = len(game.game.players) * 1266
+	new_x_pos = len(game.game.players) * (1280 - game.game.players[0].width)
 	game.game.players.append(Paddle(new_x_pos, (255, 255, 255)))
 	await game.channel_layer.group_send (
 		game.party,
@@ -117,3 +107,11 @@ async def new_player(game):
 			'message': 'A new player has joined the game!'
 		}
 	)
+
+async def game_update(consumer):
+	while True:
+		await asyncio.sleep(0.01)
+		await consumer.channel_layer.group_send (
+			consumer.party,
+			await build_response(consumer.game)
+		)

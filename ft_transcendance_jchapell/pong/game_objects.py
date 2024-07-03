@@ -1,3 +1,5 @@
+import asyncio
+
 from time import sleep
 
 class Paddle:
@@ -86,8 +88,7 @@ class Game:
 	
 	async def physics(self):
 		while True:
-			print("zizi")
-			sleep(0.01)
+			await asyncio.sleep(0.01)
 			for player in self.players:
 				if player.keys["up"] == 1:
 					player.move(-player.speed)
@@ -97,7 +98,7 @@ class Game:
 					player.y = 0
 				elif player.y > 432:
 					player.y = 432
-			await self.ball.physics(self.players, self.score)
+			# await self.ball.physics(self.players, self.score)
 			
 
 class Tournament:

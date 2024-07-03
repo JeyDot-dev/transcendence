@@ -129,70 +129,69 @@ ws.onmessage = function(e) {
 	});
 }
 
-// // setInterval(function() {
-// // 	render()
-// // }, 1000 / 60); // 60 FPS
+// setInterval(function() {
+// 	render()
+// }, 1000 / 60); // 60 FPS
 
-// // Draw the net
-// function drawNet() {
-// 	ctx.fillStyle = net.color;
-// 	ctx.fillRect(net.x, net.y, net.width, net.height);
-// }
+// Draw the net
+function drawNet() {
+	ctx.fillStyle = net.color;
+	ctx.fillRect(net.x, net.y, net.width, net.height);
+}
 
-// // Draw the score
-// function drawScore(x, y, score) {
-// 	ctx.fillStyle = 'WHITE';
-// 	ctx.font = '35px Arial';
-// 	ctx.fillText(score, x, y);
-// }
+// Draw the score
+function drawScore(x, y, score) {
+	ctx.fillStyle = 'WHITE';
+	ctx.font = '35px Arial';
+	ctx.fillText(score, x, y);
+}
 
-// // Draw the player
-// function drawPaddles(paddles) {
-// 	for (let i = 0; i < paddles.length; i++) {
-// 		let paddle = paddles[i];
-// 		ctx.fillStyle = paddle.color;
-// 		ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
-// 	}
-// }
+// Draw the player
+function drawPaddles(paddles) {
+	for (let i = 0; i < paddles.length; i++) {
+		let paddle = paddles[i];
+		ctx.fillStyle = `rgba(${paddle.color[0]}, ${paddle.color[1]}, ${paddle.color[2]}, 1)`;
+		ctx.fillRect(paddle.x, paddle.y, paddle.width, ballSize * 20);
+	}
+}
 
-// // Draw the ball
-// function drawBall() {
-// 	ctx.shadowColor = 'rgba(255, 255, 255, 1)';
-//     ctx.shadowBlur = 10;
-//     ctx.shadowOffsetX = 0;
-//     ctx.shadowOffsetY = 0;
+// Draw the ball
+function drawBall() {
+	ctx.shadowColor = 'rgba(255, 255, 255, 1)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 
-//     // Dessiner la balle
-//     ctx.fillStyle = ball.color;
-//     ctx.fillRect(ball.x, ball.y, ball.size, ball.size);
-//     ctx.fill();
+    // Dessiner la balle
+    ctx.fillStyle = ball.color;
+    ctx.fillRect(ball.x, ball.y, ball.size, ball.size);
 
-//     // Réinitialiser les propriétés de l'ombre
-//     ctx.shadowColor = 'transparent';
-//     ctx.shadowBlur = 0;
-//     ctx.shadowOffsetX = 0;
-//     ctx.shadowOffsetY = 0;
-// }
+    // Réinitialiser les propriétés de l'ombre
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+}
 
-// function clearCanvas() {
-// 	ctx.fillStyle = 'BLACK';
-// 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-// }
+function clearCanvas() {
+	ctx.fillStyle = 'BLACK';
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
 // // Render the game:
-// function render(game) {
-// 	clearCanvas();
+function render(game) {
+	clearCanvas();
 
-// 	// Draw the net & the scores
-// 	drawNet();
-// 	drawScore(canvas.width / 4, canvas.height / 6, player.score);
-// 	drawScore(3 * canvas.width / 4, canvas.height / 6, opponent.score);
+	// Draw the net & the scores
+	drawNet();
+	drawScore(canvas.width / 4, canvas.height / 6, 0);
+	drawScore(3 * canvas.width / 4, canvas.height / 6, 0);
 
-// 	drawScore(canvas.width / 2, canvas.height, game_id);
+	drawScore(canvas.width / 2, canvas.height, game_id);
 
-// 	// Draw the paddles 
-// 	drawPaddles(game.players);
+	// Draw the paddles 
+	drawPaddles(game.players);
 
-// 	// Finally, draw the ball
-// 	drawBall();
-// }
+	// Finally, draw the ball
+	drawBall();
+}
