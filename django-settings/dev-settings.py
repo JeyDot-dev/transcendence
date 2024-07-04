@@ -141,6 +141,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static_production")
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     BASE_DIR / "pong/static/pong",
+    BASE_DIR / "database/static/database",
 ]
 
 
