@@ -3,6 +3,14 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 class ChatConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
+		user = self.scope['user']
+		if user.is_anonymous:
+			self.send(text_data=json.dumps({
+				'type': 'error',
+				'message': 'You must be logged in to chat'
+			}))
+			await self.close()
+			return
 		self.room_name = "chat_" + self.scope['url_route']['kwargs']['game_id']
 
 		await self.channel_layer.group_add (

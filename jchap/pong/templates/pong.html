@@ -1,5 +1,25 @@
 <div id="pong">
-	<canvas id="gameCanvas"></canvas>
+	<div class="gameScreen row">
+        <!-- Colonne pour l'équipe de gauche -->
+        <div class="col-md-1 d-flex justify-content-center align-items-center">
+            <ul id="leftTeam">
+            </ul>
+        </div>
+
+        <!-- Colonne pour le canvas, centrée et prenant plus d'espace -->
+        <div class="col-md-10 d-flex justify-content-center align-items-center">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- Colonne pour l'équipe de droite -->
+        <div class="col-md-1 d-flex justify-content-center align-items-center">
+            <ul id="rightTeam">
+            </ul>
+        </div>
+    </div>
+	<div class="p-4">
+		<input id="game_id" value="1234" />
+	</div>
 	<div id="gameOver">
 		<h1>Game Over</h1>
 		<button id="playAgain" onclick="stopGame()">Play Again</button>

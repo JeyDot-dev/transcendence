@@ -69,9 +69,14 @@ function toggleAccount() {
 	accountButton.style.zIndex = '100';
 	accountButton.style.borderRadius = '0';
 	accountButton.style.borderBottomLeftRadius = '42px';
-
-	document.getElementById('pseudo').innerHTML = localStorage.getItem('username');
 }
-// For debuging:
-toggleAccount();
-active.account = !active.account;
+
+function loadData() {
+	const user = JSON.parse(localStorage.getItem('user'));
+	
+	document.getElementById('pseudo').innerText = user['username'];
+	document.getElementById('total_victories').innerText = user['total_victories'];
+	document.getElementById('total_games').innerText = user['total_games'];
+}
+
+loadData();

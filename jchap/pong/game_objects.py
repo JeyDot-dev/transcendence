@@ -95,6 +95,8 @@ class Game:
 	
 	async def physics(self):
 		while not self.running:
+			if len(self.players) >= 2:
+				self.running = True
 			await asyncio.sleep(1)
 		while self.running:
 			await asyncio.sleep(60 / 1000)

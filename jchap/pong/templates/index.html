@@ -7,7 +7,6 @@
 {% block content %}
 
 	{% if user.is_authenticated %}
-		<input id="game_id" value="1234" />
 		
 		{% include "pong.html"%}
 
@@ -17,7 +16,7 @@
 	{% else %}
 		<div>
 			<h2>Log in to play</h2>
-			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
+			<button type="button" class="btn btn-primary m-4" data-bs-toggle="modal" data-bs-target="#loginModal">
 				Login
 			</button>
 			<br />

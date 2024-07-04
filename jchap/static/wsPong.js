@@ -63,8 +63,10 @@ ws.onmessage = function(e) {
 			break;
 		case "init":
 			my_id = data.message.id;
+			addPlayerList((my_id % 2 == 0) ? 'l' : 'r');
 			break;
 		case "new_player":
+			addPlayerList((data.message.side == 0) ? 'l' : 'r');
 			break;
 	}
 }
@@ -185,11 +187,25 @@ function render(game) {
 	drawScore(canvas.width / 4, canvas.height / 6, game.score[0]);
 	drawScore(3 * canvas.width / 4, canvas.height / 6, game.score[1]);
 
-	drawScore(canvas.width / 2, canvas.height, game_id);
-
 	// Draw the paddles 
 	drawPaddles(game.players);
 
 	// Finally, draw the ball
 	drawBall(game.ball);
+}
+
+//LIST OF PLAYERS
+
+function addPlayerList(side) {
+	const user = JSON.parse(localStorage.getItem('user')); 
+
+	let list
+	if (side == 'l')
+		list = document.getElementById('leftTeam');
+	else
+		list = document.getElementById('rightTeam');
+
+	let player = document.createElement('li');
+	player.textContent = user.username;
+	list.appendChild(player);
 }

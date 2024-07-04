@@ -16,9 +16,8 @@ function login(formData) {
 		if (!data.token) {
 			alert('Invalid login');
 		} else {
-			document.cookie = `logintoken=${data.token}`;
-			localStorage.setItem('username', formData.get('username'));
-			alert('successfully logged in');
+			document.cookie = `logintoken=${data.token}; SameSite=Strict; Secure`;
+			localStorage.setItem('user', JSON.stringify(data.user));
 			location.reload();
 		}
 	})
@@ -92,7 +91,7 @@ function logout() {
 			alert(data.error);
 		} else {
 			document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-			alert('Logged out successfully');
+			localStorage.removeItem('user');
 			location.reload();
 		}
 	})
