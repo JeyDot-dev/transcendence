@@ -1,4 +1,4 @@
-function login(formData){
+function login(formData) {
 	const url = 'api/login/';
 
 	fetch(url, {
@@ -17,7 +17,9 @@ function login(formData){
 			alert('Invalid login');
 		} else {
 			document.cookie = `logintoken=${data.token}`;
+			localStorage.setItem('username', formData.get('username'));
 			alert('successfully logged in');
+			location.reload();
 		}
 	})
 }
@@ -29,6 +31,7 @@ function createAccount(formData) {
 		alert('Passwords do not match');
 		return;
 	}
+
 	fetch(url, {
 		method: 'POST',
 		body: JSON.stringify({
@@ -46,6 +49,7 @@ function createAccount(formData) {
 			alert(data.error);
 		} else {
 			alert('Account created successfully');
+			location.reload();
 		}
 	})
 }
@@ -87,7 +91,9 @@ function logout() {
 		if (data.error) {
 			alert(data.error);
 		} else {
+			document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 			alert('Logged out successfully');
+			location.reload();
 		}
 	})
 }
@@ -113,6 +119,7 @@ function changePassword(){
 			alert(data.error);
 		} else {
 			alert('Password changed successfully');
+			location.reload();
 		}
 	})
 }

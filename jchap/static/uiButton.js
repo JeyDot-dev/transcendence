@@ -4,8 +4,6 @@ const accountButton = document.querySelector('#accountButton');
 
 const accountIcon = document.querySelector('#accountIcon');
 
-$(document).off('focusin.modal'); // Prevents modal from opening on page load
-
 let active = {
 	menu: false,
 	chat: false,
@@ -60,8 +58,10 @@ accountIcon.addEventListener('click', function() {
 function toggleAccount() {
 	if (active.account) {
 		accountButton.removeAttribute('style');
+		document.getElementById('accountShow').style.display = 'none';
 		return
 	}
+	document.getElementById('accountShow').style.display = 'block';
 	accountButton.style.width = '20%';
 	accountButton.style.height = '50%';
 	accountButton.style.top = '0';
@@ -69,6 +69,8 @@ function toggleAccount() {
 	accountButton.style.zIndex = '100';
 	accountButton.style.borderRadius = '0';
 	accountButton.style.borderBottomLeftRadius = '42px';
+
+	document.getElementById('pseudo').innerHTML = localStorage.getItem('username');
 }
 // For debuging:
 toggleAccount();

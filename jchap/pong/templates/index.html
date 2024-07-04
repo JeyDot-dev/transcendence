@@ -5,13 +5,29 @@
 {% endblock %}
 
 {% block content %}
-<input id="game_id" value="1234" />
 
-	{% comment %} {% include "pong.html"%} {% endcomment %}
-	
-	{% include "uiButtons/menuButton.html" %}
-	{% include "uiButtons/accountButton.html" %}
-	{% include "uiButtons/chatButton.html" %}
+	{% if user.is_authenticated %}
+		<input id="game_id" value="1234" />
+		
+		{% include "pong.html"%}
+
+		{% include "uiButtons/menuButton.html" %}
+		{% include "uiButtons/accountButton.html" %}
+		{% include "uiButtons/chatButton.html" %}
+	{% else %}
+		<div>
+			<h2>Log in to play</h2>
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
+				Login
+			</button>
+			<br />
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signupModal">
+				Create account
+			</button>
+		</div>
+		{% include "accountCreation.html" %}
+		{% include "accountLogin.html" %}
+	{% endif %}
 {% endblock %}
 
 {% comment %} {% block footer %}
