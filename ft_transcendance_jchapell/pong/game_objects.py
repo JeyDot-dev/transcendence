@@ -46,12 +46,13 @@ class Ball:
 		elif self.vel_x < 0 and paddle_x > 1280 / 2: return False
 
 		if self.x > paddle_x + paddle.width or self.x + self.size < paddle_x: return False # Ball is not in the same x range as the paddle
-		if self.y + self.size < paddle_y or self.y > paddle_y + 432: return False # Ball is not in the same y range as the paddle
+		if self.y + self.size < paddle_y or self.y > paddle_y + (self.size * 20): return False # Ball is not in the same y range as the paddle
 
 		self.x = paddle_x + paddle.width + 1 if self.vel_x < 0 else paddle_x - self.size - 1
 		self.vel_x = -self.vel_x
 		self.add_speed(1)
 		return True
+
 
 	
 	def wall_collision(self, score):
@@ -90,7 +91,7 @@ class Game:
 		self.ball = ball
 		self.score = [0, 0]
 		self.timer = 0
-		self.running = True
+		self.running = False
 	
 	async def physics(self):
 		while not self.running:

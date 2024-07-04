@@ -2,6 +2,10 @@ const menuButton = document.querySelector('#menuButton');
 const chatButton = document.querySelector('#chatIcon');
 const accountButton = document.querySelector('#accountButton');
 
+const accountIcon = document.querySelector('#accountIcon');
+
+$(document).off('focusin.modal'); // Prevents modal from opening on page load
+
 let active = {
 	menu: false,
 	chat: false,
@@ -48,7 +52,7 @@ function toggleChat() {
 	chatButton.style.borderTopLeftRadius = '42px';
 }
 
-accountButton.addEventListener('click', function() {
+accountIcon.addEventListener('click', function() {
 	toggleAccount();
 	active.account = !active.account;
 });
@@ -66,3 +70,6 @@ function toggleAccount() {
 	accountButton.style.borderRadius = '0';
 	accountButton.style.borderBottomLeftRadius = '42px';
 }
+// For debuging:
+toggleAccount();
+active.account = !active.account;
