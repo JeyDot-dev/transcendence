@@ -37,5 +37,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 		await self.send(text_data=json.dumps({
 			'type': 'chat_message',
-			'message': message
+			'message': build_response(self, message)
 		}))
+
+
+def build_response(self, message):
+	return json.dumps({
+		'sender': self.scope['user'].username,
+		'message': message,
+	})

@@ -16,6 +16,8 @@ chatSocket.onmessage = function(e) {
 	const message = data['message'];
 	const type = data['type'];
 
+	console.log('Message: ', data);
+
 	if (type == 'chat_message') {
 		addMessage('receiver', "https://media.4-paws.org/1/2/6/0/1260b8bbeb9d82d5a6caaa078d5061bbf626f94e/VIER%20PFOTEN_2015-04-27_010-1927x1333-1920x1328.jpg", message);
 	}
