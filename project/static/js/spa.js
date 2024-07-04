@@ -1,5 +1,6 @@
 let loadedCSS = [];
 let loadedJS = [];
+let defaultTitle = document.title;
 
 // Listener for browser navigation management
 window.addEventListener("popstate", spa);
@@ -23,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function spa() {
     unloadCSS();
     unloadJS();
+    unloadTitle();
 
     const url = makeURL(location.pathname);
     const content = await fetchHTML(url);
@@ -31,6 +33,7 @@ async function spa() {
 
     loadCSS(mainElement);
     loadJS(mainElement);
+    loadTitle(mainElement);
 }
 
 // Function to create a new URL object
@@ -157,6 +160,27 @@ function unloadJS() {
     });
     // Clear the list of loaded CSS
     loadedJS = [];
+}
+
+// Function to load the title
+function loadTitle(mainElement) {
+    // Get the title in the content
+    const titleElement = mainElement.querySelector('title');
+
+    if (titleElement) {
+        // Store the current title
+        defaultTitle = document.title;
+        // Set the new title
+        document.title = titleElement.textContent;
+        // Remove the original title element
+        titleElement.remove();
+    }
+}
+
+// Function to unload the title
+function unloadTitle() {
+    // Restore the default title
+    document.title = defaultTitle;
 }
 
 // Function to navigate to a new URL
