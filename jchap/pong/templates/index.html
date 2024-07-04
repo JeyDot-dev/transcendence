@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}
+	<h1>ft_transcendance</h1>
+{% endblock %}
+
+{% block content %}
+<input id="game_id" value="1234" />
+
+	{% comment %} {% include "pong.html"%} {% endcomment %}
+	
+	{% include "uiButtons/menuButton.html" %}
+	{% include "uiButtons/accountButton.html" %}
+	{% include "uiButtons/chatButton.html" %}
+{% endblock %}
+
+{% comment %} {% block footer %}
+	<footer>
+		<h3> ft_transcendance 42</h3>
+		<h3> proudly made in 2024 by Jchapell </h3>
+	</footer>
+{% endblock %} {% endcomment %}

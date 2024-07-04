@@ -1,0 +1,147 @@
+body {
+	background: rgb(132,108,217);
+	background: linear-gradient(180deg, rgba(132,108,217,1) 0%, rgba(37,25,64,1) 14%, rgba(163,135,181,1) 90%, rgba(202,169,217,1) 100%);
+	background-repeat: no-repeat;
+	height: 100vh;
+	color: white;
+	text-align: center;
+}
+
+* {
+	box-sizing: border-box;
+	font-family: Lato, Arial, Helvetica, sans-serif;
+}
+
+/* Style the heading */
+h1 {
+	font-family: 'Lato', sans-serif;
+	font-size: 72px;
+	padding: 42px;
+	text-shadow: 0 4px 4px 0 rgba(0, 0, 0, 1);
+}
+
+/* Style the paragraph */
+p {
+	font-size: 16px;
+	color: #666;
+	line-height: 1.5;
+}
+
+#gameCanvas {
+	width: 100%;
+	height: 100%;
+	border-radius: 21px;
+	box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 1);
+}
+
+#pong{
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+#gameOver {
+	color: white;
+	position: absolute;
+	display: none; /*Change to flex*/
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	top: 40%;
+	left: 32%;
+	z-index: 1;
+}
+
+footer {
+	position: absolute;
+	display: flex;
+	justify-content: space-around;
+	padding: 10px;
+	padding-left: 250px;
+	padding-right: 250px;
+	width: 100%;
+	bottom: 0;
+}
+
+.uiButton {
+	background-color: #CAA9D9;
+	border: none;
+	color: rgb(0, 0, 0);
+	padding: 19px 30px;
+	text-align: center;
+	text-decoration: none;
+	font-size: 32px;
+	cursor: pointer;
+	border-radius: 100px;
+	position: absolute;
+	box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 1);
+	transition: 0.45s;
+}
+
+.uiButton:hover {
+	background-color: #A08AC1;
+}
+
+#chatButton {
+	right: 5vh;
+	bottom: 5vh;
+}
+
+#menuButton {
+	left: 5vh;
+	top: 5vh;
+}
+
+#accountButton {
+	right: 5vh;
+	top: 5vh;
+}
+
+#chatBox {
+	display: none;
+	width: 400px;
+	margin: 0 auto;
+	border-radius: 5px;
+	overflow: hidden;
+  }
+#chatContainer {
+	height: 300px;
+	overflow: auto;
+	direction: rtl;
+}
+.chatContainer .chatMessage {
+	padding: 20px;
+	transform: rotate(180deg);
+	direction: ltr;
+}
+
+.chatMessage {
+	display: flex;
+	align-items: flex-end;
+	color: black;
+	margin-top: 5px;
+}
+
+.chatMessage img {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+}
+
+.sender {
+	text-align: right;
+	font-weight: bold;
+}
+
+.receiver {
+	text-align: left;
+	font-weight: normal;
+}
+
+#senderMessage {
+	width: 80%;
+	padding: 10px;
+	border: none;
+	border-radius: 5px;
+	font-size: 16px;
+}
