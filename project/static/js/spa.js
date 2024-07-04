@@ -26,7 +26,7 @@ async function spa() {
     unloadJS();
     unloadTitle();
 
-    const url = makeURL(location.pathname);
+    const url = makeURL(location.pathname + location.search);
     const content = await fetchHTML(url);
     const mainElement = document.querySelector("main");
     mainElement.innerHTML = content;
@@ -46,7 +46,6 @@ function makeURL(url) {
         if (url.endsWith("/")) {
             url = url.slice(0, -1);
         }
-
         // Create a new URL object
         let newURL = new URL(url, window.location.origin);
 
@@ -68,7 +67,8 @@ function makeURL(url) {
 // It sends an XMLHttpRequest to the server
 async function fetchHTML(url) {
     try {
-        const response = await fetch(url.pathname, {
+        const destination = url.pathname + url.search;
+        const response = await fetch(destination, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
