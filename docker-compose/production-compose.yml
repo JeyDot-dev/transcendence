@@ -16,9 +16,11 @@ services:
   #   restart:        always
   nginx:
     container_name: nginx
-    image:         nginx:1.27.0
     restart:        always
 
+    build:
+      dockerfile:     ../containers/nginx/Dockerfile
+      context:        ../containers 
     healthcheck:
       test:         ["CMD", "curl", "-f", "http://localhost"]
       interval:     1m30s
@@ -30,11 +32,9 @@ services:
 
     ports:
       - 80:80
+      - 443:443
     volumes:
-      - ../containers/nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
       - ../project/static_production:/static
-    command: ["nginx", "-g", "daemon off;"]
-    # command: [nginx-debug, '-g', 'daemon off;']
     networks:
         - backend
         - frontend
