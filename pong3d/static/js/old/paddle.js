@@ -42,7 +42,7 @@ class Paddle {
 
     move(direction) {
         // Calculer le mouvement dans le système de coordonnées local
-        const localDirection = direction;
+        const localDirection = new THREE.Vector3(direction.x, direction.y, direction.z);
         localDirection.applyQuaternion(this.mesh.quaternion);
         this.velocity.copy(localDirection).multiplyScalar(this.speed); // Mettre à jour la vitesse
         this.mesh.position.add(this.velocity);

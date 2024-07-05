@@ -1,3 +1,6 @@
+// import * as THREE from 'three';
+// import { Paddle } from './Paddle.js';
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Script pong3d.js chargé');
 
@@ -16,14 +19,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // controls.screenSpacePanning = false;
     // controls.enableKeys = false;
 
-    // Ajouter des contrôles Trackball
+    // ORBIT: Ajouter des contrôles Trackball
     const controls = new THREE.TrackballControls(camera, renderer.domElement);
-    controls.rotateSpeed = 5.0;
-    controls.zoomSpeed = 1.2;
-    controls.panSpeed = 0.8;
-    controls.dynamicDampingFactor = 0.3;
+	controls.rotateSpeed = 5.0;
+	controls.zoomSpeed = 1.2;
+	controls.panSpeed = 0.8;
+	controls.noZoom = false;
+	controls.noPan = false;
+	controls.staticMoving = true;
+	controls.dynamicDampingFactor = 0.3;
 
-    // Ajouter une lumière directionnelle
+    // LIGHT: Ajouter une lumière directionnelle
     // const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
     // directionalLight.position.set(5, 5, 5).normalize();
     // scene.add(directionalLight);
@@ -54,24 +60,40 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Variables de jeu
-    var paddleWidth = 0.5, paddleHeight = 0.1, paddleDepth = 0.2;
-    var paddleSpeed = 0.1;
     var score1 = 0, score2 = 0;
 
-    // Création des paddles
-    var paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
-    var paddleMaterial1 = new THREE.MeshStandardMaterial({ color: 0x33ccff });
-    var paddleMaterial2 = new THREE.MeshStandardMaterial({ color: 0xff2975 });
-    var paddle1 = new THREE.Mesh(paddleGeometry, paddleMaterial1);
-    var paddle2 = new THREE.Mesh(paddleGeometry, paddleMaterial2);
+    // PADDLE: Création des paddles
+    var paddle1 = new Paddle(scene, 1, 0.1, 0.2, 0x33ccff, 0.1, new THREE.Vector3(0, -2.5, 0), new THREE.Vector3(0, 0, 0));
+	var paddle2 = new Paddle(scene, 1, 0.1, 0.2, 0xff2975, 0.1, new THREE.Vector3(0, 2.5, 0), new THREE.Vector3(0, 0, 0));
+	
+
+	// Ajouter les paddles à la scène
+	scene.add(paddle1.getMesh());
+	scene.add(paddle2.getMesh());
+	paddle1.logMeshData();
+	paddle2.logMeshData();
+	// scene.add(paddle1.getBoxHelper());
+	// scene.add(paddle2.getBoxHelper());
+
+	function checkPaddle(paddle, puck) {
+		console.log(`Paddle position: ${paddle.getMesh().position.x}, ${paddle.getMesh().position.y}, ${paddle.getMesh().position.z}`);
+		console.log(`Paddle dimensions: ${paddle.width}, ${paddle.height}, ${paddle.depth}`);
+		console.log(`Puck position: ${puck.getMesh().position.x}, ${puck.getMesh().position.y}, ${puck.getMesh().position.z}`)
+	}
 
     // Positionnement des paddles
-    paddle1.position.set(0, -2.5, 0);
-    paddle2.position.set(0, 2.5, 0);
-    scene.add(paddle1);
-    scene.add(paddle2);
+    // scene.add(paddle1);
+    // scene.add(paddle2);
     console.log('Paddles ajoutés à la scène');
 
+
+	const axesHelper = new THREE.AxesHelper(1); // La longueur des axes
+	scene.add(axesHelper);
+	
+	// Ajouter une grille
+	const gridHelper = new THREE.GridHelper(10, 10); // Taille de la grille et nombre de divisions
+	gridHelper.rotation.x = Math.PI / 2;
+	scene.add(gridHelper);	
     // Création de la balle
     // var ballSize = 0.1;
     // var ballSpeed = 0.02;
@@ -93,8 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // var material = new THREE.MeshStandardMaterial({ color: 0x0000ff }); // Bleu
     // // Créer le maillage du palet
 
-    var puck = new Puck(0.1, 0.05, 0xff0000, 0.2, new THREE.Vector3(0, 0, -0.05));
+	// PUCK: Creation du puck
+    var puck = new Puck(scene, 0.1, 0.05, 0xff0000, 0.1, new THREE.Vector3(0, 0, -0.05));
     scene.add(puck.getMesh());
+	// scene.add(puck.getBoxHelper());
 
     // Création des bords
     var borderThickness = 0.1;
@@ -126,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Drapeaux pour les touches de déplacement
     var moveLeft1 = false, moveRight1 = false;
     var moveLeft2 = false, moveRight2 = false;
-    var pause = false;
+    var pause = true;
 
     // Gestion des mouvements des paddles
     document.addEventListener('keydown', function(event) {
@@ -165,10 +189,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mise à jour des contrôles pour prendre en compte la nouvelle rotation
     });
 
-    document.addEventListener('keydown', function(event) {
-
-    });
-
     document.addEventListener('keyup', function(event) {
         if (event.code === 'ArrowLeft') {
             moveLeft1 = false;
@@ -192,51 +212,51 @@ document.addEventListener('DOMContentLoaded', function() {
     // }
 
     // Création de l'explosion
-    var particleCount = 100;
-    var particles = new THREE.BufferGeometry();
-    var positions = new Float32Array(particleCount * 3);
-    var velocities = new Float32Array(particleCount * 3);
-    var colors = new Float32Array(particleCount * 3);
+    // var particleCount = 100;
+    // var particles = new THREE.BufferGeometry();
+    // var positions = new Float32Array(particleCount * 3);
+    // var velocities = new Float32Array(particleCount * 3);
+    // var colors = new Float32Array(particleCount * 3);
 
-    for (var i = 0; i < particleCount; i++) {
-        positions[i * 3] = 0;
-        positions[i * 3 + 1] = 0;
-        positions[i * 3 + 2] = 0;
+    // for (var i = 0; i < particleCount; i++) {
+    //     positions[i * 3] = 0;
+    //     positions[i * 3 + 1] = 0;
+    //     positions[i * 3 + 2] = 0;
 
-        velocities[i * 3] = (Math.random() - 0.5) * 2;
-        velocities[i * 3 + 1] = (Math.random() - 0.5) * 2;
-        velocities[i * 3 + 2] = (Math.random() - 0.5) * 2;
+    //     velocities[i * 3] = (Math.random() - 0.5) * 2;
+    //     velocities[i * 3 + 1] = (Math.random() - 0.5) * 2;
+    //     velocities[i * 3 + 2] = (Math.random() - 0.5) * 2;
 
-        colors[i * 3] = Math.random();
-        colors[i * 3 + 1] = Math.random();
-        colors[i * 3 + 2] = Math.random();
-    }
+    //     colors[i * 3] = Math.random();
+    //     colors[i * 3 + 1] = Math.random();
+    //     colors[i * 3 + 2] = Math.random();
+    // }
 
-    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    particles.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
-    particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    // particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    // particles.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+    // particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    var particleMaterial = new THREE.PointsMaterial({
-        size: 0.1,
-        vertexColors: true
-    });
+    // var particleMaterial = new THREE.PointsMaterial({
+    //     size: 0.1,
+    //     vertexColors: true
+    // });
 
-    var particleSystem = new THREE.Points(particles, particleMaterial);
-    scene.add(particleSystem);
+    // var particleSystem = new THREE.Points(particles, particleMaterial);
+    // scene.add(particleSystem);
 
-    function triggerExplosion(position) {
-        for (var i = 0; i < particleCount; i++) {
-            particles.attributes.position.array[i * 3] = position.x;
-            particles.attributes.position.array[i * 3 + 1] = position.y;
-            particles.attributes.position.array[i * 3 + 2] = position.z;
+    // function triggerExplosion(position) {
+    //     for (var i = 0; i < particleCount; i++) {
+    //         particles.attributes.position.array[i * 3] = position.x;
+    //         particles.attributes.position.array[i * 3 + 1] = position.y;
+    //         particles.attributes.position.array[i * 3 + 2] = position.z;
 
-            particles.attributes.velocity.array[i * 3] = (Math.random() - 0.5) * 2;
-            particles.attributes.velocity.array[i * 3 + 1] = (Math.random() - 0.5) * 2;
-            particles.attributes.velocity.array[i * 3 + 2] = (Math.random() - 0.5) * 2;
-        }
-        particles.attributes.position.needsUpdate = true;
-        particles.attributes.velocity.needsUpdate = true;
-    }
+    //         particles.attributes.velocity.array[i * 3] = (Math.random() - 0.5) * 2;
+    //         particles.attributes.velocity.array[i * 3 + 1] = (Math.random() - 0.5) * 2;
+    //         particles.attributes.velocity.array[i * 3 + 2] = (Math.random() - 0.5) * 2;
+    //     }
+    //     particles.attributes.position.needsUpdate = true;
+    //     particles.attributes.velocity.needsUpdate = true;
+    // }
 
     // Fonction de réinitialisation de la balle
     // function resetBall() {
@@ -254,26 +274,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fonction de détection des collisions
     function checkCollision() {
-        // Collision avec les paddles
-        if (puck.position.y - puck.size <= paddle1.position.y + paddleHeight / 2 &&
-        puck.position.x >= paddle1.position.x - paddleWidth / 2 &&
-        puck.position.x <= paddle1.position.x + paddleWidth / 2) {
-            puck.inverseDirectionY();
-            puck.speed *= 1.1;
-        }
-        
-        if (puck.position.y + puck.size >= paddle2.position.y - paddleHeight / 2 &&
-        puck.position.x >= paddle2.position.x - paddleWidth / 2 &&
-        puck.position.x <= paddle2.position.x + paddleWidth / 2) {
-            puck.inverseDirectionY();
-            // puckDirection.y = -puckSpeed;
-            puck.speed *= 1.1;
-        }
-        
+        // COLLISION: Collision avec les paddles
+        if (paddle1.checkCollision(puck)) {
+			checkPaddle(paddle1, puck);
+			puck.reflect(paddle1.getNormal(), paddle1.velocity);
+		}
+        if (paddle2.checkCollision(puck)) {
+			checkPaddle(paddle2, puck);
+			puck.reflect(paddle2.getNormal(), paddle2.velocity);
+		}
         // Collision avec les bords
         if (puck.position.x - puck.size <= -window.innerWidth / window.innerHeight / 2) {
-        puck.inverseDirectionX();
-        // puckDirection.x = puckSpeed;
+        	puck.inverseDirectionX();
+        	// puckDirection.x = puckSpeed;
         }
         
         if (puck.position.x + puck.size >= window.innerWidth / window.innerHeight / 2) {
@@ -285,15 +298,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (puck.position.y - puck.size <= -3) {
             score2++;
             updateScoreP2Text(score2);
-            triggerExplosion(puck.position.clone());
+            // triggerExplosion(puck.position.clone());
+			var explo = new Explosion(scene, 100, 0.1, 2);
+			explo.trigger(puck.position);
             // updateScores();
             puck.reset();
         }
-
+		
         if (puck.position.y + puck.size >= 3) {
-            score1++;
+			score1++;
             updateScoreP1Text(score1);
-            triggerExplosion(puck.position.clone());
+            // triggerExplosion(puck.position.clone());
+			var explo = new Explosion(scene, 100, 0.1, 2);
+			explo.trigger(puck.position);
             // updateScores();
             puck.reset();
         }
@@ -390,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    const timeLimit = 10;
+    const timeLimit = 120;
     var startTime = Date.now();
     var elapsedTime = 0;
     var endGame = false;
@@ -407,27 +424,34 @@ document.addEventListener('DOMContentLoaded', function() {
     var animate = function() {
         requestAnimationFrame(animate);
 
+		// paddle1.updateBoxHelper();
+		// paddle2.updateBoxHelper();
+		// puck.updateBoxHelper();
+
         if (!pause && !endGame) {
             // Mise à jour des positions des paddles
-            if (moveLeft1) paddle1.position.x -= paddleSpeed;
-            if (moveRight1) paddle1.position.x += paddleSpeed;
-            if (moveLeft2) paddle2.position.x -= paddleSpeed;
-            if (moveRight2) paddle2.position.x += paddleSpeed;
+            if (moveLeft1) paddle1.move(new THREE.Vector3 (-1, 0, 0));
+            if (moveRight1) paddle1.move(new THREE.Vector3 (1, 0, 0));
+            if (moveLeft2) paddle2.move(new THREE.Vector3 (-1, 0, 0));
+            if (moveRight2) paddle2.move(new THREE.Vector3 (1, 0, 0));
 
-            puck.updatePosition();
+            puck.move();
             checkCollision();
             checkTime();
 
-            // Mise à jour des particules pour l'explosion
-            var positions = particles.attributes.position.array;
-            var velocities = particles.attributes.velocity.array;
-            for (var i = 0; i < particleCount; i++) {
-                positions[i * 3] += velocities[i * 3] * 0.1;
-                positions[i * 3 + 1] += velocities[i * 3 + 1] * 0.1;
-                positions[i * 3 + 2] += velocities[i * 3 + 2] * 0.1;
-            }
-            particles.attributes.position.needsUpdate = true;
+            // // Mise à jour des particules pour l'explosion
+            // var positions = particles.attributes.position.array;
+            // var velocities = particles.attributes.velocity.array;
+            // for (var i = 0; i < particleCount; i++) {
+            //     positions[i * 3] += velocities[i * 3] * 0.1;
+            //     positions[i * 3 + 1] += velocities[i * 3 + 1] * 0.1;
+            //     positions[i * 3 + 2] += velocities[i * 3 + 2] * 0.1;
+            // }
+            // particles.attributes.position.needsUpdate = true;
         }
+		if (endGame) {
+
+		}
         controls.update(); // Met à jour les contrôles
 
 
