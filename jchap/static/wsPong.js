@@ -53,7 +53,10 @@ ws.onopen = function() {
 	console.log("Pong socket open");
 }
 
+let global_game
+
 ws.onmessage = function(e) {
+	const user = JSON.parse(localStorage.getItem('user')); 
 	let data = JSON.parse(e.data);
 	let game = data.game ? data.game : data;
 
@@ -63,10 +66,17 @@ ws.onmessage = function(e) {
 			break;
 		case "init":
 			my_id = data.message.id;
-			addPlayerList((my_id % 2 == 0) ? 'l' : 'r');
+			addPlayerList(user.username, (my_id % 2 == 0) ? 'l' : 'r');
+			updatePlayerCount(data.message.nb_players, data.message.nb_players);
 			break;
 		case "new_player":
-			addPlayerList((data.message.side == 0) ? 'l' : 'r');
+			console.log(data);
+			addPlayerList(data.name, (data.side >= 640) ? 'r' : 'l');
+			updatePlayerCount(data.nb_players, data.nb_players);
+			break;
+		case "player_left":
+			updatePlayerCount(data.nb_players, data.nb_players);
+			console.log("Player left: " + data.who);
 			break;
 	}
 }
@@ -130,7 +140,7 @@ ws.onmessage = function(e) {
 }
 
 // setInterval(function() {
-// 	render()
+// 	render(global_game)
 // }, 1000 / 60); // 60 FPS
 
 // Draw the net
@@ -174,7 +184,7 @@ function drawBall(ball) {
 }
 
 function clearCanvas() {
-	ctx.fillStyle = 'BLACK';
+	ctx.fillStyle = 'rgba(0, 0, 0, 1)';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -196,7 +206,7 @@ function render(game) {
 
 //LIST OF PLAYERS
 
-function addPlayerList(side) {
+function addPlayerList(new_user, side) {
 	const user = JSON.parse(localStorage.getItem('user')); 
 
 	let list
@@ -206,6 +216,13 @@ function addPlayerList(side) {
 		list = document.getElementById('rightTeam');
 
 	let player = document.createElement('li');
-	player.textContent = user.username;
+	player.textContent = new_user;
 	list.appendChild(player);
 }
+
+function updatePlayerCount(nb_players, nb_max) {
+	const playerString = nb_players > 1 ? "Players" : "Player";
+	document.getElementById('playerCount').textContent = playerString + " " + nb_players + "/" + nb_max;
+}
+
+// TEAM MANIPULATION

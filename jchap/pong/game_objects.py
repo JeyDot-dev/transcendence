@@ -3,7 +3,7 @@ import asyncio
 from time import sleep
 
 class Paddle:
-	def __init__(self, x, color):
+	def __init__(self, x, color, id):
 		self.x = x
 		self.y = 216
 		self.width = 28
@@ -11,6 +11,7 @@ class Paddle:
 		self.speed = 15
 		self.bounce = 1
 		self.keys = { "up": 0, "down": 0 }
+		self.id: int = id
 
 	def move(self, dy):
 		self.y += dy

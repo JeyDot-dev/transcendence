@@ -17,9 +17,13 @@
             </ul>
         </div>
     </div>
+	<p class="p-4" id="playerCount">player: 0/0</p>
 	<div class="p-4">
 		<input id="game_id" value="1234" />
 	</div>
+	<button id="startGame" onclick="startGame()">Start Game</button>
+	<button id="pauseGame" onclick="pauseGame()">Pause Game</button>
+	<button id="resumeGame" onclick="changeTeam()">Change team</button>
 	<div id="gameOver">
 		<h1>Game Over</h1>
 		<button id="playAgain" onclick="stopGame()">Play Again</button>

@@ -9,6 +9,7 @@ class UserInfos(AbstractUser):
 	grade = models.IntegerField(default=0)
 	total_games = models.IntegerField(default=0)
 	total_victories = models.IntegerField(default=0)
+	skin = models.CharField(max_length=11, default="255,255,255")
 
 	REQUIRED_FIELDS = ['email', 'password'] 
 
@@ -24,5 +25,6 @@ class UserInfos(AbstractUser):
 			'is_playing': self.is_playing,
 			'grade': self.grade,
 			'total_games': self.total_games,
-			'total_victories': self.total_victories
+			'total_victories': self.total_victories,
+			'skin': self.skin
 		}
