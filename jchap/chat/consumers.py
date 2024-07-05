@@ -4,7 +4,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 class ChatConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		user = self.scope['user']
-		if user.is_anonymous:
+		if not user.is_authenticated:
 			self.send(text_data=json.dumps({
 				'type': 'error',
 				'message': 'You must be logged in to chat'
@@ -28,7 +28,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			self.room_name,
 			{
 				'type': 'chat_message',
-				'message': message
+				'message': await self.build_response(message)
 			}
 		)
 
@@ -37,12 +37,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 		await self.send(text_data=json.dumps({
 			'type': 'chat_message',
-			'message': build_response(self, message)
+			'message': message
 		}))
 
-
-def build_response(self, message):
-	return json.dumps({
-		'sender': self.scope['user'].username,
-		'message': message,
-	})
+	async def build_response(self, message):
+		user = self.scope['user']
+		return json.dumps({
+			'username': user.username,
+			'profile_pic': user.profile_pic,
+			'message': message,
+		})

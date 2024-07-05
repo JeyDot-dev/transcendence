@@ -104,22 +104,25 @@ footer {
 	border-radius: 5px;
 	overflow: hidden;
   }
+
 #chatContainer {
 	height: 300px;
 	overflow: auto;
-	direction: rtl;
 }
-.chatContainer .chatMessage {
+
+#chatContainer .chatMessage {
 	padding: 20px;
-	transform: rotate(180deg);
-	direction: ltr;
 }
 
 .chatMessage {
 	display: flex;
-	align-items: flex-end;
+	align-items: center;
 	color: black;
-	margin-top: 5px;
+	flex-direction: row-reverse;
+}
+
+.receiver {
+	flex-direction: row;
 }
 
 .chatMessage img {
@@ -130,12 +133,13 @@ footer {
 
 .sender {
 	text-align: right;
-	font-weight: bold;
 }
 
-.receiver {
-	text-align: left;
-	font-weight: normal;
+.coreMessage {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: end;
 }
 
 #senderMessage {
