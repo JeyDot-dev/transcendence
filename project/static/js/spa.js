@@ -3,7 +3,11 @@ let loadedJS = [];
 let defaultTitle = document.title;
 
 // Listener for browser navigation management
-window.addEventListener("popstate", spa);
+window.addEventListener("popstate", event => {
+    const url = document.location.toString();
+    const data = event.state;
+    spa(url, data);
+});
 
 // Listener for link clicks management
 document.addEventListener("DOMContentLoaded", () => {
@@ -15,19 +19,32 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     });
-    spa();
+    spa(document.location.toString());
 });
+
+// Listener for form submissions management
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.addEventListener("submit", e => {
+        if (e.target.matches("form")) { // Check if the submitted element is a form
+            e.preventDefault();
+            const url = e.target.action;
+            const data = new FormData(e.target);
+            navigateTo(url, data);
+        }
+    });
+});
+
 
 // Main function for SPA
 // It fetches the content of the page and replaces the current content
 // It also loads the CSS and JS files and unloads the previous ones
-async function spa() {
+async function spa(url, data = null) {
     unloadCSS();
     unloadJS();
     unloadTitle();
 
-    const url = makeURL(location.pathname + location.search);
-    const content = await fetchHTML(url);
+    url = makeURL(url);
+    const content = await fetchHTML(url, data);
     const mainElement = document.querySelector("main");
     mainElement.innerHTML = content;
 
@@ -65,14 +82,22 @@ function makeURL(url) {
 
 // Function to fetch the HTML content of the page
 // It sends an XMLHttpRequest to the server
-async function fetchHTML(url) {
+async function fetchHTML(url, data = null) {
     try {
         const destination = url.pathname + url.search;
-        const response = await fetch(destination, {
+        const options = {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
-        });
+        };
+
+        if (data) {
+            options.method = 'POST';
+            options.headers['X-CSRFToken'] = getCookie('csrftoken'); // Add CSRF token to the request header
+            options.body = data;
+        }
+
+        const response = await fetch(destination, options);
         return await response.text();
     } catch (err) {
         console.error(err);
@@ -184,7 +209,24 @@ function unloadTitle() {
 }
 
 // Function to navigate to a new URL
-function navigateTo(url) {
-    history.pushState(null, null, url);
-    spa();
+function navigateTo(url, data = null) {
+    history.pushState(data, null, url);
+    spa(url, data);
 };
+
+// Function to get a cookie by name
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
