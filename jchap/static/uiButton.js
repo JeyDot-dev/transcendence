@@ -73,10 +73,10 @@ function toggleAccount() {
 
 function loadData() {
 	const user = JSON.parse(localStorage.getItem('user'));
-	
+
 	document.getElementById('pseudo').innerText = user['username'];
-	document.getElementById('total_victories').innerText = user['total_victories'];
-	document.getElementById('total_games').innerText = user['total_games'];
+	document.getElementById('total_victories').innerText = user['total_victories'] + " 👑";
+	document.getElementById('total_games').innerText = user['total_games'] + " 🏓";
 }
 
 loadData();

@@ -7,7 +7,7 @@ const chatSocket = new WebSocket(url);
 chatSocket.onopen = function(e) {
 	console.log('Chat socket open');
 	chatSocket.send(JSON.stringify({
-		'message': 'Hello'
+		'message': 'Hello 👋'
 	}));
 }
 
