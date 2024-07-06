@@ -19,7 +19,6 @@ class Puck {
         // Ajouter un BoxHelper pour visualiser la boîte englobante
         this.boxHelper = new THREE.BoxHelper(this.mesh, 0xffff00);
         scene.add(this.boxHelper); // Ajouter le BoxHelper à la scène
-
     }
 
     getMesh() {
