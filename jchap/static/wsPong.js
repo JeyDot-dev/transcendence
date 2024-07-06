@@ -70,7 +70,6 @@ ws.onmessage = function(e) {
 			updatePlayerCount(data.message.nb_players, data.message.nb_players);
 			break;
 		case "new_player":
-			console.log(data);
 			addPlayerList(data.name, (data.side >= 640) ? 'r' : 'l');
 			updatePlayerCount(data.nb_players, data.nb_players);
 			break;
@@ -184,7 +183,8 @@ function drawBall(ball) {
 }
 
 function clearCanvas() {
-	ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+	ctx.clearCanvas(0, 0, canvas.width, canvas.height);
+	ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -226,3 +226,26 @@ function updatePlayerCount(nb_players, nb_max) {
 }
 
 // TEAM MANIPULATION
+
+const joinLeftTeam = document.getElementById('joinLeftTeam');
+const joinRightTeam = document.getElementById('joinRightTeam');
+
+function joinLeftTeam() {
+	let message_form = {
+		type: 'join_team',
+		team: 'left',
+		player_id: my_id
+	}
+	if (ws.readyState === ws.OPEN)
+		ws.send(JSON.stringify(message_form));
+}
+
+function joinRightTeam() {
+	let message_form = {
+		type: 'join_team',
+		team: 'right',
+		player_id: my_id
+	}
+	if (ws.readyState === ws.OPEN)
+		ws.send(JSON.stringify(message_form));
+}

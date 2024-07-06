@@ -74,9 +74,12 @@ function testToken(token) {
 }
 
 function logout() {
+
+	if (document.cookie.split(';').find(cookie => cookie.includes('logintoken')) === undefined)
+		return console.log('No token found');
+
 	const url = 'api/logout/';
 	const token = document.cookie.split(';').find(cookie => cookie.includes('logintoken')).split('=')[1];
-	console.log(token);
 
 	fetch(url, {
 		method: 'POST',
@@ -90,8 +93,8 @@ function logout() {
 		if (data.error) {
 			alert(data.error);
 		} else {
-			document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 			localStorage.removeItem('user');
+			document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 			location.reload();
 		}
 	})
