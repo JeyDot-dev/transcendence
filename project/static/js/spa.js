@@ -84,20 +84,26 @@ function makeURL(url) {
 // It sends an XMLHttpRequest to the server
 async function fetchHTML(url, data = null) {
     try {
+        // Build fetch destination
         const destination = url.pathname + url.search;
+
+        // Add the X-Requested-With header to the request
         const options = {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         };
 
+        // If there is data, add the POST method and the CSRF token to the request
         if (data) {
             options.method = 'POST';
-            options.headers['X-CSRFToken'] = getCookie('csrftoken'); // Add CSRF token to the request header
+            options.headers['X-CSRFToken'] = getCookie('csrftoken');
             options.body = data;
         }
 
+        // Fetch the destination
         const response = await fetch(destination, options);
+
         return await response.text();
     } catch (err) {
         console.error(err);
@@ -217,6 +223,7 @@ function navigateTo(url, data = null) {
 // Function to get a cookie by name
 function getCookie(name) {
     let cookieValue = null;
+
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
