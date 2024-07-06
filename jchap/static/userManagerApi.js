@@ -74,7 +74,6 @@ function testToken(token) {
 }
 
 function logout() {
-
 	if (document.cookie.split(';').find(cookie => cookie.includes('logintoken')) === undefined)
 		return console.log('No token found');
 

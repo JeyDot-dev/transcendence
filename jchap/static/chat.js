@@ -2,7 +2,7 @@ const senderMessage = document.getElementById('senderMessage');
 
 let url = `ws://${window.location.host}/ws/chat/1234/`;
 
-const chatSocket = new WebSocket(url);
+let chatSocket = local_user ? new WebSocket(url) : null;
 
 chatSocket.onopen = function(e) {
 	console.log('Chat socket open');
@@ -10,8 +10,6 @@ chatSocket.onopen = function(e) {
 		'message': 'Hello 👋'
 	}));
 }
-
-const me = JSON.parse(localStorage.getItem('user'));
 
 chatSocket.onmessage = function(e) {
 	const data = JSON.parse(e.data);
@@ -47,7 +45,7 @@ function addMessage(sender, message) {
 
 	div.classList.add('chatMessage');
 
-	div.classList.add(sender['username'] == me['username'] ? 'sender' : 'receiver');
+	div.classList.add(sender['username'] == local_user['username'] ? 'sender' : 'receiver');
 
 	if (sender['profile_pic'].length == 0) {
 		img.src = 'https://media.4-paws.org/1/2/6/0/1260b8bbeb9d82d5a6caaa078d5061bbf626f94e/VIER%20PFOTEN_2015-04-27_010-1927x1333-1920x1328.jpg';

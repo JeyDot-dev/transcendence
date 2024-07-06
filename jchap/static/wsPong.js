@@ -56,7 +56,6 @@ ws.onopen = function() {
 let global_game
 
 ws.onmessage = function(e) {
-	const user = JSON.parse(localStorage.getItem('user')); 
 	let data = JSON.parse(e.data);
 	let game = data.game ? data.game : data;
 
@@ -65,8 +64,9 @@ ws.onmessage = function(e) {
 			render(game);
 			break;
 		case "init":
+			if (!local_user) return;
 			my_id = data.message.id;
-			addPlayerList(user.username, (my_id % 2 == 0) ? 'l' : 'r');
+			addPlayerList(local_user.username, (my_id % 2 == 0) ? 'l' : 'r');
 			updatePlayerCount(data.message.nb_players, data.message.nb_players);
 			break;
 		case "new_player":
@@ -183,7 +183,7 @@ function drawBall(ball) {
 }
 
 function clearCanvas() {
-	ctx.clearCanvas(0, 0, canvas.width, canvas.height);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
@@ -207,7 +207,6 @@ function render(game) {
 //LIST OF PLAYERS
 
 function addPlayerList(new_user, side) {
-	const user = JSON.parse(localStorage.getItem('user')); 
 
 	let list
 	if (side == 'l')
@@ -227,8 +226,8 @@ function updatePlayerCount(nb_players, nb_max) {
 
 // TEAM MANIPULATION
 
-const joinLeftTeam = document.getElementById('joinLeftTeam');
-const joinRightTeam = document.getElementById('joinRightTeam');
+const joinLeftTeamButton = document.getElementById('joinLeftTeam');
+const joinRightTeamButton = document.getElementById('joinRightTeam');
 
 function joinLeftTeam() {
 	let message_form = {
