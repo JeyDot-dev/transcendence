@@ -7,16 +7,16 @@ from time import sleep
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
 from .game_objects import Ball, Paddle, Game
+from userManager.models import UserInfos
 
 games = []
 
 class PongConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		await self.accept()
-		user = self.scope['user']
+		self.user = self.scope['user']
 		self.party = "pong_" + self.scope['url_route']['kwargs']['game_id']
 		self.game = get_game(self.party)
-		self.player_id = 0
 
 		await self.channel_layer.group_add (
 			self.party,
@@ -24,7 +24,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			)
 
 		if self.game == None:
-			self.game = Game(self.party, [Paddle(0, (255, 255, 255), 0)], Ball(560, 360, (255, 255, 255)))
+			self.game = Game(self.party, [self.user.to_dict()], Ball(640, 360, (255, 255, 255)))
 			games.append(self.game)
 			await self.send(text_data=json.dumps({
 				'type': 'init',
@@ -36,13 +36,11 @@ class PongConsumer(AsyncWebsocketConsumer):
 			asyncio.create_task(self.game.physics())
 			asyncio.create_task(game_update(self))
 		else:
-			await new_player(self, user.username)
-			self.player_id = self.game.players[-1].id
+			await new_player(self, self.user)
 			await self.send(text_data=json.dumps({
 				'type': 'init',
 				'message': {
-					'id': self.game.players[-1].id,
-					'new_player': user.username,
+					'new_player': self.user.username,
 					'nb_players': len(self.game.players)
 				}
 			}))
@@ -50,13 +48,11 @@ class PongConsumer(AsyncWebsocketConsumer):
 	async def receive(self, text_data=None, bytes_data=None):
 		text_data_json = json.loads(text_data)
 
-		who = next((i for i, player in enumerate(self.game.players) if player.id == text_data_json["player_id"]), None)
+		who = next((i for i, paddle in enumerate(self.game.paddles) if paddle.user_id == text_data_json["player_id"]), None) #Il trouve le paddle correspondant à l'id du joueur
 		if who == None: return
 
 		if text_data_json['type'] == "keydown" or text_data_json['type'] == "keyup":
 			await handle_key(self.game, text_data_json['type'], text_data_json['key'], who)
-
-		# await self.input_message(text_data_json)
 	
 	async def new_player(self, event):
 		await self.send(text_data=json.dumps(event))
@@ -73,8 +69,12 @@ class PongConsumer(AsyncWebsocketConsumer):
 	async def disconnect(self, close_code):
 
 		for player in self.game.players:
-			if player.id == self.player_id:
+			if player.id == self.player.id:
 				self.game.players.remove(player)
+				break
+		for paddles in self.game.paddles:
+			if paddles.player.id == self.player.id:
+				self.game.paddles.remove(paddles)
 				break
 		
 		print("Game player count:" + str(len(self.game.players)))
@@ -92,7 +92,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 					'type': 'player_left',
 					'message': 'A player has left the game!',
 					'nb_players': len(self.game.players),
-					'who': self.player_id
+					'who': self.user.id
 				}
 			)
 
@@ -107,14 +107,14 @@ async def handle_key(game, types, key, who=0):
 		return
 	
 	game.players[who].keys[key] = 1 if types == "keydown" else 0
-	# print(str(who) + " -> " + str(key) + ": " + str(1 if types == "keydown" else 0))
+	print(str(who) + " -> " + str(key) + ": " + str(1 if types == "keydown" else 0))
 
 async def build_response(game):
 	return {
 		'type': 'game_state',
 		'game': {
 			'id': game.id,
-			'players': [player.__dict__ for player in game.players],
+			'paddles': [paddle.__dict__ for paddle in game.paddles],
 			'ball': game.ball.__dict__,
 			'score': game.score,
 			'timer': game.timer
@@ -122,17 +122,14 @@ async def build_response(game):
 	}
 
 async def new_player(game, who):
-	new_id = game.game.players[-1].id + 1
-	new_x_pos = len(game.game.players) * (1280 - game.game.players[0].width)
-	game.game.players.append(Paddle(new_x_pos, (255, 255, 255), new_id))
+	game.game.players.append(who)
 	await game.channel_layer.group_send (
 		game.party,
 		{
 			'type': 'new_player',
 			'message': 'A new player has joined the game!',
-			'side': new_x_pos,
 			'nb_players': len(game.game.players),
-			'name': who
+			'name': who.username
 		}
 	)
 

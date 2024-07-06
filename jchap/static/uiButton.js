@@ -72,7 +72,7 @@ function toggleAccount() {
 }
 
 function loadData() {
-	if (!user_local) return;
+	if (!local_user) return;
 	const user = JSON.parse(localStorage.getItem('user'));
 
 	document.getElementById('pseudo').innerText = user['username'];

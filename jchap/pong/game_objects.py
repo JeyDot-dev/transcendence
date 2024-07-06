@@ -1,9 +1,8 @@
 import asyncio
-
-from time import sleep
+from userManager.models import UserInfos
 
 class Paddle:
-	def __init__(self, x, color, side):
+	def __init__(self, x, color, side, user_id):
 		self.x = x
 		self.y = 216 # Middle of the screen
 		self.width = 28
@@ -12,6 +11,7 @@ class Paddle:
 		self.bounce = 1
 		self.keys = { "up": 0, "down": 0 }
 		self.side: int = side
+		self.user_id = user_id
 
 	def move(self, dy):
 		self.y += dy
@@ -86,31 +86,31 @@ class Ball:
 		self.y += self.speed * self.vel_y
 
 class Game:
-	def __init__(self, id, paddles, ball):
+	def __init__(self, id, players, ball):
 		self.id = id
-		self.paddles = players # il faut que ça soit une array de la class Paddle
+		self.players:list[UserInfos] = players 
+		self.paddles:list[Paddle] = []
 		self.ball = ball
 		self.score = [0, 0]
 		self.timer = 0
 		self.running = False
+		self.nb_max_players = 2
 	
 	async def physics(self):
 		while not self.running:
-			if len(self.players) >= 2:
-				self.running = True
 			await asyncio.sleep(1)
 		while self.running:
 			await asyncio.sleep(60 / 1000)
-			for player in self.players:
-				if player.keys["up"] == 1:
-					player.move(-player.speed)
-				elif player.keys["down"] == 1:
-					player.move(player.speed)
-				if player.y < 0:
-					player.y = 0
-				elif player.y > 432:
-					player.y = 432
-			await self.ball.physics(self.players, self.score)
+			for paddle in self.paddles:
+				if paddle.keys["up"] == 1:
+					paddle.move(-paddle.speed)
+				elif paddle.keys["down"] == 1:
+					paddle.move(paddle.speed)
+				if paddle.y < 0:
+					paddle.y = 0
+				elif paddle.y > 432:
+					paddle.y = 432
+			await self.ball.physics(self.paddles, self.score)
 			
 
 class Tournament:
