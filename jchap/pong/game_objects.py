@@ -3,15 +3,15 @@ import asyncio
 from time import sleep
 
 class Paddle:
-	def __init__(self, x, color, id):
+	def __init__(self, x, color, side):
 		self.x = x
-		self.y = 216
+		self.y = 216 # Middle of the screen
 		self.width = 28
 		self.color = color # (r, g, b)
 		self.speed = 15
 		self.bounce = 1
 		self.keys = { "up": 0, "down": 0 }
-		self.id: int = id
+		self.side: int = side
 
 	def move(self, dy):
 		self.y += dy
@@ -86,9 +86,9 @@ class Ball:
 		self.y += self.speed * self.vel_y
 
 class Game:
-	def __init__(self, id, players, ball):
+	def __init__(self, id, paddles, ball):
 		self.id = id
-		self.players = players # il faut que ça soit une array de la class Paddle
+		self.paddles = players # il faut que ça soit une array de la class Paddle
 		self.ball = ball
 		self.score = [0, 0]
 		self.timer = 0

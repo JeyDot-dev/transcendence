@@ -72,10 +72,7 @@ function toggleAccount() {
 }
 
 function loadData() {
-	if (!localStorage.getItem('user')) {
-		console.log('No user data found');
-		return;
-	}
+	if (!user_local) return;
 	const user = JSON.parse(localStorage.getItem('user'));
 
 	document.getElementById('pseudo').innerText = user['username'];
@@ -83,4 +80,4 @@ function loadData() {
 	document.getElementById('total_games').innerText = user['total_games'] + " 🏓";
 }
 
-//loadData();
+loadData();
