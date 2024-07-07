@@ -4,13 +4,13 @@ import random
 # Create your models here.
 class GameDB(models.Model):
 	id = models.CharField(max_length=200, primary_key=True)
-	players_username = models.JSONField()
+	players_username = models.JSONField(default=list)
 	ball_color = models.CharField(max_length=7, default="#FFFFFF")
 	left_score = models.IntegerField(default=0)
 	right_score = models.IntegerField(default=0)
 	started = models.BooleanField(default=False)
 	finished = models.BooleanField(default=False)
-	winners = models.JSONField()
+	winners = models.JSONField(default=list)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 	nb_max_players = models.IntegerField(default=2)
@@ -62,16 +62,17 @@ class GameDB(models.Model):
 	def get_players(self):
 		return self.players_username
 
-class Tournament(models.Model):
+class TournamentDB(models.Model):
 	id = models.CharField(max_length=200, primary_key=True)
+	name = models.CharField(max_length=50, default="Tournament")
 	nb_player_per_team = models.IntegerField(default=1)
 	nb_players = models.IntegerField(default=4)
 	finished = models.BooleanField(default=False)
 	started = models.BooleanField(default=False)
-	winner = models.JSONField()
+	winners = models.JSONField(default=list)
 	ready = models.BooleanField(default=False)
-	games_id = models.JSONField()
-	players_username = models.JSONField()
+	games_id = models.JSONField(default=list)
+	players_username = models.JSONField(default=list)
 
 	def __str__(self):
 		return self.id

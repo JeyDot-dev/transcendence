@@ -1,4 +1,4 @@
-const menuButton = document.querySelector('#menuButton');
+const menuButton = document.querySelector('#menuIcon');
 const chatButton = document.querySelector('#chatIcon');
 const accountButton = document.querySelector('#accountButton');
 
@@ -18,6 +18,7 @@ menuButton.addEventListener('click', function() {
 function toggleMenu() {
 	if (active.menu) {
 		menuButton.removeAttribute('style');
+		document.getElementById('uiButtonInfos').style.display = 'none';
 		return
 	}
 	menuButton.style.width = '30%';
@@ -27,6 +28,8 @@ function toggleMenu() {
 	menuButton.style.zIndex = '100';
 	menuButton.style.borderRadius = '0';
 	menuButton.style.borderTopRightRadius = '42px';
+	document.getElementById('uiButtonInfos').style.display = 'flex';
+	document.getElementById('uiButtonInfos').style.flexDirection = 'column';
 }
 
 chatButton.addEventListener('click', function() {
