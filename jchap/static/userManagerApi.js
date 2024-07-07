@@ -124,3 +124,20 @@ function changePassword(){
 		}
 	})
 }
+
+function changeSkin(newColor) {
+	const url = 'api/change_skin/';
+	const token = document.cookie.split(';').find(cookie => cookie.includes('logintoken')).split('=')[1];
+
+	fetch(url, {
+		method: "POST",
+		headers: {
+			"Content-Type": 'application/json',
+			"Authorization": `Token ${token}`,
+		},
+		body: JSON.stringify({
+			"username": local_user.username,
+			"color": newColor
+		})
+	});
+}

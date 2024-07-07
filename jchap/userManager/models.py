@@ -9,7 +9,8 @@ class UserInfos(AbstractUser):
 	grade = models.IntegerField(default=0)
 	total_games = models.IntegerField(default=0)
 	total_victories = models.IntegerField(default=0)
-	skin = models.CharField(max_length=11, default="255,255,255")
+	skin = models.CharField(max_length=7, default="#FFFFFF")
+	last_tournament_id = models.CharField(max_length=200, default="")
 
 	REQUIRED_FIELDS = ['email', 'password'] 
 
@@ -28,3 +29,11 @@ class UserInfos(AbstractUser):
 			'total_victories': self.total_victories,
 			'skin': self.skin
 		}
+	
+	def get_last_tournament_id(self):
+		return self.last_tournament_id
+
+	def set_skin(self, skin: str):
+		self.skin = skin
+		self.save()
+	

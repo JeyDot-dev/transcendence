@@ -51,3 +51,13 @@ def signup(request):
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 def test_token(request):
 	return Response({'message': 'Token is valid'})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+def change_skin(request):
+	user = get_object_or_404(UserInfos, username=request.data.get('username'))
+	if not user:
+		return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+	user.set_skin(request.data['color'])
+	return Response({'message': 'Skin changed successfully'}, status=status.HTTP_200_OK)

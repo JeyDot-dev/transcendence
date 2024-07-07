@@ -159,7 +159,7 @@ function drawScore(x, y, score) {
 function drawPaddles(paddles) {
 	for (let i = 0; i < paddles.length; i++) {
 		let paddle = paddles[i];
-		ctx.fillStyle = `rgba(${paddle.color[0]}, ${paddle.color[1]}, ${paddle.color[2]}, 1)`;
+		ctx.fillStyle = `${paddle.color}`;
 		ctx.fillRect(paddle.x, paddle.y, paddle.width, ballSize * 20);
 	}
 }
@@ -233,7 +233,7 @@ function joinLeftTeam() {
 	let message_form = {
 		type: 'join_team',
 		team: 'left',
-		player_id: my_id
+		player_id: local_user.id
 	}
 	if (ws.readyState === ws.OPEN)
 		ws.send(JSON.stringify(message_form));
@@ -243,7 +243,7 @@ function joinRightTeam() {
 	let message_form = {
 		type: 'join_team',
 		team: 'right',
-		player_id: my_id
+		player_id: local_user.id
 	}
 	if (ws.readyState === ws.OPEN)
 		ws.send(JSON.stringify(message_form));

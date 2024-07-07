@@ -1,16 +1,17 @@
 import asyncio
+import random
 from userManager.models import UserInfos
 
 class Paddle:
-	def __init__(self, x, color, side, user_id):
+	def __init__(self, x, color, user_id):
 		self.x = x
 		self.y = 216 # Middle of the screen
 		self.width = 28
-		self.color = color # (r, g, b)
+		self.color = color # #FFFFFF
 		self.speed = 15
 		self.bounce = 1
 		self.keys = { "up": 0, "down": 0 }
-		self.side: int = side
+		self.side: int = 0 if x <= 1280 / 2 else 1 # 0 = left, 1 = right
 		self.user_id = user_id
 
 	def move(self, dy):
@@ -86,7 +87,7 @@ class Ball:
 		self.y += self.speed * self.vel_y
 
 class Game:
-	def __init__(self, id, players, ball):
+	def __init__(self, id, players, ball, nb_max_players=2):
 		self.id = id
 		self.players:list[UserInfos] = players 
 		self.paddles:list[Paddle] = []
@@ -94,7 +95,15 @@ class Game:
 		self.score = [0, 0]
 		self.timer = 0
 		self.running = False
-		self.nb_max_players = 2
+		self.nb_max_players = nb_max_players
+	
+	def add_player(self, player: UserInfos, side: int):
+		if len(self.players) < self.nb_max_players:
+			player_skin = player.get_skin()
+			self.players.append(player)
+			self.paddles.append(Paddle(0 if side == 0 else 1280 - 28, player.skin, player.id))
+		else:
+			raise ValueError("Game is full")
 	
 	async def physics(self):
 		while not self.running:
@@ -114,6 +123,44 @@ class Game:
 			
 
 class Tournament:
-	def __init__(self, id, games):
+	def __init__(self, id, nb_player_per_team=1, nb_players=4):
+		# verify:
+		if nb_players % nb_player_per_team != 0:
+			raise ValueError("nb_players must be a multiple of nb_player_per_team")
+		if nb_players < 2 or nb_player_per_team < 1:
+			raise ValueError("nb_players must be at least 2 and nb_player_per_team at least 1")
+		
 		self.id = id
-		self.games = games # il faut que ça soit une array de la class Game
+		self.nb_player_per_team = nb_player_per_team
+		self.nb_players = nb_players
+		self.finished = False
+		self.ready = False
+		
+		self.games: list[Game] = []
+		self.players: list[UserInfos] = []
+
+		for i in range(0, nb_players / 2, nb_player_per_team):
+			new_id = "turnament_" + str(id) + "_game_" + str(i)
+			self.games.append(Game(new_id, [], Ball(1280 / 2 - 7, 720 / 2 - 7, (255, 255, 255)), nb_player_per_team * 2))
+
+	def add_player(self, player):
+		self.players.append(player)
+		if len(self.players) == self.nb_players:
+			self.ready = True
+	
+	def randomize_teams(self):
+		if not self.ready:
+			raise ValueError("Not enough players")
+		random.shuffle(self.players)
+	
+	def start(self):
+		if not self.ready:
+			raise ValueError("Not enough players")
+		for i in range(0, self.nb_players / 2, self.nb_player_per_team):
+			for j in range(0, self.nb_player_per_team):
+				self.games[i].add_player(self.players[i + j])
+		for game in self.games:
+			asyncio.create_task(game.physics())
+						
+
+
