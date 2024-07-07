@@ -74,11 +74,8 @@ function testToken(token) {
 }
 
 function logout() {
-	if (document.cookie.split(';').find(cookie => cookie.includes('logintoken')) === undefined)
-		return console.log('No token found');
-
 	const url = 'api/logout/';
-	const token = document.cookie.split(';').find(cookie => cookie.includes('logintoken')).split('=')[1];
+	const token = getToken();
 
 	fetch(url, {
 		method: 'POST',
@@ -127,7 +124,7 @@ function changePassword(){
 
 function changeSkin(newColor) {
 	const url = 'api/change_skin/';
-	const token = document.cookie.split(';').find(cookie => cookie.includes('logintoken')).split('=')[1];
+	const token = getToken();
 
 	fetch(url, {
 		method: "POST",
@@ -140,4 +137,8 @@ function changeSkin(newColor) {
 			"color": newColor
 		})
 	});
+}
+
+function getToken() {
+	return document.cookie.split(';').find(cookie => cookie.includes('logintoken')).split('=')[1];
 }

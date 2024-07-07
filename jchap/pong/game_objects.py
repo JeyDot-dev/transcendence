@@ -96,6 +96,7 @@ class Game:
 		self.timer = 0
 		self.running = False
 		self.nb_max_players = nb_max_players
+		self.winners = []
 	
 	def add_player(self, player: UserInfos, side: int):
 		if len(self.players) < self.nb_max_players:
@@ -120,6 +121,8 @@ class Game:
 				elif paddle.y > 432:
 					paddle.y = 432
 			await self.ball.physics(self.paddles, self.score)
+			if self.score[0] >= 5 or self.score[1] >= 5:
+				self.running = False
 			
 
 class Tournament:
@@ -134,14 +137,15 @@ class Tournament:
 		self.nb_player_per_team = nb_player_per_team
 		self.nb_players = nb_players
 		self.finished = False
+		self.winner: list[str] = []
 		self.ready = False
 		
-		self.games: list[Game] = []
-		self.players: list[UserInfos] = []
+		self.games: list[str] = []
+		self.players: list[str] = []
 
 		for i in range(0, nb_players / 2, nb_player_per_team):
 			new_id = "turnament_" + str(id) + "_game_" + str(i)
-			self.games.append(Game(new_id, [], Ball(1280 / 2 - 7, 720 / 2 - 7, (255, 255, 255)), nb_player_per_team * 2))
+			self.games.append(new_id)
 
 	def add_player(self, player):
 		self.players.append(player)
@@ -152,6 +156,13 @@ class Tournament:
 		if not self.ready:
 			raise ValueError("Not enough players")
 		random.shuffle(self.players)
+
+	def get_game_id(self, username):
+		for game in self.games:
+			for player in game.players:
+				if player.username == username:
+					return self.game.id
+		return None
 	
 	def start(self):
 		if not self.ready:
