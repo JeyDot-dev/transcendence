@@ -29,7 +29,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["transcendence.jjorge.ch", "195.15.214.88", "localhost"]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -43,6 +42,7 @@ INSTALLED_APPS = [
     "database.apps.DatabaseConfig",
     "channels",
     "pong",
+	"chat"
 ]
 
 MIDDLEWARE = [
