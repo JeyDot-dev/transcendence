@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     "channels",
     "rest_framework",
     "pong3d",
-    "pong",
 ]
 
 MIDDLEWARE = [
