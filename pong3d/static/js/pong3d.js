@@ -81,9 +81,9 @@ document.addEventListener('DOMContentLoaded', function() {
 	scene.add(axesHelper);
 	
 	// Ajouter une grille
-	const gridHelper = new THREE.GridHelper(10, 10); // Taille de la grille et nombre de divisions
-	gridHelper.rotation.x = Math.PI / 2;
-	scene.add(gridHelper);
+	// const gridHelper = new THREE.GridHelper(10, 10); // Taille de la grille et nombre de divisions
+	// gridHelper.rotation.x = Math.PI / 2;
+	// scene.add(gridHelper);
 
 	// PUCK: Creation du puck
     var puck = new Puck(scene, 0.1, 0.05, 0xff0000, 0.2, new THREE.Vector3(0, 0, 0));
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Collision avec les bords supérieur et inférieur
         if (puck.position.y - puck.size <= -3) {
             score2++;
-            updateScoreP2Text(score2);
+            p2Text.updateText(score2);
             // triggerExplosion(puck.position.clone());
 			var explo = new Explosion(scene, 100, 0.1, 2);
 			explo.trigger(puck.position);
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		
         if (puck.position.y + puck.size >= 3) {
 			score1++;
-            updateScoreP1Text(score1);
+            p1Text.updateText(score1);
             // triggerExplosion(puck.position.clone());
 			var explo = new Explosion(scene, 100, 0.1, 2);
 			explo.trigger(puck.position);
@@ -204,94 +204,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Charger la police pour afficher le texte
     const fontLoader = new THREE.FontLoader();
-    var p1ScoreText, p2ScoreText, timeText, loadedFont;
-    
-    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        loadedFont = font;
-        const textGeometry = new THREE.TextGeometry('0s', {
-            font: loadedFont,
-            size: 0.5,
-            height: 0.1,
-            curveSegments: 12,
-        });
-        const textP1Geometry = new THREE.TextGeometry('0', {
-            font: loadedFont,
-            size: 0.5,
-            height: 0.1,
-            curveSegments: 12,
-        });
-        const textP2Geometry = new THREE.TextGeometry('0', {
-            font: loadedFont,
-            size: 0.5,
-            height: 0.1,
-            curveSegments: 12,
-        });
-        const textMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-        const textP1Material = new THREE.MeshStandardMaterial({ color: 0x33ccff });
-        const textP2Material = new THREE.MeshStandardMaterial({ color: 0xff2975 });
-        timeText = new THREE.Mesh(textGeometry, textMaterial);
-        p1ScoreText = new THREE.Mesh(textP1Geometry, textP1Material);
-        p2ScoreText = new THREE.Mesh(textP2Geometry, textP2Material);
-        timeText.position.set(-0.2, 0, 3);
-        timeText.rotation.x = Math.PI / 2;
-        p1ScoreText.position.set(-2.2, 0, 3);
-        p1ScoreText.rotation.x = Math.PI / 2;
-        p2ScoreText.position.set(2, 0, 3);
-        p2ScoreText.rotation.x = Math.PI / 2;
-        scene.add(timeText);
-        scene.add(p1ScoreText);
-        scene.add(p2ScoreText);
-    });
-    // Fonction pour mettre à jour le texte du temps écoulé
-    
-    function updateTimeText(elapsedTime) {
-        if (timeText && loadedFont) {
-            scene.remove(timeText);
-            const textGeometry = new THREE.TextGeometry(`${Math.floor(elapsedTime)}s`, {
-                font: loadedFont,
-                size: 0.5,
-                height: 0.1,
-                curveSegments: 12,
-            });
-            const textMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-            timeText = new THREE.Mesh(textGeometry, textMaterial);
-            timeText.position.set(-0.2, 0, 3);
-            timeText.rotation.x = Math.PI / 2;
-            scene.add(timeText);
-        }
-    }
-    function updateScoreP1Text(p1Score) {
-        if (p1ScoreText && loadedFont) {
-            scene.remove(p1ScoreText);
-            const textP1Geometry = new THREE.TextGeometry(p1Score.toString(), {
-                font: loadedFont,
-                size: 0.5,
-                height: 0.1,
-                curveSegments: 12,
-            });
-            const textP1Material = new THREE.MeshStandardMaterial({ color: 0x33ccff });
-            p1ScoreText = new THREE.Mesh(textP1Geometry, textP1Material);
-            p1ScoreText.position.set(-2.2, 0, 3);
-            p1ScoreText.rotation.x = Math.PI / 2;
-            scene.add(p1ScoreText);
-        }
-    }
-    function updateScoreP2Text(p2Score) {
-        if (p2ScoreText && loadedFont) {
-            scene.remove(p2ScoreText);
-            const textP2Geometry = new THREE.TextGeometry(p2Score.toString(), {
-                font: loadedFont,
-                size: 0.5,
-                height: 0.1,
-                curveSegments: 12,
-            });
-            const textP2Material = new THREE.MeshStandardMaterial({ color: 0xff2975 });
-            p2ScoreText = new THREE.Mesh(textP2Geometry, textP2Material);
-            p2ScoreText.position.set(2, 0, 3);
-            p2ScoreText.rotation.x = Math.PI / 2;
-            scene.add(p2ScoreText);
-        }
-    }
+	fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json');
+    // var p1ScoreText, p2ScoreText, timeText, loadedFont;
+    // TEXT: Créer les objets de Text3d pour les scores et le temps 
+	var timeText = new Text3d(scene, fontLoader, 0.5, 0.1, 0xffffff, '0s',
+		new THREE.Vector3(-0.2, 0, 3),
+		new THREE.Vector3(0, 0, 0)
+	);
+	var p1Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0x33ccff, '0',
+		new THREE.Vector3(-0.2, 0, 3),
+		new THREE.Vector3(0, 0, 0)
+	);
+	var p2Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0xff2975, '0s',
+		new THREE.Vector3(-0.2, 0, 3),
+		new THREE.Vector3(0, 0, 0)
+	);
+
 
     const timeLimit = 120;
     var startTime = Date.now();
@@ -300,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fonction pour vérifier le temps écoulé
     function checkTime() {
         elapsedTime = (Date.now() - startTime) / 1000; // Temps écoulé en secondes
-        updateTimeText(elapsedTime)
+        timeText.updateText(`${Math.floor(elapsedTime)}s`);
         if (elapsedTime >= timeLimit) {
             endGame = true;
         }
