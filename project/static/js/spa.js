@@ -170,6 +170,10 @@ function loadJS(mainElement) {
             else { // If the script doesn't have a src attribute, set the text content of the new script element
                 newScript.textContent = `(function() { ${script.textContent} })();`;
             }
+            if (script.defer) {
+              newScript.defer = true;
+            }
+
             // Append the new script element to the head
             document.head.appendChild(newScript);
         }

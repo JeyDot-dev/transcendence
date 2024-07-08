@@ -20,9 +20,9 @@ from django.urls import include, path, re_path
 from . import views
 
 urlpatterns = [
-    path('admin', admin.site.urls),
+    path("admin", admin.site.urls),
     path("api/home", views.home_content, name="home_content"),
-    path("api/pong", include("database.urls")),
+    path("api/pong", include("pong3d.urls")),
     path("api/about", views.about_content, name="about_content"),
     path("api/test", views.test_content, name="test_content"),
     re_path(r"^api/.*$", views.home_content),
