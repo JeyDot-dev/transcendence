@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseForbidden
 
 class FetchOnlyMiddleware:
 	def __init__(self, get_response):
@@ -13,6 +13,6 @@ class FetchOnlyMiddleware:
 
 		if request_path.startswith('/api/') or request_path in self.restricted_paths:
 			if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
-				return HttpResponseRedirect('/')
+				return HttpResponseForbidden("403 Forbidden")
 		response = self.get_response(request)
 		return response
