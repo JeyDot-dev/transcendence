@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "database.apps.DatabaseConfig",
     "channels",
-    "pong",
+    "rest_framework",
+    "pong3d",
 ]
 
 MIDDLEWARE = [
@@ -140,7 +141,7 @@ STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static_production")
 STATICFILES_DIRS = [
     BASE_DIR / "static",
-    BASE_DIR / "pong/static/pong",
+    BASE_DIR / "pong3d/static/pong3d",
 ]
 
 
