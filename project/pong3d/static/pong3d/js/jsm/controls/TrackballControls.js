@@ -5,7 +5,7 @@ import {
 	Quaternion,
 	Vector2,
 	Vector3
-} from './threejs/Three.js';
+} from 'three';
 
 const _changeEvent = { type: 'change' };
 const _startEvent = { type: 'start' };
