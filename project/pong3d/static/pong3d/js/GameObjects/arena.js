@@ -1,4 +1,4 @@
-import * as THREE from "../threejs/Three.js.js";
+import * as THREE from "../threejs/Three.js";
 
 export class Arena {
     constructor(width, height, depth, color, wallColor, wallThickness, borderRadius, innerWallColor) {
@@ -29,7 +29,7 @@ export class Arena {
     createWalls() {
         const shape = new THREE.Shape();
         const halfWidth = (this.width + this.wallThickness) / 2;
-        const halfDepth = (this.depth  + this.wallThickness) / 2;
+        const halfDepth = (this.depth + this.wallThickness) / 2;
         const wallThickness = this.wallThickness;
         const borderRadius = this.borderRadius;
 

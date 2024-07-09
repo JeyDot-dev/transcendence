@@ -1,4 +1,4 @@
-import * as THREE from "../threejs/Three.js.js";
+import * as THREE from "../threejs/Three.js";
 
 export class Puck {
     constructor(scene, puckSize = 1, height = 1, color = 0x0000ff, puckSpeed = 1, initialPosition = new THREE.Vector3(0, 0, 0)) {
@@ -8,7 +8,7 @@ export class Puck {
         this.initialPosition = initialPosition;
         this.initialSpeed = puckSpeed;
         // this.puckDirection = new THREE.Vector3(0, puckSpeed, 0);
-		this.velocity = new THREE.Vector3(0, -puckSpeed, 0);
+        this.velocity = new THREE.Vector3(0, -puckSpeed, 0);
         this.geometry = new THREE.CylinderGeometry(puckSize, puckSize, height, radialSegments);
         this.material = new THREE.MeshStandardMaterial({ color: color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -59,30 +59,30 @@ export class Puck {
     //     this.mesh.position.x += this.puckDirection.x * this.puckSpeed;
     //     this.mesh.position.y += this.puckDirection.y * this.puckSpeed;
     // }
-	updateBoundingBox() {
+    updateBoundingBox() {
         this.boundingBox.setFromObject(this.mesh);
         this.boxHelper.update(); // Mettre à jour le BoxHelper
     }
     move() {
         // Déplacer la balle en fonction de sa vitesse
         this.mesh.position.add(this.velocity.clone().multiplyScalar(this.puckSpeed));
-		this.updateBoundingBox();
-	}
+        this.updateBoundingBox();
+    }
     reflect(normal, paddleVelocity) {
         // Calculer le vecteur réfléchi en utilisant la normale de la surface
         const dot = this.velocity.dot(normal);
         const reflectedVelocity = this.velocity.clone().sub(normal.multiplyScalar(2 * dot));
-		console.log('Reflect Data:');
-		console.log('Normal: ', normal);
-		console.log('Dot: ', dot);
-		console.log('Reflected Velocity: ', reflectedVelocity);
+        console.log('Reflect Data:');
+        console.log('Normal: ', normal);
+        console.log('Dot: ', dot);
+        console.log('Reflected Velocity: ', reflectedVelocity);
         // Ajouter la vitesse du paddle à la vitesse réfléchie de la balle
         this.velocity.copy(reflectedVelocity.add(paddleVelocity));
     }
     reset() {
         this.mesh.position.copy(this.initialPosition);
         this.velocity.x = 0;
-		this.velocity.y = -this.puckSpeed;
-		this.velocity.Z = 0;
+        this.velocity.y = -this.puckSpeed;
+        this.velocity.Z = 0;
     }
 }

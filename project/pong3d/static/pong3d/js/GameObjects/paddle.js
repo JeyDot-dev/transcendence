@@ -1,4 +1,4 @@
-import * as THREE from "../threejs/Three.js.js";
+import * as THREE from "../threejs/Three.js";
 
 export class Paddle {
     constructor(scene, width = 0.5, height = 0.1, depth = 0.2, color = 0xffffff, speed = 0.1, position = new THREE.Vector3(0, 0, 0), orientation = new THREE.Vector3(0, 0, 0)) {
@@ -15,7 +15,7 @@ export class Paddle {
         this.geometry = new THREE.BoxGeometry(1, 1, 1);
         this.material = new THREE.MeshStandardMaterial({ color: this.color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-		this.mesh.scale.set(width, height, depth);
+        this.mesh.scale.set(width, height, depth);
         // Positionner et orienter le paddle
         this.mesh.position.copy(this.position);
         this.setOrientation(this.orientation);
@@ -54,16 +54,16 @@ export class Paddle {
         this.boxHelper.update(); // Mettre à jour le BoxHelper
     }
 
-	logMeshData() {
-	console.log('Mesh Data:');
-	console.log('Dimensions (Width, Height, Depth):', this.geometry.parameters.width, this.geometry.parameters.height, this.geometry.parameters.depth);
-	console.log('Position:', this.mesh.position);
-	console.log('Rotation:', this.mesh.rotation);
-	console.log('Scale:', this.mesh.scale);
-	console.log('Bounding Box:');
-	console.log('Min:', this.boxHelper.min);
-	console.log('Max:', this.boxHelper.max);
-	}
+    logMeshData() {
+        console.log('Mesh Data:');
+        console.log('Dimensions (Width, Height, Depth):', this.geometry.parameters.width, this.geometry.parameters.height, this.geometry.parameters.depth);
+        console.log('Position:', this.mesh.position);
+        console.log('Rotation:', this.mesh.rotation);
+        console.log('Scale:', this.mesh.scale);
+        console.log('Bounding Box:');
+        console.log('Min:', this.boxHelper.min);
+        console.log('Max:', this.boxHelper.max);
+    }
     move(direction) {
         // Calculer le mouvement dans le système de coordonnées local
         const localDirection = new THREE.Vector3(direction.x, direction.y, direction.z);
@@ -80,31 +80,31 @@ export class Paddle {
     }
 
     checkCollision(ball) {
-		if (this.boundingBox.intersectsBox(ball.boundingBox)) {
-			this.getIntersectionPoints(this.boundingBox, ball.boundingBox);
-			return this.boundingBox.intersectsBox(ball.boundingBox);
-		}
-		return false;
+        if (this.boundingBox.intersectsBox(ball.boundingBox)) {
+            this.getIntersectionPoints(this.boundingBox, ball.boundingBox);
+            return this.boundingBox.intersectsBox(ball.boundingBox);
+        }
+        return false;
     }
-	getIntersectionPoints(box1, box2) {
-		if (box1.intersectsBox(box2)) {
-			const intersectionBox = new THREE.Box3().copy(box1).intersect(box2);
-			const min = intersectionBox.min;
-			const max = intersectionBox.max;
-	
-			// Calculate the center of the intersection box
-			const intersectionPoint = new THREE.Vector3(
-				(min.x + max.x) / 2,
-				(min.y + max.y) / 2,
-				(min.z + max.z) / 2
-			);
-	
-			console.log('Intersection Box:', intersectionBox);
-			console.log('Intersection Point:', intersectionPoint);
-			return intersectionPoint;
-		}
-		return null;
-	}
+    getIntersectionPoints(box1, box2) {
+        if (box1.intersectsBox(box2)) {
+            const intersectionBox = new THREE.Box3().copy(box1).intersect(box2);
+            const min = intersectionBox.min;
+            const max = intersectionBox.max;
+
+            // Calculate the center of the intersection box
+            const intersectionPoint = new THREE.Vector3(
+                (min.x + max.x) / 2,
+                (min.y + max.y) / 2,
+                (min.z + max.z) / 2
+            );
+
+            console.log('Intersection Box:', intersectionBox);
+            console.log('Intersection Point:', intersectionPoint);
+            return intersectionPoint;
+        }
+        return null;
+    }
     getNormal() {
         const normalMatrix = new THREE.Matrix3().getNormalMatrix(this.mesh.matrixWorld);
         const normal = new THREE.Vector3(0, 1, 0).applyMatrix3(normalMatrix).normalize();

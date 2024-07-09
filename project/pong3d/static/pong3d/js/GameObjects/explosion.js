@@ -1,4 +1,4 @@
-import * as THREE from "../threejs/Three.js.js";
+import * as THREE from "../threejs/Three.js";
 
 export class Explosion {
     constructor(scene, particleCount = 100, particleSize = 0.1, duration = 2) {

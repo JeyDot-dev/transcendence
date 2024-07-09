@@ -4,9 +4,8 @@ import { Arena } from './GameObjects/arena.js';
 import { Puck } from './GameObjects/puck.js';
 import { Text3d } from './GameObjects/text3d.js';
 import { Explosion } from './GameObjects/explosion.js';
-import 
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('Script pong3d.js chargé');
 
     // Initialisation de la scène, de la caméra et du renderer avec antialiasing activé
@@ -14,19 +13,20 @@ document.addEventListener('DOMContentLoaded', function() {
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     var renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    const mainElement = document.getElementById('main');
+    mainElement.appendChild(renderer.domElement);
     console.log('Renderer ajouté au DOM');
 
 
     // ORBIT: Ajouter des contrôles Trackball
-    const controls = new THREE.TrackballControls(camera, renderer.domElement);
-	controls.rotateSpeed = 5.0;
-	controls.zoomSpeed = 1.2;
-	controls.panSpeed = 0.8;
-	controls.noZoom = false;
-	controls.noPan = false;
-	controls.staticMoving = true;
-	controls.dynamicDampingFactor = 0.3;
+    //const controls = new THREE.TrackballControls(camera, renderer.domElement);
+    //controls.rotateSpeed = 5.0;
+    //controls.zoomSpeed = 1.2;
+    //controls.panSpeed = 0.8;
+    //controls.noZoom = false;
+    //controls.noPan = false;
+    //controls.staticMoving = true;
+    //controls.dynamicDampingFactor = 0.3;
 
 
     // Ajouter une lumière ponctuelle
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // controls.saveState();
 
     // Ajouter un bouton pour réinitialiser la caméra
-    document.getElementById('resetButton').addEventListener('click', function() {
+    document.getElementById('resetButton').addEventListener('click', function () {
         controls.reset();
         console.log('Camera reset');
     });
@@ -59,22 +59,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // PADDLE: Création des paddles
     var paddle1 = new Paddle(scene, 1, 0.1, 0.2, 0x33ccff, 0.1, new THREE.Vector3(0, -2.5, 0), new THREE.Vector3(0, 0, 0));
-	var paddle2 = new Paddle(scene, 1, 0.1, 0.2, 0xff2975, 0.1, new THREE.Vector3(0, 2.5, 0), new THREE.Vector3(0, 0, 0));
-	
+    var paddle2 = new Paddle(scene, 1, 0.1, 0.2, 0xff2975, 0.1, new THREE.Vector3(0, 2.5, 0), new THREE.Vector3(0, 0, 0));
 
-	// Ajouter les paddles à la scène
-	scene.add(paddle1.getMesh());
-	scene.add(paddle2.getMesh());
-	paddle1.logMeshData();
-	paddle2.logMeshData();
-	// scene.add(paddle1.getBoxHelper());
-	// scene.add(paddle2.getBoxHelper());
 
-	function checkPaddle(paddle, puck) {
-		console.log(`Paddle position: ${paddle.getMesh().position.x}, ${paddle.getMesh().position.y}, ${paddle.getMesh().position.z}`);
-		console.log(`Paddle dimensions: ${paddle.width}, ${paddle.height}, ${paddle.depth}`);
-		console.log(`Puck position: ${puck.getMesh().position.x}, ${puck.getMesh().position.y}, ${puck.getMesh().position.z}`)
-	}
+    // Ajouter les paddles à la scène
+    scene.add(paddle1.getMesh());
+    scene.add(paddle2.getMesh());
+    paddle1.logMeshData();
+    paddle2.logMeshData();
+    // scene.add(paddle1.getBoxHelper());
+    // scene.add(paddle2.getBoxHelper());
+
+    function checkPaddle(paddle, puck) {
+        console.log(`Paddle position: ${paddle.getMesh().position.x}, ${paddle.getMesh().position.y}, ${paddle.getMesh().position.z}`);
+        console.log(`Paddle dimensions: ${paddle.width}, ${paddle.height}, ${paddle.depth}`);
+        console.log(`Puck position: ${puck.getMesh().position.x}, ${puck.getMesh().position.y}, ${puck.getMesh().position.z}`)
+    }
 
     // Positionnement des paddles
     // scene.add(paddle1);
@@ -82,18 +82,18 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Paddles ajoutés à la scène');
 
 
-	const axesHelper = new THREE.AxesHelper(1); // La longueur des axes
-	scene.add(axesHelper);
-	
-	// Ajouter une grille
-	// const gridHelper = new THREE.GridHelper(10, 10); // Taille de la grille et nombre de divisions
-	// gridHelper.rotation.x = Math.PI / 2;
-	// scene.add(gridHelper);
+    const axesHelper = new THREE.AxesHelper(1); // La longueur des axes
+    scene.add(axesHelper);
 
-	// PUCK: Creation du puck
+    // Ajouter une grille
+    // const gridHelper = new THREE.GridHelper(10, 10); // Taille de la grille et nombre de divisions
+    // gridHelper.rotation.x = Math.PI / 2;
+    // scene.add(gridHelper);
+
+    // PUCK: Creation du puck
     var puck = new Puck(scene, 0.1, 0.05, 0xff0000, 0.2, new THREE.Vector3(0, 0, 0));
     scene.add(puck.getMesh());
-	// scene.add(puck.getBoxHelper());
+    // scene.add(puck.getBoxHelper());
 
     // ARENA: Création des bords
     var borderThickness = 0.1;
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var pause = true;
 
     // Gestion des mouvements des paddles
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function (event) {
         if (event.code === 'ArrowLeft') {
             moveLeft1 = true;
         } else if (event.code === 'ArrowRight') {
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.addEventListener('keyup', function(event) {
+    document.addEventListener('keyup', function (event) {
         if (event.code === 'ArrowLeft') {
             moveLeft1 = false;
         } else if (event.code === 'ArrowRight') {
@@ -167,19 +167,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function checkCollision() {
         // COLLISION: Collision avec les paddles
         if (paddle1.checkCollision(puck)) {
-			checkPaddle(paddle1, puck);
-			puck.reflect(paddle1.getNormal(), paddle1.velocity);
-		}
+            checkPaddle(paddle1, puck);
+            puck.reflect(paddle1.getNormal(), paddle1.velocity);
+        }
         if (paddle2.checkCollision(puck)) {
-			checkPaddle(paddle2, puck);
-			puck.reflect(paddle2.getNormal(), paddle2.velocity);
-		}
+            checkPaddle(paddle2, puck);
+            puck.reflect(paddle2.getNormal(), paddle2.velocity);
+        }
         // Collision avec les bords
         if (puck.position.x - puck.size <= -window.innerWidth / window.innerHeight / 2) {
-        	puck.inverseDirectionX();
-        	// puckDirection.x = puckSpeed;
+            puck.inverseDirectionX();
+            // puckDirection.x = puckSpeed;
         }
-        
+
         if (puck.position.x + puck.size >= window.innerWidth / window.innerHeight / 2) {
             puck.inverseDirectionX();
             // puckDirection.x = -puckSpeed;
@@ -190,48 +190,48 @@ document.addEventListener('DOMContentLoaded', function() {
             score2++;
             p2Text.updateText(score2);
             // triggerExplosion(puck.position.clone());
-			var explo = new Explosion(scene, 100, 0.1, 2);
-			explo.trigger(puck.position);
+            var explo = new Explosion(scene, 100, 0.1, 2);
+            explo.trigger(puck.position);
             // updateScores();
             puck.reset();
         }
-		
+
         if (puck.position.y + puck.size >= 3) {
-			score1++;
+            score1++;
             p1Text.updateText(score1);
             // triggerExplosion(puck.position.clone());
-			var explo = new Explosion(scene, 100, 0.1, 2);
-			explo.trigger(puck.position);
+            var explo = new Explosion(scene, 100, 0.1, 2);
+            explo.trigger(puck.position);
             // updateScores();
             puck.reset();
         }
     }
 
     // FONT: Charger la police pour afficher le texte
-	fontLoader.load(
-	'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
-	function (font) {
-		// Now the font is loaded, we can create text objects
-    // var p1ScoreText, p2ScoreText, timeText, loadedFont;
-    // TEXT: Créer les objets de Text3d pour les scores et le temps 
-			var timeText = new Text3d(scene, fontLoader, 0.5, 0.1, 0xffffff, '0s',
-				new THREE.Vector3(-0.2, 0, 3),
-				new THREE.Vector3(0, 0, 0)
-			);
-			var p1Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0x33ccff, '0',
-				new THREE.Vector3(-0.2, 0, 3),
-				new THREE.Vector3(0, 0, 0)
-			);
-			var p2Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0xff2975, '0s',
-				new THREE.Vector3(-0.2, 0, 3),
-				new THREE.Vector3(0, 0, 0)
-			);
-		},
-		undefined, // onProgress callback (optional)
-		function (error) { // onError callback
-			console.error('An error occurred loading the font:', error);
-		}
-	);
+    fontLoader.load(
+        'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
+        function (font) {
+            // Now the font is loaded, we can create text objects
+            // var p1ScoreText, p2ScoreText, timeText, loadedFont;
+            // TEXT: Créer les objets de Text3d pour les scores et le temps 
+            var timeText = new Text3d(scene, fontLoader, 0.5, 0.1, 0xffffff, '0s',
+                new THREE.Vector3(-0.2, 0, 3),
+                new THREE.Vector3(0, 0, 0)
+            );
+            var p1Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0x33ccff, '0',
+                new THREE.Vector3(-0.2, 0, 3),
+                new THREE.Vector3(0, 0, 0)
+            );
+            var p2Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0xff2975, '0s',
+                new THREE.Vector3(-0.2, 0, 3),
+                new THREE.Vector3(0, 0, 0)
+            );
+        },
+        undefined, // onProgress callback (optional)
+        function (error) { // onError callback
+            console.error('An error occurred loading the font:', error);
+        }
+    );
 
 
     const timeLimit = 120;
@@ -248,30 +248,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Fonction d'animation
-    var animate = function() {
+    var animate = function () {
         requestAnimationFrame(animate);
 
         if (!pause && !endGame) {
             // Mise à jour des positions des paddles
-            if (moveLeft1) paddle1.move(new THREE.Vector3 (-1, 0, 0));
-            if (moveRight1) paddle1.move(new THREE.Vector3 (1, 0, 0));
-            if (moveLeft2) paddle2.move(new THREE.Vector3 (-1, 0, 0));
-            if (moveRight2) paddle2.move(new THREE.Vector3 (1, 0, 0));
+            if (moveLeft1) paddle1.move(new THREE.Vector3(-1, 0, 0));
+            if (moveRight1) paddle1.move(new THREE.Vector3(1, 0, 0));
+            if (moveLeft2) paddle2.move(new THREE.Vector3(-1, 0, 0));
+            if (moveRight2) paddle2.move(new THREE.Vector3(1, 0, 0));
 
             puck.move();
             checkCollision();
             checkTime();
         }
-		if (endGame) {
+        if (endGame) {
 
-		}
+        }
         controls.update(); // Met à jour les contrôles
 
 
         renderer.render(scene, camera);
         // TODO: ajouter une fonction qui va envoyer le score a la db
         // if (endGame) {
-            //
+        //
         //}
     };
 
