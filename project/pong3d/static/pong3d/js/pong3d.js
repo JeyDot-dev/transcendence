@@ -20,14 +20,14 @@ console.log('Renderer ajouté au DOM');
 
 
 // ORBIT: Ajouter des contrôles Trackball
-//const controls = new THREE.TrackballControls(camera, renderer.domElement);
-//controls.rotateSpeed = 5.0;
-//controls.zoomSpeed = 1.2;
-//controls.panSpeed = 0.8;
-//controls.noZoom = false;
-//controls.noPan = false;
-//controls.staticMoving = true;
-//controls.dynamicDampingFactor = 0.3;
+const controls = new THREE.TrackballControls(camera, renderer.domElement);
+controls.rotateSpeed = 5.0;
+controls.zoomSpeed = 1.2;
+controls.panSpeed = 0.8;
+controls.noZoom = false;
+controls.noPan = false;
+controls.staticMoving = true;
+controls.dynamicDampingFactor = 0.3;
 
 
 // Ajouter une lumière ponctuelle
