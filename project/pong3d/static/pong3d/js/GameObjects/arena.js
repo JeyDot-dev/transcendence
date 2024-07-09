@@ -1,4 +1,4 @@
-import * as THREE from "../threejs/Three.js";
+import * as THREE from "../threejs/Three.js.js";
 
 export class Arena {
     constructor(width, height, depth, color, wallColor, wallThickness, borderRadius, innerWallColor) {

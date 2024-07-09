@@ -1,8 +1,10 @@
-// import * as THREE from 'three';
-import { Paddle } from './GameObjects/Paddle.js';
+import * as THREE from './threejs/Three.js';
+import { Paddle } from './GameObjects/paddle.js';
 import { Arena } from './GameObjects/arena.js';
-import { Puck } from './GameObjects/Puck.js';
-import { Text3d } from './GameObjects/Paddle.js';
+import { Puck } from './GameObjects/puck.js';
+import { Text3d } from './GameObjects/text3d.js';
+import { Explosion } from './GameObjects/explosion.js';
+import 
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Script pong3d.js chargé');
@@ -17,14 +19,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // ORBIT: Ajouter des contrôles Trackball
-    // const controls = new THREE.TrackballControls(camera, renderer.domElement);
-	// controls.rotateSpeed = 5.0;
-	// controls.zoomSpeed = 1.2;
-	// controls.panSpeed = 0.8;
-	// controls.noZoom = false;
-	// controls.noPan = false;
-	// controls.staticMoving = true;
-	// controls.dynamicDampingFactor = 0.3;
+    const controls = new THREE.TrackballControls(camera, renderer.domElement);
+	controls.rotateSpeed = 5.0;
+	controls.zoomSpeed = 1.2;
+	controls.panSpeed = 0.8;
+	controls.noZoom = false;
+	controls.noPan = false;
+	controls.staticMoving = true;
+	controls.dynamicDampingFactor = 0.3;
 
 
     // Ajouter une lumière ponctuelle

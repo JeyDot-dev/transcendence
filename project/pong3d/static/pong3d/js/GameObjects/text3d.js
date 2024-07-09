@@ -1,4 +1,4 @@
-import * as THREE from "../threejs/Three.js";
+import * as THREE from "../threejs/Three.js.js";
 
 export class Text3d {
     constructor(scene, font, size = 0.5, height = 0.1, color, text,
