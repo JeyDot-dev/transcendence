@@ -1,5 +1,4 @@
 let loadedCSS = [];
-let loadedJS = [];
 let defaultTitle = document.title;
 
 // Listener for browser navigation management
@@ -40,7 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // It also loads the CSS and JS files and unloads the previous ones
 async function spa(url, data = null) {
     unloadCSS();
-    unloadJS();
     unloadTitle();
 
     url = makeURL(url);
@@ -48,8 +46,9 @@ async function spa(url, data = null) {
     const mainElement = document.querySelector("main");
     mainElement.innerHTML = content;
 
+    handleJS(mainElement);
+
     loadCSS(mainElement);
-    loadJS(mainElement);
     loadTitle(mainElement);
 }
 
@@ -153,7 +152,7 @@ function unloadCSS() {
 }
 
 // Function to load the JS files
-async function loadJS(mainElement) {
+async function handleJS(mainElement) {
     // Get all the scripts in the content
     const scripts = mainElement.querySelectorAll('script');
 
@@ -163,7 +162,6 @@ async function loadJS(mainElement) {
             // If the script has a src attribute, dynamically import the script
             if (script.src) {
                 await import(script.src);
-                loadedJS.push(script.src);
             }
             else { // If the script doesn't have a src attribute, evaluate the script content
                 new Function(script.textContent)();
@@ -172,21 +170,6 @@ async function loadJS(mainElement) {
         // Remove the original script element in any case
         //script.remove();
     }
-}
-
-// Function to unload the JS files
-function unloadJS() {
-    // Remove all the loaded JS files
-    loadedJS.forEach(src => {
-        // Get the script element with the src
-        const script = document.head.querySelector(`script[src="${src}"]`);
-        // If the script exists, remove it
-        if (script) {
-            script.parentNode.removeChild(script);
-        }
-    });
-    // Clear the list of loaded CSS
-    loadedJS = [];
 }
 
 // Function to load the title
