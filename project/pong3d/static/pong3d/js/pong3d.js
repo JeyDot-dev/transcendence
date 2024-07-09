@@ -1,4 +1,6 @@
 import * as THREE from './threejs/Three.js';
+import { TrackballControls } from './TrackballControls.js';
+import { FontLoader } from './FontLoader.js';
 import { Paddle } from './GameObjects/paddle.js';
 import { Arena } from './GameObjects/arena.js';
 import { Puck } from './GameObjects/puck.js';
@@ -20,7 +22,7 @@ console.log('Renderer ajouté au DOM');
 
 
 // ORBIT: Ajouter des contrôles Trackball
-const controls = new THREE.TrackballControls(camera, renderer.domElement);
+const controls = new TrackballControls(camera, renderer.domElement);
 controls.rotateSpeed = 5.0;
 controls.zoomSpeed = 1.2;
 controls.panSpeed = 0.8;
@@ -208,6 +210,8 @@ function checkCollision() {
     }
 }
 
+const fontLoader = new FontLoader();
+
 // FONT: Charger la police pour afficher le texte
 fontLoader.load(
     'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
@@ -215,15 +219,15 @@ fontLoader.load(
         // Now the font is loaded, we can create text objects
         // var p1ScoreText, p2ScoreText, timeText, loadedFont;
         // TEXT: Créer les objets de Text3d pour les scores et le temps 
-        var timeText = new Text3d(scene, fontLoader, 0.5, 0.1, 0xffffff, '0s',
+        var timeText = new Text3d(scene, font, 0.5, 0.1, 0xffffff, '0s',
             new THREE.Vector3(-0.2, 0, 3),
             new THREE.Vector3(0, 0, 0)
         );
-        var p1Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0x33ccff, '0',
+        var p1Text = new Text3d(scene, font, 0.5, 0.1, 0x33ccff, '0',
             new THREE.Vector3(-0.2, 0, 3),
             new THREE.Vector3(0, 0, 0)
         );
-        var p2Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0xff2975, '0s',
+        var p2Text = new Text3d(scene, font, 0.5, 0.1, 0xff2975, '0s',
             new THREE.Vector3(-0.2, 0, 3),
             new THREE.Vector3(0, 0, 0)
         );

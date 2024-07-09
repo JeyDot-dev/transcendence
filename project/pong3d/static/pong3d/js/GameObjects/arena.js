@@ -69,7 +69,7 @@ export class Arena {
         ];
 
         // Créer un matériau spécial pour gérer les différentes faces
-        const faceMaterial = new THREE.MeshFaceMaterial(materials);
+        const faceMaterial = new THREE.MeshStandardMaterial(materials);
 
         // Créer le mesh avec la géométrie extrudée et le matériau multi-face
         const wallMesh = new THREE.Mesh(geometry, faceMaterial);
