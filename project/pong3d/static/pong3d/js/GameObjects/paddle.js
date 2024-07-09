@@ -1,6 +1,6 @@
-// import * as THREE from 'three';
+import * as THREE from "../threejs/Three.js";
 
-class Paddle {
+export class Paddle {
     constructor(scene, width = 0.5, height = 0.1, depth = 0.2, color = 0xffffff, speed = 0.1, position = new THREE.Vector3(0, 0, 0), orientation = new THREE.Vector3(0, 0, 0)) {
         this.width = width;
         this.height = height;

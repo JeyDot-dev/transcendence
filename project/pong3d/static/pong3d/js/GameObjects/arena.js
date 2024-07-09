@@ -1,4 +1,6 @@
-class Arena {
+import * as THREE from "../threejs/Three.js";
+
+export class Arena {
     constructor(width, height, depth, color, wallColor, wallThickness, borderRadius, innerWallColor) {
         this.width = width;
         this.height = height;

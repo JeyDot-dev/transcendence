@@ -1,4 +1,6 @@
-class Text3d {
+import * as THREE from "../threejs/Three.js";
+
+export class Text3d {
     constructor(scene, font, size = 0.5, height = 0.1, color, text,
             position = new THREE.Vector3(0, 0, 0),
             rotation = new THREE.Vector3(0, 0, 0)) {

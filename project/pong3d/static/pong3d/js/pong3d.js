@@ -1,5 +1,8 @@
 // import * as THREE from 'three';
-// import { Paddle } from './Paddle.js';
+import { Paddle } from './GameObjects/Paddle.js';
+import { Arena } from './GameObjects/arena.js';
+import { Puck } from './GameObjects/Puck.js';
+import { Text3d } from './GameObjects/Paddle.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Script pong3d.js chargé');
@@ -14,14 +17,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // ORBIT: Ajouter des contrôles Trackball
-    const controls = new THREE.TrackballControls(camera, renderer.domElement);
-	controls.rotateSpeed = 5.0;
-	controls.zoomSpeed = 1.2;
-	controls.panSpeed = 0.8;
-	controls.noZoom = false;
-	controls.noPan = false;
-	controls.staticMoving = true;
-	controls.dynamicDampingFactor = 0.3;
+    // const controls = new THREE.TrackballControls(camera, renderer.domElement);
+	// controls.rotateSpeed = 5.0;
+	// controls.zoomSpeed = 1.2;
+	// controls.panSpeed = 0.8;
+	// controls.noZoom = false;
+	// controls.noPan = false;
+	// controls.staticMoving = true;
+	// controls.dynamicDampingFactor = 0.3;
 
 
     // Ajouter une lumière ponctuelle
@@ -118,8 +121,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // group.rotation.x = Math.PI / 2;
     console.log('Bords ajoutés à la scène');
 
-    // const arena = new Arena(5, 0.3, 8, 0x20b2aa, 0xffffff, 0.3, 0.5, 0x04444e); // Dimensions, couleur de l'arène et couleur des bords
-    // arena.addToScene(scene);
+    const arena = new Arena(5, 0.3, 8, 0x20b2aa, 0xffffff, 0.3, 0.5, 0x04444e); // Dimensions, couleur de l'arène et couleur des bords
+    arena.addToScene(scene);
     // Position de la caméra
     camera.position.z = 5;
 
@@ -202,22 +205,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Charger la police pour afficher le texte
-    const fontLoader = new THREE.FontLoader();
-	fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json');
+    // FONT: Charger la police pour afficher le texte
+	fontLoader.load(
+	'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
+	function (font) {
+		// Now the font is loaded, we can create text objects
     // var p1ScoreText, p2ScoreText, timeText, loadedFont;
     // TEXT: Créer les objets de Text3d pour les scores et le temps 
-	var timeText = new Text3d(scene, fontLoader, 0.5, 0.1, 0xffffff, '0s',
-		new THREE.Vector3(-0.2, 0, 3),
-		new THREE.Vector3(0, 0, 0)
-	);
-	var p1Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0x33ccff, '0',
-		new THREE.Vector3(-0.2, 0, 3),
-		new THREE.Vector3(0, 0, 0)
-	);
-	var p2Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0xff2975, '0s',
-		new THREE.Vector3(-0.2, 0, 3),
-		new THREE.Vector3(0, 0, 0)
+			var timeText = new Text3d(scene, fontLoader, 0.5, 0.1, 0xffffff, '0s',
+				new THREE.Vector3(-0.2, 0, 3),
+				new THREE.Vector3(0, 0, 0)
+			);
+			var p1Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0x33ccff, '0',
+				new THREE.Vector3(-0.2, 0, 3),
+				new THREE.Vector3(0, 0, 0)
+			);
+			var p2Text = new Text3d(scene, fontLoader, 0.5, 0.1, 0xff2975, '0s',
+				new THREE.Vector3(-0.2, 0, 3),
+				new THREE.Vector3(0, 0, 0)
+			);
+		},
+		undefined, // onProgress callback (optional)
+		function (error) { // onError callback
+			console.error('An error occurred loading the font:', error);
+		}
 	);
 
 

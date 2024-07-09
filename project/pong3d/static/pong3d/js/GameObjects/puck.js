@@ -1,4 +1,6 @@
-class Puck {
+import * as THREE from "../threejs/Three.js";
+
+export class Puck {
     constructor(scene, puckSize = 1, height = 1, color = 0x0000ff, puckSpeed = 1, initialPosition = new THREE.Vector3(0, 0, 0)) {
         const radialSegments = 32; // Segments radiaux pour une surface lisse
         this.puckSpeed = puckSpeed;

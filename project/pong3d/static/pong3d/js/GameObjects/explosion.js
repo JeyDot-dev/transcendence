@@ -1,4 +1,6 @@
-class Explosion {
+import * as THREE from "../threejs/Three.js";
+
+export class Explosion {
     constructor(scene, particleCount = 100, particleSize = 0.1, duration = 2) {
         this.scene = scene;
         this.particleCount = particleCount;
