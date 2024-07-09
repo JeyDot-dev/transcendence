@@ -153,29 +153,25 @@ function unloadCSS() {
 }
 
 // Function to load the JS files
-function loadJS(mainElement) {
+async function loadJS(mainElement) {
     // Get all the scripts in the content
     const scripts = mainElement.querySelectorAll('script');
 
-    scripts.forEach(script => {
+    for (let script of scripts) {
         // Check if the script is already loaded
         if (!document.head.querySelector(`script[src="${script.src}"]`)) {
-            // Create a new script element
-            const newScript = document.createElement('script');
-            // If the script has a src attribute, set the src attribute of the new script element
+            // If the script has a src attribute, dynamically import the script
             if (script.src) {
-                newScript.src = script.src;
+                await import(script.src);
                 loadedJS.push(script.src);
             }
-            else { // If the script doesn't have a src attribute, set the text content of the new script element
-                newScript.textContent = `(function() { ${script.textContent} })();`;
+            else { // If the script doesn't have a src attribute, evaluate the script content
+                new Function(script.textContent)();
             }
-            // Append the new script element to the head
-            document.head.appendChild(newScript);
         }
         // Remove the original script element in any case
-        script.remove();
-    });
+        //script.remove();
+    }
 }
 
 // Function to unload the JS files
