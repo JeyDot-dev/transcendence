@@ -151,26 +151,23 @@ function unloadCSS() {
     loadedCSS = [];
 }
 
-// Function to load the JS files
 async function handleJS(mainElement) {
     // Get all the scripts in the content
     const scripts = mainElement.querySelectorAll('script');
 
     for (let script of scripts) {
-        // Check if the script is already loaded
-        if (!document.head.querySelector(`script[src="${script.src}"]`)) {
-            // If the script has a src attribute, dynamically import the script
-            if (script.src) {
-                await import(script.src);
-            }
-            else { // If the script doesn't have a src attribute, evaluate the script content
-                new Function(script.textContent)();
-            }
+        // If the script has a src attribute, dynamically import the script
+        if (script.src) {
+            await import(script.src + '?t=' + new Date().getTime());
+        }
+        else { // If the script doesn't have a src attribute, evaluate the script content
+            new Function(script.textContent)();
         }
         // Remove the original script element in any case
         //script.remove();
     }
 }
+// Function to load the JS files
 
 // Function to load the title
 function loadTitle(mainElement) {
