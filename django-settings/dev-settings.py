@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "channels",
     "rest_framework",
     "pong3d",
+    "cube",
 ]
 
 MIDDLEWARE = [
@@ -142,6 +143,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static_production")
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     BASE_DIR / "pong3d/static/pong3d",
+    BASE_DIR / "cube/static/cube",
 ]
 
 

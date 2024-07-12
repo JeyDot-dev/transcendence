@@ -36,7 +36,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def send_game_state(self):
         await self.send(text_data=json.dumps({
             'playerY': self.player_paddle.y,
-			'playerX': self.player_paddle.x,
+            'playerX': self.player_paddle.x,
             'aiX': self.ai_paddle.x,
             'aiY': self.ai_paddle.y,
             'playerScore': self.player_score,

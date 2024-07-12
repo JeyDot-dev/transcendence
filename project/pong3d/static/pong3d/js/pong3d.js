@@ -8,7 +8,6 @@ import { Arena } from './GameObjects/arena.js';
 import { Puck } from './GameObjects/puck.js';
 import { Text3d } from './GameObjects/text3d.js';
 import { Explosion } from './GameObjects/explosion.js';
-export const 'three' = './Three.js';
 
 console.log('Chargement du script pong3d.js');
 console.log('Script pong3d.js chargé');

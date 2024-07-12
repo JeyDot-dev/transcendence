@@ -25,6 +25,7 @@ urlpatterns = [
     path("api/pong", include("pong3d.urls")),
     path("api/about", views.about_content, name="about_content"),
     path("api/test", views.test_content, name="test_content"),
+	path("api/cube", include("cube.urls")),
     re_path(r"^api/.*$", views.home_content),
     re_path(r"^.*$", views.index, name="index"),
 ]
