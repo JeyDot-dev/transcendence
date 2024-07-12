@@ -1,4 +1,6 @@
 import * as THREE from './threejs/Three.js';
+import { RectAreaLightHelper } from './jsm/helpers/RectAreaLightHelper.js';
+import { RectAreaLightUniformsLib } from './jsm/lights/RectAreaLightUniformsLib.js';
 import { TrackballControls } from './TrackballControls.js';
 import { FontLoader } from './FontLoader.js';
 import { Paddle } from './GameObjects/paddle.js';
@@ -6,7 +8,7 @@ import { Arena } from './GameObjects/arena.js';
 import { Puck } from './GameObjects/puck.js';
 import { Text3d } from './GameObjects/text3d.js';
 import { Explosion } from './GameObjects/explosion.js';
-
+export const 'three' = './Three.js';
 
 console.log('Chargement du script pong3d.js');
 console.log('Script pong3d.js chargé');
@@ -32,14 +34,63 @@ controls.staticMoving = true;
 controls.dynamicDampingFactor = 0.3;
 
 
-// Ajouter une lumière ponctuelle
-const pointLight = new THREE.PointLight(0xffffff, 1, 100);
-pointLight.position.set(0, -1, 3);
+// Ajouter des lumières à la scène
+
+// Ambient Light
+const ambientLight = new THREE.AmbientLight(0x404040, 1); // Soft white light
+scene.add(ambientLight);
+
+// Directional Light
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(5, 10, 7.5);
+directionalLight.castShadow = true;
+scene.add(directionalLight);
+scene.add(directionalLight.target);
+
+// Point Light
+const pointLight = new THREE.PointLight(0xffffff, 1);
+pointLight.position.set(0, 5, 10);
+pointLight.castShadow = true;
 scene.add(pointLight);
 
-// Ajouter une lumière ambiante
-const ambientLight = new THREE.AmbientLight(0x404040); // Lumière douce
-scene.add(ambientLight);
+// Spot Light
+const spotLight = new THREE.SpotLight(0xffffff, 1);
+spotLight.position.set(10, 10, 10);
+spotLight.angle = Math.PI / 6;
+spotLight.penumbra = 0.2;
+spotLight.decay = 2;
+spotLight.distance = 200;
+spotLight.castShadow = true;
+scene.add(spotLight);
+scene.add(spotLight.target);
+
+// Hemisphere Light
+const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+scene.add(hemisphereLight);
+
+// RectAreaLight (requires RectAreaLightUniformsLib)
+RectAreaLightUniformsLib.init();
+const rectLight = new THREE.RectAreaLight(0xffffff, 1, 10, 10);
+rectLight.position.set(5, 5, 5);
+rectLight.lookAt(0, 0, 0);
+scene.add(rectLight);
+
+// Adding helpers to visualize the lights
+const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
+scene.add(directionalLightHelper);
+
+const pointLightHelper = new THREE.PointLightHelper(pointLight, 1);
+scene.add(pointLightHelper);
+
+const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+scene.add(spotLightHelper);
+
+const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight, 5);
+scene.add(hemisphereLightHelper);
+
+const rectAreaLightHelper = new RectAreaLightHelper(rectLight);
+scene.add(rectAreaLightHelper);
+
 
 // Position initiale de la caméra
 camera.position.set(0, 0, 5);
@@ -50,12 +101,6 @@ controls.update();
 
 // Sauvegarder l'état initial de la caméra
 // controls.saveState();
-
-// Ajouter un bouton pour réinitialiser la caméra
-document.getElementById('resetButton').addEventListener('click', function () {
-    controls.reset();
-    console.log('Camera reset');
-});
 
 // Variables de jeu
 var score1 = 0, score2 = 0;
@@ -126,7 +171,7 @@ scene.add(group);
 // group.rotation.x = Math.PI / 2;
 console.log('Bords ajoutés à la scène');
 
-const arena = new Arena(5, 0.3, 8, 0x20b2aa, 0xffffff, 0.3, 0.5, 0x04444e); // Dimensions, couleur de l'arène et couleur des bords
+const arena = new Arena(5, 0.3, 8, 0x20b2aa, 0xfaa501, 0.3, 0.5, 0xff1493); // Dimensions, couleur de l'arène et couleur des bords
 arena.addToScene(scene);
 // Position de la caméra
 camera.position.z = 5;
@@ -163,6 +208,7 @@ document.addEventListener('keyup', function (event) {
     }
     if (event.code === 'Space') {
         pause = !pause;
+        console.log('Pause toggled:', pause);
     }
 });
 
@@ -217,18 +263,17 @@ fontLoader.load(
     'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
     function (font) {
         // Now the font is loaded, we can create text objects
-        // var p1ScoreText, p2ScoreText, timeText, loadedFont;
         // TEXT: Créer les objets de Text3d pour les scores et le temps 
-        var timeText = new Text3d(scene, font, 0.5, 0.1, 0xffffff, '0s',
+        const timeText = new Text3d(scene, font, 0.5, 0.1, 0xffffff, '0s',
             new THREE.Vector3(-0.2, 0, 3),
             new THREE.Vector3(0, 0, 0)
         );
-        var p1Text = new Text3d(scene, font, 0.5, 0.1, 0x33ccff, '0',
-            new THREE.Vector3(-0.2, 0, 3),
+        const p1Text = new Text3d(scene, font, 0.5, 0.1, 0x33ccff, '0',
+            new THREE.Vector3(-2.2, 0, 3),
             new THREE.Vector3(0, 0, 0)
         );
-        var p2Text = new Text3d(scene, font, 0.5, 0.1, 0xff2975, '0s',
-            new THREE.Vector3(-0.2, 0, 3),
+        const p2Text = new Text3d(scene, font, 0.5, 0.1, 0xff2975, '0',
+            new THREE.Vector3(2.2, 0, 3),
             new THREE.Vector3(0, 0, 0)
         );
     },
@@ -246,7 +291,7 @@ var endGame = false;
 // Fonction pour vérifier le temps écoulé
 function checkTime() {
     elapsedTime = (Date.now() - startTime) / 1000; // Temps écoulé en secondes
-    timeText.updateText(`${Math.floor(elapsedTime)}s`);
+    timeText.updateText(`${Math.floor(elapsedTime)}s`, scene);
     if (elapsedTime >= timeLimit) {
         endGame = true;
     }

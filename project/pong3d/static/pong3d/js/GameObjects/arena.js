@@ -17,10 +17,11 @@ export class Arena {
 
         this.group.add(this.arena);
         this.group.add(this.walls);
+		// this.group.translateX(10);
     }
 
     createArena() {
-        const geometry = new THREE.PlaneGeometry(this.width, this.depth);
+        const geometry = new THREE.PlaneGeometry(this.width - this.wallThickness, this.depth - this.wallThickness);
         const material = new THREE.MeshStandardMaterial({ color: this.color, side: THREE.DoubleSide });
         const arenaMesh = new THREE.Mesh(geometry, material);
         return arenaMesh;
@@ -57,22 +58,64 @@ export class Arena {
         // Extrude la forme pour créer les murs
         const extrudeSettings = {
             depth: this.height,
-            bevelEnabled: false
+            bevelEnabled: false,
+            steps: 1,
+            // material: 0, // Assign first material (wallColor) to the entire geometry initially
+            // extrudeMaterial: 1 // Assign second material (innerWallColor) to the sides
         };
 
-        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        let geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
         // Appliquer différentes couleurs aux faces
-        const materials = [
-            new THREE.MeshStandardMaterial({ color: this.wallColor }), // Couleur pour les faces extérieures
-            new THREE.MeshStandardMaterial({ color: this.innerWallColor }) // Couleur pour les faces intérieures
-        ];
+        const wallMaterial = new THREE.MeshStandardMaterial({ color: this.wallColor });
+        const innerWallMaterial = new THREE.MeshStandardMaterial({ color: this.innerWallColor });
 
-        // Créer un matériau spécial pour gérer les différentes faces
-        const faceMaterial = new THREE.MeshStandardMaterial(materials);
+        const materials = [wallMaterial, innerWallMaterial];
 
-        // Créer le mesh avec la géométrie extrudée et le matériau multi-face
-        const wallMesh = new THREE.Mesh(geometry, faceMaterial);
+        // Manually assign material indices to the faces
+        const positions = geometry.attributes.position;
+        const faceCount = positions.count / 3;
+
+        geometry.clearGroups();
+
+        for (let i = 0; i < faceCount; i++) {
+            const zValues = [
+                positions.getZ(i * 3),
+                positions.getZ(i * 3 + 1),
+                positions.getZ(i * 3 + 2)
+            ];
+
+            // Check if the face is an extruded side face
+            const isExtrudedSide = zValues.some(z => z !== 0);
+
+            // Determine if the face belongs to the inner or outer wall by checking the X and Y coordinates
+            const xValues = [
+                positions.getX(i * 3),
+                positions.getX(i * 3 + 1),
+                positions.getX(i * 3 + 2)
+            ];
+
+            const yValues = [
+                positions.getY(i * 3),
+                positions.getY(i * 3 + 1),
+                positions.getY(i * 3 + 2)
+            ];
+
+            // Identify inner wall by checking if all vertices lie within the inner wall boundaries
+            const isInnerWall = xValues.every(x => Math.abs(x) < halfWidth - wallThickness) &&
+                yValues.every(y => Math.abs(y) < halfDepth - wallThickness);
+
+            if (isExtrudedSide && isInnerWall) {
+                geometry.addGroup(i * 3, 3, 1); // Inner wall material index
+            } else {
+                geometry.addGroup(i * 3, 3, 0); // Outer wall material index
+            }
+        }
+        // Create the mesh with the extruded geometry
+        const wallMesh = new THREE.Mesh(geometry, materials);
+
+        // Créer le mesh avec la géométrie extrudée
+        // const wallMesh = new THREE.Mesh(geometry, materials);
 
         const walls = new THREE.Group();
         walls.add(wallMesh);

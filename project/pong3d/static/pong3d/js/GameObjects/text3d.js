@@ -2,24 +2,25 @@ import * as THREE from "../threejs/Three.js";
 import { TextGeometry } from "../TextGeometry.js";
 
 export class Text3d {
-    constructor(scene, font, size = 0.5, height = 0.1, color, text,
+    constructor(scene, font, size = 0.5, depth = 0.1, color, text,
         position = new THREE.Vector3(0, 0, 0),
         rotation = new THREE.Vector3(0, 0, 0)) {
         this.font = font;
         this.text = text;
         this.size = size;
-        this.height = height;
+        this.depth = depth;
         this.color = color;
+		this.scene = scene;
         this.position = position;
         this.rotation = rotation;
         this.material = new THREE.MeshStandardMaterial({ color: color });
-        this.geomatry = new TextGeometry(text, {
+        this.geometry = new TextGeometry(text, {
             font: font,
             size: size,
-            height: height,
+            depth: depth,
             curveSegments: 12
         });
-        this.mesh = THREE.Mesh(this.geomatry, this.material);
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
 
         this.mesh.position.set(position);
         this.mesh.rotation.set(rotation);
@@ -27,16 +28,16 @@ export class Text3d {
     }
 
 
-    updateText(text) {
+    updateText(text, scene) {
         scene.remove(this.mesh);
-        this.mesh = new TextGeometry('text', {
+        this.mesh = new TextGeometry(text, {
             font: this.font,
             size: this.size,
-            height: this.height,
+            depth: this.depth,
             curveSegments: 12,
         });
         const textMaterial = new THREE.MeshStandardMaterial({ color: this.color });
-        this.mesh = new THREE.Mesh(this.geomatry, this.material);
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.position.set(this.position);
         this.mesh.rotation.set(this.rotation);
         scene.add(this.mesh);
