@@ -10,7 +10,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "transcendence.settings")
 application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
-        "websocket": AuthMiddlewareStack(URLRouter(pong.routing.websocket_urlpatterns)),
-        "websocketCube": AuthMiddlewareStack(URLRouter(cube.routing.websocket_urlpatterns)),
+        "websocket": AuthMiddlewareStack(URLRouter(cube.routing.websocket_urlpatterns)),
+        # "websocketCube": AuthMiddlewareStack(URLRouter(cube.routing.websocket_urlpatterns)),
     }
 )
