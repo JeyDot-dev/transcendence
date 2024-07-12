@@ -2,7 +2,10 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module
 import { TrackballControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/TrackballControls.js';
 
 
-let cube, rotateX, rotateY, rotateZ;
+let cube, rotateX = 0, rotateY = 0, rotateZ = 0;
+let lastSentRotation = { x: 0, y: 0, z: 0 };
+let lastSentTime = Date.now();
+const updateInterval = 100; 
 // Initialisation de la scène
 const scene = new THREE.Scene();
 
@@ -69,40 +72,66 @@ function initCube(size, x, y, z) {
 document.addEventListener('keydown', function (event) {
     // let keypress;
     // if (event.code === 'ArrowLeft') {
-    //     keypress = ;
-    // } else if (event.code === 'ArrowRight') {
-    //     moveRight1 = true;
-    // }
-    console.log(event.code);
-    socket.send(JSON.stringify({ 'keypress': event.code}));
-});
+        //     keypress = ;
+        // } else if (event.code === 'ArrowRight') {
+            //     moveRight1 = true;
+            // }
+            console.log(event.code);
+            socket.send(JSON.stringify({ 'keypress': event.code}));
+        });
+        
+        // Fonction d'animation
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotation du cube pour l'animation
+            if (rotateX) cube.rotation.x += 0.01 * rotateX;
+            if (rotateY) cube.rotation.y += 0.01 * rotateY;
+            if (rotateZ) cube.rotation.z += 0.01 * rotateZ;
+            
+            
+            // mainCube.rotation.x += 0.01;
+            mainCube.rotation.y += 0.01;
+            // mainCube.rotation.z += 0.01;
+            
+            controls.update();
+            // Rendu de la scène
+            renderer.render(scene, camera);
+            
+            // Envoyer les mises à jour de rotation périodiquement
+            const now = Date.now();
+            if (now - lastSentTime >= updateInterval) {
+                const newRotation = {
+                    x: cube.rotation.x,
+                    y: cube.rotation.y,
+                    z: cube.rotation.z
+                };
+                if (hasRotationChanged(newRotation)) {
+                    socket.send(JSON.stringify({
+                        'type': 'current_rotation',
+                        'rotation': newRotation
+                    }));
+                    lastSentRotation = newRotation;
+                    lastSentTime = now;
+                }
+            }
+        }
 
-// Fonction d'animation
-function animate() {
-    requestAnimationFrame(animate);
-    
-    // Rotation du cube pour l'animation
-    if (rotateX) cube.rotation.x += 0.01 * rotateX;
-    if (rotateY) cube.rotation.y += 0.01 * rotateY;
-    if (rotateZ) cube.rotation.z += 0.01 * rotateZ;
-
-
-    // mainCube.rotation.x += 0.01;
-    mainCube.rotation.y += 0.01;
-    // mainCube.rotation.z += 0.01;
-    
-    controls.update();
-    // Rendu de la scène
-    renderer.render(scene, camera);
+function hasRotationChanged(newRotation) {
+    return newRotation.x !== lastSentRotation.x ||
+    newRotation.y !== lastSentRotation.y ||
+    newRotation.z !== lastSentRotation.z;
 }
+
 const socket = new WebSocket('ws://' + window.location.host + '/ws/cube/');
 
 socket.onmessage = function (e) {
     // console.log("Message WebSocket reçu :", e.data);
     const data = JSON.parse(e.data);
     if (data.type == 'init') {
-        console.log("Init Cube");
+        console.log("Init Cube : " + data.rotation.x + ' ' + data.rotation.y + ' ' + data.rotation.z);
         initCube(data.cubeSize, data.cubeX, data.cubeY, data.cubeZ);
+        cube.rotation.set(data.rotation.x, data.rotation.y, data.rotation.z);
     } else if (data.type == 'rotation') {
         console.log("rotation");
         rotateX = data.rotateX;

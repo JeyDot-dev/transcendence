@@ -5,6 +5,10 @@ import asyncio
 
 class CubeConsumer(AsyncWebsocketConsumer):
     group_name = "cube_updates"
+    connection_count = 0
+    orientation_state = {'x': 0, 'y': 0, 'z': 0}
+    rotation_state = {'x': 0, 'y': 0, 'z': 0}
+
 
     async def connect(self):
         await self.channel_layer.group_add(
@@ -17,18 +21,27 @@ class CubeConsumer(AsyncWebsocketConsumer):
         self.cubeX = 2
         self.cubeY = 2
         self.cubeZ = 2
-        self.rotateX = 0
-        self.rotateY = 0
-        self.rotateZ = 0
+        self.rotateX = CubeConsumer.rotation_state['x']
+        self.rotateY = CubeConsumer.rotation_state['y']
+        self.rotateZ = CubeConsumer.rotation_state['z']
         self.running = True
-        self.framerate = 60
+        self.framerate = 5
+        self.rotation = CubeConsumer.orientation_state
 
         await self.send(text_data=json.dumps({
             'type': 'init',
             'cubeSize': self.cubeSize,
             'cubeX': self.cubeX,
             'cubeY': self.cubeY,
-            'cubeZ': self.cubeZ
+            'cubeZ': self.cubeZ,
+            # 'rotateX': self.rotateX,
+            # 'rotateY': self.rotateY,
+            # 'rotateZ': self.rotateZ,
+            # 'rotation': self.rotation
+            'rotateX': CubeConsumer.rotation_state['x'],
+            'rotateY': CubeConsumer.rotation_state['y'],
+            'rotateZ': CubeConsumer.rotation_state['z'],
+            'rotation': CubeConsumer.orientation_state
         }))
         asyncio.ensure_future(self.loop())
 
@@ -52,26 +65,44 @@ class CubeConsumer(AsyncWebsocketConsumer):
             keypress = data['keypress']
 
             if keypress == 'ArrowLeft':
-                self.rotateX += -1
+                self.rotateX -= 1
+                CubeConsumer.rotation_state['x'] -= 1
             elif keypress == 'ArrowRight':
                 self.rotateX += 1
+                CubeConsumer.rotation_state['x'] += 1
             elif keypress == 'ArrowUp':
                 self.rotateY += 1
+                CubeConsumer.rotation_state['y'] += 1
             elif keypress == 'ArrowDown':
-                self.rotateY += -1
+                self.rotateY -= 1
+                CubeConsumer.rotation_state['y'] -= 1
 
-            await self.channel_layer.group_send(
-                self.group_name,
-                {
-                    'type': 'rotation_update',
-                    'rotateX': self.rotateX,
-                    'rotateY': self.rotateY,
-                    'rotateZ': self.rotateZ
-                }
-            )
+            # await self.channel_layer.group_send(
+            #     self.group_name,
+            #     {
+            #         'type': 'rotation_update',
+            #         'rotateX': self.rotateX,
+            #         'rotateY': self.rotateY,
+            #         'rotateZ': self.rotateZ,
+            #     }
+            # )
+        elif 'type' in data and data['type'] == 'current_rotation':
+            self.rotation = data['rotation']
+            CubeConsumer.orientation_state = self.rotation
+            # await self.channel_layer.group_send(
+            #     self.group_name,
+            #     {
+            #         'type': 'current_rotation',
+            #         'rotation': self.rotation
+            #     }
+            # )
+
 
     def updateState(self):
-        pass
+        self.rotateX = CubeConsumer.rotation_state['x']
+        self.rotateY = CubeConsumer.rotation_state['y']
+        self.rotateZ = CubeConsumer.rotation_state['z']
+        # self.rotation = CubeConsumer.orientation_state
 
     async def sendState(self):
         await self.send(text_data=json.dumps({
@@ -81,13 +112,14 @@ class CubeConsumer(AsyncWebsocketConsumer):
             'rotateZ': self.rotateZ
         }))
 
-    async def rotation_update(self, event):
-        self.rotateX = event['rotateX']
-        self.rotateY = event['rotateY']
-        self.rotateZ = event['rotateZ']
-        await self.send(text_data=json.dumps({
-            'type': 'rotation',
-            'rotateX': self.rotateX,
-            'rotateY': self.rotateY,
-            'rotateZ': self.rotateZ
-        }))
+    # async def rotation_update(self, event):
+    #     self.rotateX = event['rotateX']
+    #     self.rotateY = event['rotateY']
+    #     self.rotateZ = event['rotateZ']
+    #     await self.send(text_data=json.dumps({
+    #         'type': 'rotation',
+    #         'rotateX': self.rotateX,
+    #         'rotateY': self.rotateY,
+    #         'rotateZ': self.rotateZ
+    #     }))
+
