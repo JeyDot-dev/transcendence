@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "database.apps.DatabaseConfig",
     "channels",
     "rest_framework",
+    "singlepage",
     "pong3d",
     "cube",
 ]
@@ -63,7 +64,7 @@ ROOT_URLCONF = "transcendence.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -141,7 +142,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static_production")
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    #BASE_DIR / "singlepage/static/singlepage",
     BASE_DIR / "pong3d/static/pong3d",
     BASE_DIR / "cube/static/cube",
 ]

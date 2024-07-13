@@ -17,8 +17,13 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path, re_path
+from . import views
 
 urlpatterns = [
-    path("admin", admin.site.urls),
-    path("", include("singlepage.urls"), name="index"),
+    path("api/home", views.home, name="home_content"),
+    path("api/about", views.about, name="about_content"),
+    path("api/test", views.test, name="test_content"),
+    path("api/pong", include("pong3d.urls")),
+    path("api/cube", include("cube.urls")),
+    path("", views.index, name="index"),
 ]
