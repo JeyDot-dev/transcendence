@@ -1,5 +1,7 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
 import { TrackballControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/TrackballControls.js';
+import { RectAreaLightUniformsLib } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/lights/RectAreaLightUniformsLib.js';
+import { RectAreaLightHelper } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/helpers/RectAreaLightHelper.js';
 
 
 let cube, rotateX = 0, rotateY = 0, rotateZ = 0;
@@ -15,6 +17,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 // Initialisation du renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
 const mainElement = document.querySelector('main');
 mainElement.appendChild(renderer.domElement);
 
@@ -31,16 +34,45 @@ const ambientLight = new THREE.AmbientLight(0x404040, 1); // Soft white light
 scene.add(ambientLight);
 
 // Directional Light
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(5, 10, 7.5);
+const directionalLight = new THREE.DirectionalLight(0xffa500, 1);
+directionalLight.position.set(-5, 5, 7.5);
 directionalLight.castShadow = true;
 scene.add(directionalLight);
 scene.add(directionalLight.target);
+const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
+scene.add(directionalLightHelper);
+
+// Ajout d'une lumière directionnelle pour projeter les ombres
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.position.set(5, 10, 5);
+dirLight.castShadow = true;  // La lumière projette des ombres
+const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 5);
+scene.add(dirLightHelper);
+scene.add(dirLight);
+
+// Configurer les propriétés de l'ombre de la lumière directionnelle
+dirLight.shadow.mapSize.width = 1024;
+dirLight.shadow.mapSize.height = 1024;
+dirLight.shadow.camera.near = 0.5;
+dirLight.shadow.camera.far = 50;
+dirLight.shadow.camera.left = -10;
+dirLight.shadow.camera.right = 10;
+dirLight.shadow.camera.top = 10;
+dirLight.shadow.camera.bottom = -10;
+// // RectAreaLight (requires RectAreaLightUniformsLib)
+// RectAreaLightUniformsLib.init();
+// const rectLight = new THREE.RectAreaLight(0xffa500, 1, 10, 10);
+// rectLight.position.set(5, 5, 5);
+// rectLight.lookAt(0, 0, 0);
+// scene.add(rectLight);
+// const rectAreaLightHelper = new RectAreaLightHelper(rectLight);
+// scene.add(rectAreaLightHelper);
 
 // MAINCUBE: Cube de reference
-const geometryMain = new THREE.BoxGeometry(1, 1, 1);
+const geometryMain = new THREE.BoxGeometry(3, 3, 3);
 const materialMain = new THREE.MeshStandardMaterial({ color: 0xcbc3f5 });
 const mainCube = new THREE.Mesh(geometryMain, materialMain);
+mainCube.receiveShadow = true;
 mainCube.position.set(0, 0, 0);
 scene.add(mainCube);
 
@@ -65,6 +97,7 @@ function initCube(size, x, y, z) {
     const geometry = new THREE.BoxGeometry(size, size, size);
     const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
     cube = new THREE.Mesh(geometry, material);
+    cube.castShadow = true;
     cube.position.set(x, y, z);
     scene.add(cube);
 }
@@ -80,6 +113,13 @@ document.addEventListener('keydown', function (event) {
             socket.send(JSON.stringify({ 'keypress': event.code}));
         });
         
+
+        // Variables pour l'animation de la lumière
+        let blink = true;
+        const colors = [0xff0000, 0x00ff00, 0x0000ff]; // rouge, vert, bleu
+        let colorIndex = 0;
+        let lastTime = Date.now();
+        const blinkInterval = 500; // Temps en ms entre chaque clignotement
         // Fonction d'animation
         function animate() {
             requestAnimationFrame(animate);
@@ -89,7 +129,17 @@ document.addEventListener('keydown', function (event) {
             if (rotateY) cube.rotation.y += 0.01 * rotateY;
             if (rotateZ) cube.rotation.z += 0.01 * rotateZ;
             
-            
+            // Faire clignoter la lumière et changer sa couleur
+            const currentTime = Date.now();
+            if (currentTime - lastTime >= blinkInterval) {
+                blink = !blink;
+                dirLight.intensity = blink ? 1 : 0; // Clignotement
+                if (blink) {
+                    colorIndex = (colorIndex + 1) % colors.length; // Changement de couleur
+                    dirLight.color.setHex(colors[colorIndex]);
+                }
+                lastTime = currentTime;
+            }
             // mainCube.rotation.x += 0.01;
             mainCube.rotation.y += 0.01;
             // mainCube.rotation.z += 0.01;
