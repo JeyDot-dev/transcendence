@@ -1,3 +1,10 @@
+let socket;
+let socketReady = new Promise((resolve, reject) => {
+    socket = new WebSocket("ws://" + window.location.host + "/ws/spa/");
+    socket.onopen = () => resolve();
+    socket.onerror = error => reject(error);
+})
+
 let loadedCSS = [];
 let defaultTitle = document.title;
 
@@ -41,9 +48,16 @@ async function spa(url, data = null) {
     unloadCSS();
     unloadTitle();
 
-    url = makeURL(url);
-    const content = await fetchHTML(url, data);
     const mainElement = document.querySelector("main");
+    let content;
+    try {
+        let request = makeView(url);
+        console.log('Request:', request);
+        content = await getContent(request);
+    } catch (error) {
+        console.error('Error getting view:', error);
+    }
+
     mainElement.innerHTML = content;
 
     handleJS(mainElement);
@@ -52,62 +66,41 @@ async function spa(url, data = null) {
     loadTitle(mainElement);
 }
 
-// Function to create a new URL object
-// It deletes the last slash if there is one
-// It also sets the pathname to "/home" if it is empty
-// It adds the "/api" prefix to the pathname
-function makeURL(url) {
+function makeView(url) {
     try {
-        // Delete the last slash if there is one
-        if (url.endsWith("/")) {
-            url = url.slice(0, -1);
-        }
-        // Create a new URL object
         let newURL = new URL(url, window.location.origin);
+        let viewName = newURL.pathname;
+        let request;
 
-        // If the pathname is empty, set it to "/home"
-        if (newURL.pathname === "/") {
-            newURL.pathname = "/home";
+        if (viewName === "/") {
+            return JSON.stringify({
+                view: "home",
+            });
         }
-        // Add the "/api" prefix to the pathname
-        newURL.pathname = "api" + newURL.pathname;
 
-        return newURL;
+        return request = JSON.stringify({
+            view: viewName.slice(1),
+        });
     } catch (err) {
         console.error(err);
-        throw err;
+        return "home";
     }
 }
 
-// Function to fetch the HTML content of the page
-// It sends an XMLHttpRequest to the server
-async function fetchHTML(url, data = null) {
-    try {
-        // Build fetch destination
-        const destination = url.pathname + url.search;
+async function getContent(request) {
+    await socketReady;
 
-        // Add the X-Requested-With header to the request
-        const options = {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
+    return new Promise((resolve, reject) => {
+
+        socket.send(request);
+        socket.onmessage = function (event) {
+            const response = event.data;
+            resolve(response);
         };
-
-        // If there is data, add the POST method and the CSRF token to the request
-        if (data) {
-            options.method = 'POST';
-            options.headers['X-CSRFToken'] = getCookie('csrftoken');
-            options.body = data;
-        }
-
-        // Fetch the destination
-        const response = await fetch(destination, options);
-
-        return await response.text();
-    } catch (err) {
-        console.error(err);
-        throw err;
-    }
+        socket.onerror = function (error) {
+            reject(error);
+        };
+    });
 }
 
 // Function to load the CSS files
@@ -158,16 +151,18 @@ async function handleJS(mainElement) {
     for (let script of scripts) {
         // If the script has a src attribute, dynamically import the script
         if (script.src) {
-            await import(script.src + '?t=' + new Date().getTime());
+            // Add a unique query parameter to the script src
+            let scriptSrc = new URL(script.src);
+            scriptSrc.searchParams.set('timestamp', Date.now());
+            await import(scriptSrc.href);
         }
         else { // If the script doesn't have a src attribute, evaluate the script content
             new Function(script.textContent)();
         }
         // Remove the original script element in any case
-        //script.remove();
+        script.remove();
     }
 }
-// Function to load the JS files
 
 // Function to load the title
 function loadTitle(mainElement) {
