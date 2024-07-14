@@ -20,11 +20,12 @@ from django.urls import include, path, re_path
 from . import views
 
 urlpatterns = [
-    path("api/home", views.home_content, name="home_content"),
-    path("api/about", views.about_content, name="about_content"),
-    path("api/test", views.test_content, name="test_content"),
-    path("api/pong", include("pong3d.urls")),
-    path("api/cube", include("cube.urls")),
-    re_path(r"^api/.*$", views.home_content),
-    re_path(r"^.*$", views.index, name="index"),
+    path("home", views.home_content, name="home_content"),
+    path("about", views.about_content, name="about_content"),
+    path("test", views.test_content, name="test_content"),
+    path("pong3d", include("pong3d.urls"), name="pong3d"),
+    path("cube", include("cube.urls"), name="cube"),
+    path("database", include("database.urls"), name="database"),
+    #re_path(r"^api/.*$", views.home_content),
+    re_path(r"^.*$", views.index, name="default_view"),
 ]
