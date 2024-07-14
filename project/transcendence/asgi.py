@@ -4,6 +4,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 import pong.routing
 import cube.routing
+import singlepage.routing
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "transcendence.settings")
 
@@ -11,6 +12,7 @@ application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
         "websocket": AuthMiddlewareStack(URLRouter(cube.routing.websocket_urlpatterns)),
+        "websocket": AuthMiddlewareStack(URLRouter(singlepage.routing.websocket_urlpatterns)),
         # "websocketCube": AuthMiddlewareStack(URLRouter(cube.routing.websocket_urlpatterns)),
     }
 )
