@@ -11,6 +11,7 @@ class UserInfos(AbstractUser):
 	total_victories = models.IntegerField(default=0)
 	skin = models.CharField(max_length=7, default="#FFFFFF")
 	last_tournament_id = models.CharField(max_length=200, default="")
+	is_3d = models.BooleanField(default=False)
 
 	REQUIRED_FIELDS = ['email', 'password'] 
 

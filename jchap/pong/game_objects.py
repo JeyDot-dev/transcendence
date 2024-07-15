@@ -54,8 +54,6 @@ class Ball:
 		self.vel_x = -self.vel_x
 		self.add_speed(1)
 		return True
-
-
 	
 	def wall_collision(self, score):
 		if self.y <= 0:
@@ -100,7 +98,7 @@ class Game:
 	
 	def add_player(self, player: UserInfos, side: int):
 		if len(self.players) < self.nb_max_players:
-			player_skin = player.get_skin()
+			
 			self.players.append(player)
 			self.paddles.append(Paddle(0 if side == 0 else 1280 - 28, player.skin, player.id))
 		else:
@@ -123,55 +121,6 @@ class Game:
 			await self.ball.physics(self.paddles, self.score)
 			if self.score[0] >= 5 or self.score[1] >= 5:
 				self.running = False
-			
-
-class Tournament:
-	def __init__(self, id, nb_player_per_team=1, nb_players=4):
-		# verify:
-		if nb_players % nb_player_per_team != 0:
-			raise ValueError("nb_players must be a multiple of nb_player_per_team")
-		if nb_players < 2 or nb_player_per_team < 1:
-			raise ValueError("nb_players must be at least 2 and nb_player_per_team at least 1")
-		
-		self.id = id
-		self.nb_player_per_team = nb_player_per_team
-		self.nb_players = nb_players
-		self.finished = False
-		self.winner: list[str] = []
-		self.ready = False
-		
-		self.games: list[str] = []
-		self.players: list[str] = []
-
-		for i in range(0, nb_players / 2, nb_player_per_team):
-			new_id = "turnament_" + str(id) + "_game_" + str(i)
-			self.games.append(new_id)
-
-	def add_player(self, player):
-		self.players.append(player)
-		if len(self.players) == self.nb_players:
-			self.ready = True
-	
-	def randomize_teams(self):
-		if not self.ready:
-			raise ValueError("Not enough players")
-		random.shuffle(self.players)
-
-	def get_game_id(self, username):
-		for game in self.games:
-			for player in game.players:
-				if player.username == username:
-					return self.game.id
-		return None
-	
-	def start(self):
-		if not self.ready:
-			raise ValueError("Not enough players")
-		for i in range(0, self.nb_players / 2, self.nb_player_per_team):
-			for j in range(0, self.nb_player_per_team):
-				self.games[i].add_player(self.players[i + j])
-		for game in self.games:
-			asyncio.create_task(game.physics())
 						
 
 

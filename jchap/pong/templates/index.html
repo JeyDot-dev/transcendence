@@ -8,11 +8,12 @@
 
 	{% if user.is_authenticated %}
 		
-		{% comment %} {% include "pong.html"%} {% endcomment %}
+		{% include "pong.html"%}
 
 		{% include "uiButtons/menuButton.html" %}
 		{% include "uiButtons/accountButton.html" %}
 		{% include "uiButtons/chatButton.html" %}
+
 	{% else %}
 		<div>
 			<h2>Log in to play</h2>
@@ -29,9 +30,3 @@
 	{% endif %}
 {% endblock %}
 
-{% comment %} {% block footer %}
-	<footer>
-		<h3> ft_transcendance 42</h3>
-		<h3> proudly made in 2024 by Jchapell </h3>
-	</footer>
-{% endblock %} {% endcomment %}

@@ -25,25 +25,18 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 		if self.game == None:
 			self.game = Game(self.party, [self.user.to_dict()], Ball(640, 360, (255, 255, 255)))
+			self.game.add_player(self.user, 0)
 			games.append(self.game)
-			await self.send(text_data=json.dumps({
-				'type': 'init',
-				'message': {
-					'id': 0,
-					'nb_players': 1
-				}
-			}))
+
 			asyncio.create_task(self.game.physics())
 			asyncio.create_task(game_update(self))
 		else:
 			await new_player(self, self.user)
-			await self.send(text_data=json.dumps({
-				'type': 'init',
-				'message': {
-					'new_player': self.user.username,
-					'nb_players': len(self.game.players)
-				}
-			}))
+		
+		await self.send(text_data=json.dumps({
+			'type': 'init',
+			'game': await build_game_init(self.game)
+		}))
 
 	async def receive(self, text_data=None, bytes_data=None):
 		text_data_json = json.loads(text_data)
@@ -67,7 +60,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 		await self.send(text_data=json.dumps(event))
 		
 	async def disconnect(self, close_code):
-
 		for player in self.game.players:
 			if player.id == self.player.id:
 				self.game.players.remove(player)
@@ -91,7 +83,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 				{
 					'type': 'player_left',
 					'message': 'A player has left the game!',
-					'nb_players': len(self.game.players),
 					'who': self.user.id
 				}
 			)
@@ -109,7 +100,7 @@ async def handle_key(game, types, key, who=0):
 	game.players[who].keys[key] = 1 if types == "keydown" else 0
 	print(str(who) + " -> " + str(key) + ": " + str(1 if types == "keydown" else 0))
 
-async def build_response(game):
+async def build_game_state(game):
 	return {
 		'type': 'game_state',
 		'game': {
@@ -121,15 +112,24 @@ async def build_response(game):
 		}
 	}
 
+async def build_game_init(game):
+	return {
+		'id': game.id,
+		'paddles': [paddle.__dict__ for paddle in game.paddles],
+		'ball': game.ball.__dict__,
+		'score': game.score
+	}
+
 async def new_player(game, who):
-	game.game.players.append(who)
+	game.game.add_player(who, 0 if len(game.game.players) == 0 else 1)
+
 	await game.channel_layer.group_send (
 		game.party,
 		{
 			'type': 'new_player',
 			'message': 'A new player has joined the game!',
-			'nb_players': len(game.game.players),
-			'name': who.username
+			'name': who.username,
+			'new_paddle': game.paddles[-1].__dict__,
 		}
 	)
 
@@ -138,5 +138,5 @@ async def game_update(consumer):
 		await asyncio.sleep(60 / 1000)
 		await consumer.channel_layer.group_send (
 			consumer.party,
-			await build_response(consumer.game)
+			await build_game_state(consumer.game)
 		)

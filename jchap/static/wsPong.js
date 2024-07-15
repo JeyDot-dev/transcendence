@@ -1,3 +1,5 @@
+import { Game } from './GameObjects/game.js'
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -54,10 +56,46 @@ ws.onopen = function() {
 }
 
 let global_game
+let game_object;
+/* 
+
+typical game_init:
+Object { id: "pong_1234", paddles: [], ball: {…}, score: (2) […] }
+​
+ball: Object { x: 640, y: 360, speed: 10, … }
+​
+id: "pong_1234"
+​
+paddles: Array []
+​
+score: Array [ 0, 0 ]
+
+exemple, to get ball pos: game.ball.x
+*/
+
+/* 
+
+typical game_state:
+
+Object { id: "pong_1234", paddles: [], ball: {…}, score: (2) […], timer: 0 }
+​
+ball: Object { x: 640, y: 360, speed: 10, … }
+​
+id: "pong_1234"
+​
+paddles: Array []
+​
+score: Array [ 0, 0 ]
+​
+timer: 0
+
+*/
 
 ws.onmessage = function(e) {
 	let data = JSON.parse(e.data);
 	let game = data.game ? data.game : data;
+
+	console.log(game);
 
 	switch (data.type) {
 		case "game_state":
@@ -65,9 +103,10 @@ ws.onmessage = function(e) {
 			break;
 		case "init":
 			if (!local_user) return;
-			my_id = data.message.id;
+			my_id = game.id;
 			addPlayerList(local_user.username, (my_id % 2 == 0) ? 'l' : 'r');
-			updatePlayerCount(data.message.nb_players, data.message.nb_players);
+			game_object = new Game(game.width, game.height, game.ball);
+			//updatePlayerCount(data.message.nb_players, data.message.nb_players);
 			break;
 		case "new_player":
 			addPlayerList(data.name, (data.side >= 640) ? 'r' : 'l');
@@ -198,7 +237,7 @@ function render(game) {
 	drawScore(3 * canvas.width / 4, canvas.height / 6, game.score[1]);
 
 	// Draw the paddles 
-	drawPaddles(game.players);
+	drawPaddles(game.paddles);
 
 	// Finally, draw the ball
 	drawBall(game.ball);
