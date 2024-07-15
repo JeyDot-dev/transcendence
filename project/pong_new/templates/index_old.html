@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}
+	<h1>ft_transcendance</h1>
+{% endblock %}
+
+{% block content %}
+
+	{% if user.is_authenticated %}
+		
+		{% comment %} {% include "pong.html"%} {% endcomment %}
+
+		{% include "uiButtons/menuButton.html" %}
+		{% include "uiButtons/accountButton.html" %}
+		{% include "uiButtons/chatButton.html" %}
+	{% else %}
+		<div>
+			<h2>Log in to play</h2>
+			<button type="button" class="btn btn-primary m-4" data-bs-toggle="modal" data-bs-target="#loginModal">
+				Login
+			</button>
+			<br />
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signupModal">
+				Create account
+			</button>
+		</div>
+		{% include "accountCreation.html" %}
+		{% include "accountLogin.html" %}
+	{% endif %}
+{% endblock %}
+
+{% comment %} {% block footer %}
+	<footer>
+		<h3> ft_transcendance 42</h3>
+		<h3> proudly made in 2024 by Jchapell </h3>
+	</footer>
+{% endblock %} {% endcomment %}

@@ -1,6 +1,6 @@
 import * as THREE from './threejs/Three.js';
-import { RectAreaLightHelper } from './jsm/helpers/RectAreaLightHelper.js';
-import { RectAreaLightUniformsLib } from './jsm/lights/RectAreaLightUniformsLib.js';
+// import { RectAreaLightHelper } from './jsm/helpers/RectAreaLightHelper.js';
+// import { RectAreaLightUniformsLib } from './jsm/lights/RectAreaLightUniformsLib.js';
 import { TrackballControls } from './TrackballControls.js';
 import { FontLoader } from './FontLoader.js';
 import { Paddle } from './GameObjects/paddle.js';
@@ -10,7 +10,45 @@ import { Text3d } from './GameObjects/text3d.js';
 import { Explosion } from './GameObjects/explosion.js';
 
 console.log('Chargement du script pong3d.js');
-console.log('Script pong3d.js chargé');
+
+
+// WS: Fonctions pour les WebSockets
+let ws = new WebSocket(`ws://${window.location.host}/ws/pong/${game_id}/`);
+
+function updateWebsocketId() {
+	ws.close();
+	ws = new WebSocket(`ws://${window.location.host}/ws/pong/${game_id}/`);
+}
+
+ws.onopen = function() {
+	console.log("Pong socket open");
+}
+
+ws.onmessage = function(e) {
+	let data = JSON.parse(e.data);
+	let game = data.game ? data.game : data;
+
+	switch (data.type) {
+		case "game_state":
+			render(game); // pas de render avec threejs adapter pour animate
+			break;
+		case "init":
+			if (!local_user) return;
+			my_id = data.message.id;
+			addPlayerList(local_user.username, (my_id % 2 == 0) ? 'l' : 'r');
+			updatePlayerCount(data.message.nb_players, data.message.nb_players);
+			break;
+		case "new_player":
+			addPlayerList(data.name, (data.side >= 640) ? 'r' : 'l');
+			updatePlayerCount(data.nb_players, data.nb_players);
+			break;
+		case "player_left":
+			updatePlayerCount(data.nb_players, data.nb_players);
+			console.log("Player left: " + data.who);
+			break;
+	}
+}
+
 
 // Initialisation de la scène, de la caméra et du renderer avec antialiasing activé
 var scene = new THREE.Scene();
@@ -62,34 +100,6 @@ spotLight.distance = 200;
 spotLight.castShadow = true;
 scene.add(spotLight);
 scene.add(spotLight.target);
-
-// Hemisphere Light
-const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
-scene.add(hemisphereLight);
-
-// RectAreaLight (requires RectAreaLightUniformsLib)
-RectAreaLightUniformsLib.init();
-const rectLight = new THREE.RectAreaLight(0xffffff, 1, 10, 10);
-rectLight.position.set(5, 5, 5);
-rectLight.lookAt(0, 0, 0);
-scene.add(rectLight);
-
-// Adding helpers to visualize the lights
-const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
-scene.add(directionalLightHelper);
-
-const pointLightHelper = new THREE.PointLightHelper(pointLight, 1);
-scene.add(pointLightHelper);
-
-const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-scene.add(spotLightHelper);
-
-const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight, 5);
-scene.add(hemisphereLightHelper);
-
-const rectAreaLightHelper = new RectAreaLightHelper(rectLight);
-scene.add(rectAreaLightHelper);
-
 
 // Position initiale de la caméra
 camera.position.set(0, 0, 5);
