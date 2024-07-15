@@ -97,7 +97,7 @@ class Game:
 		self.winners = []
 	
 	def add_player(self, player: UserInfos, side: int):
-		if len(self.players) < self.nb_max_players:
+		if len(self.players) <= self.nb_max_players:
 			
 			self.players.append(player)
 			self.paddles.append(Paddle(0 if side == 0 else 1280 - 28, player.skin, player.id))

@@ -95,7 +95,7 @@ ws.onmessage = function(e) {
 	let data = JSON.parse(e.data);
 	let game = data.game ? data.game : data;
 
-	console.log(game);
+	console.log(data);
 
 	switch (data.type) {
 		case "game_state":
@@ -115,6 +115,9 @@ ws.onmessage = function(e) {
 		case "player_left":
 			updatePlayerCount(data.nb_players, data.nb_players);
 			console.log("Player left: " + data.who);
+			break;
+		case "error":
+			alert(data.message);
 			break;
 	}
 }
@@ -287,3 +290,13 @@ function joinRightTeam() {
 	if (ws.readyState === ws.OPEN)
 		ws.send(JSON.stringify(message_form));
 }
+
+var animate = function () {
+    requestAnimationFrame(animate);
+
+    Game.update(game);
+    controls.update(); // Met à jour les contrôles
+
+
+    renderer.render(scene, camera);
+};

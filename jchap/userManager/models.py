@@ -20,6 +20,7 @@ class UserInfos(AbstractUser):
 	
 	def to_dict(self):
 		return {
+			'id': self.id,
 			'username': self.username,
 			'profile_pic': self.profile_pic,
 			'status': self.status,
@@ -37,4 +38,7 @@ class UserInfos(AbstractUser):
 	def set_skin(self, skin: str):
 		self.skin = skin
 		self.save()
+	
+	def get_id(self):
+		return self.id
 	

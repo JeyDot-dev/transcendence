@@ -28,10 +28,20 @@ class PongConsumer(AsyncWebsocketConsumer):
 			self.game.add_player(self.user, 0)
 			games.append(self.game)
 
-			asyncio.create_task(self.game.physics())
-			asyncio.create_task(game_update(self))
+			#asyncio.create_task(self.game.physics())
+			#asyncio.create_task(game_update(self))
+			print("Game created")
 		else:
-			await new_player(self, self.user)
+			try: 
+				await new_player(self, self.user)
+			except Exception as e:
+				print(f'Error: {e}')
+				await self.send(text_data=json.dumps({
+					'type': 'error',
+					'message': 'Game is full'
+				}))
+				await self.close()
+				return
 		
 		await self.send(text_data=json.dumps({
 			'type': 'init',
@@ -45,6 +55,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 		if who == None: return
 
 		if text_data_json['type'] == "keydown" or text_data_json['type'] == "keyup":
+			print("Key event")
 			await handle_key(self.game, text_data_json['type'], text_data_json['key'], who)
 	
 	async def new_player(self, event):
@@ -61,10 +72,12 @@ class PongConsumer(AsyncWebsocketConsumer):
 		
 	async def disconnect(self, close_code):
 		for player in self.game.players:
-			if player.id == self.player.id:
+			if player is not UserInfos: continue
+			if player.id == self.user.id:
 				self.game.players.remove(player)
 				break
 		for paddles in self.game.paddles:
+			if paddles is not Paddle: continue
 			if paddles.player.id == self.player.id:
 				self.game.paddles.remove(paddles)
 				break
@@ -129,7 +142,7 @@ async def new_player(game, who):
 			'type': 'new_player',
 			'message': 'A new player has joined the game!',
 			'name': who.username,
-			'new_paddle': game.paddles[-1].__dict__,
+			'new_paddle': game.game.paddles[-1].__dict__,
 		}
 	)
 
