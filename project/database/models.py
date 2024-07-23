@@ -36,8 +36,9 @@ class Tournament(models.Model):
 
 
 class Game(models.Model):
-    player1 = models.ForeignKey(Player, related_name='games_as_player1', on_delete=models.CASCADE)
-    player2 = models.ForeignKey(Player, related_name='games_as_player2', on_delete=models.CASCADE)
+    #player1 = models.ForeignKey(Player, related_name='games_as_player1', on_delete=models.CASCADE)
+    #player2 = models.ForeignKey(Player, related_name='games_as_player2', on_delete=models.CASCADE)
+    players = models.ManyToManyField(Player)
     points1 = models.IntegerField(default=0)
     points2 = models.IntegerField(default=0)
     tournament = models.ForeignKey(Tournament, related_name='games', on_delete=models.CASCADE, blank=True, null=True)

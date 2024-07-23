@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.template import loader
+from serializer.py import GameSerializer
 
 
 
@@ -50,7 +51,12 @@ def tournamentWinner(request, t_id):
 
 
 def newGame(request):
-    form = newGameForm(request.POST)
+    serializer = GameSerializer(data=request.POST)
+    if serializer.is_valid():
+        game = serializer.save()
+        return redirect("play", game_id = game.id)
+    return render(request, 'database/newgame.html', {'form': form})
+"""     form = newGameForm(request.POST)
     if form.is_valid():
         player1_name = form.cleaned_data['player1_name']
         player2_name = form.cleaned_data['player2_name']
@@ -62,7 +68,8 @@ def newGame(request):
         player2.save()
         game = Game.objects.create(player1=player1, player2=player2)
         return redirect("play", game_id = game.id)
-    return render(request, 'database/newgame.html', {'form': form})
+    return render(request, 'database/newgame.html', {'form': form}) """
+     
 
 
 def newTournament(request):

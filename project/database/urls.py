@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from . import views
 
 urlpatterns = [
@@ -12,4 +12,6 @@ urlpatterns = [
     path('addPlayers/<int:t_id>/', views.addPlayers, name = 'addPlayers'),
     path('startTournament/<int:t_id>/', views.startTournament, name = 'startTournament'),
     path('tournamentWinner/<int:t_id>/', views.tournamentWinner, name = 'tournamentWinner'),
+
+    path('api-auth/', include('rest_framework.urls'))
 ]
