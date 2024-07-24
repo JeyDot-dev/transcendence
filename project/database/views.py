@@ -4,10 +4,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.template import loader
-from serializer.py import GameSerializer
 
 
-
+from .serializer import GameSerializer
 from .models import Game, Player, Tournament
 from .forms import newGameForm, addPlayer, newTournamentForm
 # Create your views here.
@@ -55,7 +54,7 @@ def newGame(request):
     if serializer.is_valid():
         game = serializer.save()
         return redirect("play", game_id = game.id)
-    return render(request, 'database/newgame.html', {'form': form})
+    return render(request, 'database/newgame.html')
 """     form = newGameForm(request.POST)
     if form.is_valid():
         player1_name = form.cleaned_data['player1_name']
@@ -69,8 +68,7 @@ def newGame(request):
         game = Game.objects.create(player1=player1, player2=player2)
         return redirect("play", game_id = game.id)
     return render(request, 'database/newgame.html', {'form': form}) """
-     
-
+    
 
 def newTournament(request):
     form = newTournamentForm(request.POST)

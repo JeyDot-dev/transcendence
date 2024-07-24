@@ -1,6 +1,6 @@
 <h1>Start a New Game</h1>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Start Game</button>
+    {% render_form serializer %}
+    <input type="submit" value="Save">
 </form>

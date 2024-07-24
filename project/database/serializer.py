@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Group, User
 from rest_framework import serializers
-from models.py import Game, Player
+
+from .models import Game, Player
 
 class PlayerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,12 +22,3 @@ class GameSerializer(serializers.ModelSerializer):
             player, created = Player.objects.get_or_create(name=player_data['name'])
             game.players.add(player)
         return game
-
-
-
-
-class addPlayer(forms.Form):
-    player_name = forms.CharField(label='Player Name', max_length=100)
-
-class newTournamentForm(forms.Form):
-    tournament_title = forms.CharField(label='Tournament Title', max_length=100)
