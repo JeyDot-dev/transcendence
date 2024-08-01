@@ -1,6 +1,18 @@
-<h1>Start a New Game</h1>
-<form method="post">
-    {% csrf_token %}
-    {% render_form serializer %}
-    <input type="submit" value="Save">
-</form>
+<div class="container">
+    <h1>Start a New Game</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div id="player-formset">
+            {{ formset.management_form }}
+            {% for form in formset %}
+                <div class="form-group">
+                    {{ form.as_p }}
+                </div>
+            {% endfor %}
+        </div>
+        {% load static %}
+        <script type="module" src="{% static 'js/addPlayerForm.js' %}"></script>
+        <button type="button" class="btn btn-secondary" onclick="addPlayerForm()">Add Player</button>
+        <input type="submit" class="btn btn-primary" value="Save">
+    </form>
+</div>
