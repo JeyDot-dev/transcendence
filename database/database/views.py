@@ -53,19 +53,6 @@ def newGame(request):
         game = serializer.save()
         return redirect("play", game_id = game.id)
     return render(request, 'database/newgame.html')"""
-    """form = newGameForm(request.POST)
-    if form.is_valid():
-        player1_name = form.cleaned_data['player1_name']
-        player2_name = form.cleaned_data['player2_name']
-        player1, new1= Player.objects.get_or_create(name=player1_name)
-        player2, new1 = Player.objects.get_or_create(name=player2_name)
-        player1.is_winner = False
-        player2.is_winner = False 
-        player1.save()
-        player2.save()
-        game = Game.objects.create(player1=player1, player2=player2)
-        return redirect("play", game_id = game.id)
-    return render(request, 'database/newgame.html', {'form': form})"""
     if request.method == 'POST':
         formset = PlayerFormSet(request.POST, queryset=Player.objects.none())
         if formset.is_valid():
@@ -80,12 +67,21 @@ def newGame(request):
     return render(request, 'database/newgame.html', {'formset': formset})
     
 def newTournament(request):
-    form = newTournamentForm(request.POST)
-    if form.is_valid():
-        tournament = Tournament(name=form.cleaned_data['tournament_title'])
-        tournament.save()
-        return redirect("addPlayers", t_id=tournament.id)
-    return render(request, 'database/newtournament.html', {'form': form})
+    if request.method == 'POST':
+        form = newTournamentForm(request.POST)
+        if form.is_valid():
+            tournament = Tournament(name=form.cleaned_data['tournament_title'])
+            formset = PlayerFormSet(request.POST, queryset=Player.objects.none())
+            if formset.is_valid():
+                for form in formset:
+                    player = form.save()
+                    tournament.players.add(player)
+                return redirect("play", game_id=game.id)
+    else:
+        formset = PlayerFormSet(queryset=Player.objects.none())
+        form = newTournamentForm()
+    
+    return render(request, 'database/newtournament.html', {'form': form, 'formset': formset})
 
 def addPlayers(request, t_id):
     form = addPlayer(request.POST)
