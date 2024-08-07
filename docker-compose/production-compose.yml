@@ -71,6 +71,37 @@ services:
       interval: 1s
       timeout: 5s
       retries: 120
+
+  logstash:
+    container_name: logstash
+    image: logstash:8.14.3
+    restart: always
+    user: root
+    depends_on:
+      es01:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    volumes:
+      - certs_data:/usr/share/logstash/certs
+      - logstash_data:/usr/share/logstash/data
+      # - "./logstash_ingest_data/:/usr/share/logstash/ingest_data/"
+      - "../containers/logstash/:/usr/share/logstash/pipeline:ro"
+    environment:
+      - xpack.monitoring.enabled=false
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://es01:9200
+    ports:
+      - 12201:12201/udp
+    networks:
+      - elk
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:9600/_node/pipelines | grep -q '\"id\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   nginx:
     container_name: nginx
     restart:        always
@@ -84,6 +115,8 @@ services:
       timeout:      10s
       retries:      3
     depends_on:
+      logstash:
+        condition: service_healthy
       gunicorn:
         condition: service_started
       daphne:
@@ -101,40 +134,59 @@ services:
         - backend
         - frontend
         - elk
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://localhost:12201
     
   redis:
     container_name: redis
     image:          redis:7.2.5
     restart:        always
+    depends_on:
+      logstash:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 1m30s
       timeout: 10s
       retries: 3
     networks:
+        - elk
         - backend
     command: ["redis-server", "--loglevel", "debug"]
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://localhost:12201
 
   db:
     container_name: postgres
     image:          postgres:16.3-bookworm
     restart:        always
+    depends_on:
+      logstash:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U${DB_USER} -d${DB_NAME}"]
       start_period: 5s
       interval: 10s
       timeout: 5s
       retries: 5
-
     volumes:
         - postgres_data:/var/lib/postgresql/data
 
     environment: #To change to secrets
-                    POSTGRES_DB: ${DB_NAME}
-                    POSTGRES_USER: ${DB_USER} 
-                    POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER} 
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     networks:
+        - elk
         - backend
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://localhost:12201
 
   daphne:
     container_name: daphne
@@ -143,6 +195,8 @@ services:
       context:        ../containers 
     restart:        always
     depends_on:
+      logstash:
+        condition: service_healthy
       db:
         condition: service_healthy
       redis:
@@ -150,6 +204,7 @@ services:
     volumes:
       - ../project:/project
     networks:
+        - elk
         - backend
         - frontend
     environment:
@@ -161,17 +216,24 @@ services:
       SUPER_USER:   ${SUPER_USER}
       SUPER_PASSWORD:   ${SUPER_PASSWORD}
       SUPER_MAIL:   ${SUPER_MAIL}
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://localhost:12201
 
   gunicorn:
     container_name: gunicorn
     build:          ../containers/gunicorn
     restart:        always
     depends_on:
+      logstash:
+        condition: service_healthy
       db:
         condition: service_healthy
     volumes:
       - ../project:/project
     networks:
+        - elk
         - backend
         - frontend
     environment:
@@ -180,6 +242,10 @@ services:
       DB_PASSWORD:  ${DB_PASSWORD}
       DB_HOST:      db
       DB_PORT:      ${DB_PORT}
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://localhost:12201
 
   es01:
     container_name: es01

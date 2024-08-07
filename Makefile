@@ -32,7 +32,6 @@ prod-clean:
 prod-fclean: prod-clean
 	-docker rmi --force $$(docker images -q "transcendence*")
 	-docker volume rm $$(docker volume ls -q | grep transcendence) --force
-
 prod-re: prod-clean cp-prod
 	docker compose -f docker-compose/production-compose.yml up --build
 prod-fre: prod-fclean cp-prod
