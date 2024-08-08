@@ -56,7 +56,7 @@ ws.onopen = function() {
 }
 
 let global_game
-let game_object;
+let game_object
 /* 
 
 typical game_init:
@@ -102,6 +102,7 @@ ws.onmessage = function(e) {
 			render(game);
 			break;
 		case "init":
+            console.log("init");
 			if (!local_user) return;
 			my_id = game.id;
 			addPlayerList(local_user.username, (my_id % 2 == 0) ? 'l' : 'r');
@@ -287,3 +288,16 @@ function joinRightTeam() {
 	if (ws.readyState === ws.OPEN)
 		ws.send(JSON.stringify(message_form));
 }
+
+// Fonction d'animation
+// var animate = function () {
+//     requestAnimationFrame(animate);
+//     game_object.updateGame(game);
+//     controls.update(); // Met à jour les contrôles
+//     game_object.renderer.render(scene, camera);
+// };
+
+// // Remplacer par user 3d  == true
+// if (true) {
+//     animate();
+// }

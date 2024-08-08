@@ -85,7 +85,7 @@ class Ball:
 		self.y += self.speed * self.vel_y
 
 class Game:
-	def __init__(self, id, players, ball, nb_max_players=2):
+	def __init__(self, id, players, ball, nb_max_players=100):
 		self.id = id
 		self.players:list[UserInfos] = players 
 		self.paddles:list[Paddle] = []

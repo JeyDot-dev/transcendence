@@ -1,4 +1,6 @@
-import * as THREE from "./threejs/Three.js";
+// import * as THREE from "./threejs/Three.js";
+// import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
+import { THREE } from '../three.module.js';
 
 export class Cube {
     constructor(color, document) {

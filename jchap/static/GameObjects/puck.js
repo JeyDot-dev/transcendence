@@ -1,4 +1,6 @@
-import * as THREE from "../threejs/Three.js";
+// import * as THREE from "../threejs/Three.js";
+// import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
+import { THREE } from '../three.module.js';
 
 export class Puck {
     // constructor(puckSize = 1, height = 1, color = 0x0000ff, puckSpeed = 1, initialPosition = new THREE.Vector3(0, 0, 0)) {

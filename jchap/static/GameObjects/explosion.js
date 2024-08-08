@@ -1,4 +1,7 @@
-import * as THREE from "../threejs/Three.js";
+// import * as THREE from "../threejs/Three.js";
+// import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
+import { THREE } from '../three.module.js';
+
 
 export class Explosion {
     constructor(scene, particleCount = 100, particleSize = 0.1, duration = 2) {

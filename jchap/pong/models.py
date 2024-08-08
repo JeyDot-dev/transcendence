@@ -45,16 +45,16 @@ class GameDB(models.Model):
 		self.started = True
 		self.save()
 	
-	def end_game(self, winners: list[str]):
+	def end_game(self, winners):
 		self.finished = True
 		self.winners = winners
 		self.save()
 	
-	def set_ball_color(self, color: str):
+	def set_ball_color(self, color):
 		self.ball_color = color
 		self.save()
 	
-	def set_score(self, left_score: int, right_score: int):
+	def set_score(self, left_score, right_score):
 		self.left_score = left_score
 		self.right_score = right_score
 		self.save()
@@ -90,13 +90,13 @@ class TournamentDB(models.Model):
 			'players_username': self.players_username
 		}
 	
-	def set_players_username(self, players: list[str]):
+	def set_players_username(self, players):
 		self.players_username = players
 		if len(players) == self.nb_players:
 			self.ready = True
 		self.save()
 
-	def end(self, winner: list[str]):
+	def end(self, winner):
 		self.finished = True
 		self.winner = winner
 		self.save()

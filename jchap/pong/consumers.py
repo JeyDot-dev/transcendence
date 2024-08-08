@@ -28,8 +28,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 			self.game.add_player(self.user, 0)
 			games.append(self.game)
 
-			asyncio.create_task(self.game.physics())
-			asyncio.create_task(game_update(self))
+			# asyncio.create_task(self.game.physics())
+			# asyncio.create_task(game_update(self))
 		else:
 			await new_player(self, self.user)
 		
@@ -129,7 +129,7 @@ async def new_player(game, who):
 			'type': 'new_player',
 			'message': 'A new player has joined the game!',
 			'name': who.username,
-			'new_paddle': game.paddles[-1].__dict__,
+			'new_paddle': game.game.paddles[-1].__dict__,
 		}
 	)
 

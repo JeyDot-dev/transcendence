@@ -1,4 +1,6 @@
-import * as THREE from "../threejs/Three.js";
+// import * as THREE from "../threejs/Three.js";
+// import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
+import { THREE } from '../three.module.js';
 
 export class Paddle {
     // constructor(scene, width = 0.5, height = 0.1, depth = 0.2, color = 0xffffff, speed = 0.1, position = new THREE.Vector3(0, 0, 0), orientation = new THREE.Vector3(0, 0, 0)) {
@@ -7,8 +9,9 @@ export class Paddle {
         this.geometry = new THREE.BoxGeometry(1, 1, 1);
         this.material = new THREE.MeshStandardMaterial({ color: color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.mesh.scale.set(width, height, depth);
+        this.mesh.scale.set(width, 5, depth);
         this.user_id = id;
+        this.mesh.position.set(x, y, 0);
         // Positionner et orienter le paddle
         // this.mesh.position.copy(this.position);
         // this.setOrientation(this.orientation);
@@ -59,6 +62,9 @@ export class Paddle {
     }
     move(x, y) {
         this.mesh.position.set(x, y, 0);
+    }
+    addToScene(scene) {
+        scene.add(this.mesh);
     }
     // move(direction) {
     //     // Calculer le mouvement dans le système de coordonnées local

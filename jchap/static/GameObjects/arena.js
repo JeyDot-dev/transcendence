@@ -1,4 +1,6 @@
-import * as THREE from "../threejs/Three.js";
+// import * as THREE from "../threejs/Three.js";
+// import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
+import { THREE } from '../three.module.js';
 
 export class Arena {
     constructor(width, height, depth, color, wallColor, wallThickness, borderRadius, innerWallColor) {
@@ -17,7 +19,7 @@ export class Arena {
 
         this.group.add(this.arena);
         this.group.add(this.walls);
-		// this.group.translateX(10);
+		this.group.translateZ(height);
     }
 
     createArena() {
