@@ -13,13 +13,13 @@ export class Arena {
         this.borderRadius = borderRadius;
         this.innerWallColor = innerWallColor;
 
-        this.group = new THREE.Group(); // Créer un groupe pour l'arène
+        this.group = new THREE.Group();
         this.arena = this.createArena();
         this.walls = this.createWalls();
 
         this.group.add(this.arena);
         this.group.add(this.walls);
-		this.group.translateZ(height);
+		this.group.translateZ(0);
     }
 
     createArena() {

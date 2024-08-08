@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 
     // Initialisation du renderer
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     const mainElement = document.querySelector('body');
@@ -29,11 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
     controls.staticMoving = true;
     controls.dynamicDampingFactor = 0.3;
 
-    // GridHelper
-    // const size = 10; // Taille de la grille
-    // const divisions = 100; // Nombre de divisions
-    // const gridHelper = new THREE.GridHelper(size, divisions);
-    // scene.add(gridHelper);
+
 
     // Position initiale de la caméra
     camera.position.set(0, 0, 1000);
@@ -89,6 +85,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     */
 
+    // const geometry = new THREE.BoxGeometry(5, 5, 5);
+    // const material = new THREE.MeshBasicMaterial({ color: 0xff1493 });
+    // const cube = new THREE.Mesh(geometry, material);
+    // scene.add(cube);
+
     ws.onmessage = function(e) {
         let data = JSON.parse(e.data);
         let game = data.game ? data.game : data;
@@ -102,10 +103,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case "init":
                 console.log("init");
+                camera.position.set(game.ball.x, game.ball.y, 1000);
+                controls.target.set(game.ball.x, game.ball.y, 0);
+                controls.update();
+                game_object = new Game(scene, game.width, game.height, game.paddles, game.ball, camera);
                 if (!local_user) return;
                 my_id = game.id;
                 addPlayerList(local_user.username, (my_id % 2 == 0) ? 'l' : 'r');
-                game_object = new Game(scene, game.width, game.height, game.paddles, game.ball);
                 //updatePlayerCount(data.message.nb_players, data.message.nb_players);
                 break;
             case "new_player":
@@ -181,6 +185,10 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(animate);
         
         controls.update();
+        // game_object.updateGame(game, camera);
+        if (game_object) {
+            game_object.updateAnimation(camera);
+        }
         // Rendu de la scène
         renderer.render(scene, camera);
     }

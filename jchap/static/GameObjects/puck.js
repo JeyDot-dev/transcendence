@@ -4,7 +4,7 @@ import { THREE } from '../three.module.js';
 
 export class Puck {
     // constructor(puckSize = 1, height = 1, color = 0x0000ff, puckSpeed = 1, initialPosition = new THREE.Vector3(0, 0, 0)) {
-    constructor(size = 10, height = 2.5, color = 0x0000ff, position) {
+    constructor(size = 10, height = 2.5, color = 0x0000ff, x, y) {
         const radialSegments = 32; // Segments radiaux pour une surface lisse
         // this.puckSpeed = puckSpeed;
         // this.puckSize = puckSize;
@@ -17,13 +17,13 @@ export class Puck {
         this.mesh = new THREE.Mesh(this.geometry, this.material);
 
         this.mesh.rotation.x = Math.PI / 2;
-        this.mesh.position.set(position.x, position.y, 0);
+        this.mesh.position.set(x, y, height / 2);
     }
     addToScene(scene) {
         scene.add(this.mesh);
     }
-    move(position) {
-        this.mesh.position.set(position.x, position.y, 0);
+    move(x, y) {
+        this.mesh.position.set(x, y, height / 2);
     }
     // move() {
     //     // Déplacer la balle en fonction de sa vitesse

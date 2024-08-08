@@ -3,52 +3,15 @@
 import { THREE } from '../three.module.js';
 
 export class Paddle {
-    // constructor(scene, width = 0.5, height = 0.1, depth = 0.2, color = 0xffffff, speed = 0.1, position = new THREE.Vector3(0, 0, 0), orientation = new THREE.Vector3(0, 0, 0)) {
-    constructor(width, depth, color, x, y, id) {
+    constructor(width, color, x, y, id) {
         // Création de la géométrie et du matériau du paddle
         this.geometry = new THREE.BoxGeometry(1, 1, 1);
         this.material = new THREE.MeshStandardMaterial({ color: color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.mesh.scale.set(width, 5, depth);
+        this.mesh.scale.set(5, width, 15);
         this.user_id = id;
-        this.mesh.position.set(x, y, 0);
-        // Positionner et orienter le paddle
-        // this.mesh.position.copy(this.position);
-        // this.setOrientation(this.orientation);
-
-        // // Ajouter un AxesHelper propre au paddle
-        // const axesHelper = new THREE.AxesHelper(0.5); // Taille des axes
-        // this.mesh.add(axesHelper);
-
-        // // Créer la boîte englobante pour la détection de collision
-        // this.boundingBox = new THREE.Box3().setFromObject(this.mesh);
-
-        // // Ajouter un BoxHelper pour visualiser la boîte englobante
-        // this.boxHelper = new THREE.BoxHelper(this.mesh, 0xffff00);
-        // scene.add(this.boxHelper); // Ajouter le BoxHelper à la scène
+        this.mesh.position.set(x, y, 7.5);
     }
-
-    // Orienter le paddle en convertissant le vecteur par un quaternion
-    // setOrientation(vector) {
-    //     const quaternion = new THREE.Quaternion();
-    //     const up = new THREE.Vector3(0, 0, 1);
-    //     quaternion.setFromUnitVectors(up, vector.normalize());
-    //     this.mesh.quaternion.copy(quaternion);
-    // }
-
-    // setPosition(x, y, z) {
-    //     this.mesh.position.set(x, y, z);
-    //     this.updateBoundingBox();
-    // }
-
-    // getMesh() {
-    //     return this.mesh;
-    // }
-
-    // updateBoundingBox() {
-    //     this.boundingBox.setFromObject(this.mesh);
-    //     this.boxHelper.update(); // Mettre à jour le BoxHelper
-    // }
 
     logMeshData() {
         console.log('Mesh Data:');
@@ -61,7 +24,7 @@ export class Paddle {
         console.log('Max:', this.boxHelper.max);
     }
     move(x, y) {
-        this.mesh.position.set(x, y, 0);
+        this.mesh.position.set(x, y, 7.5);
     }
     addToScene(scene) {
         scene.add(this.mesh);
