@@ -6,9 +6,14 @@ import { Arena } from './arena.js';
 import { Puck } from './puck.js';
 import { FontLoader } from '../FontLoader.js';
 import { Text3d } from './text3d.js';
+import { EffectComposer } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/RenderPass.js';
+import { OutlinePass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/OutlinePass.js';
+import { ShaderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/ShaderPass.js';
+import { FXAAShader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/shaders/FXAAShader.js';
 
 export class Game {
-    constructor(scene, arena_width, arnena_height, paddles_param, ball_param, camera) {
+    constructor(scene, arena_width, arnena_height, paddles_param, ball_param, camera, renderer) {
         this.scene = scene;
         this.timeText = null;
         this.p1Text = null;
@@ -24,7 +29,8 @@ export class Game {
         // SCORE / TIME:
         const fontLoader = new FontLoader();
         fontLoader.load(
-            'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
+            // '../assets/LEMONMILK.json',
+            'https://threejs.org/examples/fonts/helvetiker_bold.typeface.json',
             (font) => {
                 // fonction flechée pour garder le contexte: this.(...)
                 const geometry = new THREE.BoxGeometry(50, 50, 50);
@@ -49,9 +55,9 @@ export class Game {
         );
 
 
-        // LIGHT: 
-        this.ambientLight = new THREE.AmbientLight(0x404040, 0.5); // Soft white light
-        this.scene.add(this.ambientLight);
+        // // LIGHT: 
+        // this.ambientLight = new THREE.AmbientLight(0x404040, 0.5); // Soft white light
+        // this.scene.add(this.ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(500, -500, 1000);
@@ -62,10 +68,33 @@ export class Game {
         scene.add(directionalLightHelper);
 
         // ARENA:
-        this.arena = new Arena(1280, 25, 720, 0x20b2aa, 0xfaa501, 25, 25, 0xff1493); // Dimensions, couleur de l'arène et couleur des bords
+        this.arena = new Arena(1280, 25, 720, 0x1c9e97, 0x5a407b, 25, 25, 0xde95d0); // Dimensions, couleur de l'arène et couleur des bords
         this.arena.addToScene(this.scene);
         this.arena.group.translateX(ball_param.x);
         this.arena.group.translateY(ball_param.y);
+        this.composer = new EffectComposer(renderer);
+        this.composer.addPass(new RenderPass(scene, camera));
+        
+        const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+        this.composer.addPass(outlinePass);
+        
+        const fxaaPass = new ShaderPass(FXAAShader);
+        fxaaPass.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
+        this.composer.addPass(fxaaPass);
+        
+        // Ajouter les murs de l'arène à l'outlinePass
+        outlinePass.selectedObjects = this.arena.getWalls();
+        console.log("Selected objects for outline:", outlinePass.selectedObjects);
+        
+        // Personnaliser l'apparence de l'outline
+        outlinePass.edgeStrength = 3.0;
+        outlinePass.edgeGlow = 3.0;
+        outlinePass.edgeThickness = 3.0;
+        outlinePass.pulsePeriod = 2;
+        outlinePass.visibleEdgeColor.set('#f161bf');
+        outlinePass.hiddenEdgeColor.set('#190a05');
+
+
         // this.arena = new Arena(1280, 5, 720, 0x20b2aa, 0xfaa501, 0.5, 5, 0xff1493); // Dimensions, couleur de l'arène et couleur des bords
         // this.arena.addToScene(this.scene);
 
@@ -105,5 +134,6 @@ export class Game {
                 camera.position,
                 this.p2Text.glowTextMesh.position);
         }
+        this.composer.render();
     }
 }

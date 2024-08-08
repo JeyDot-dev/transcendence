@@ -2,6 +2,11 @@
 import { THREE } from './three.module.js';
 import { TrackballControls } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/TrackballControls.js';
 import { Game } from './GameObjects/game.js'
+import { EffectComposer } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/RenderPass.js';
+import { OutlinePass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/OutlinePass.js';
+import { ShaderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/ShaderPass.js';
+import { FXAAShader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/shaders/FXAAShader.js';
 
 console.log("Pong3d.js loading");
 document.addEventListener('DOMContentLoaded', function() {
@@ -18,6 +23,13 @@ document.addEventListener('DOMContentLoaded', function() {
     renderer.shadowMap.enabled = true;
     const mainElement = document.querySelector('body');
     mainElement.appendChild(renderer.domElement);
+    // Testing Light
+    // const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+    // scene.add(ambientLight);
+    
+    const pointLight = new THREE.PointLight(0xffffff, 0.2);
+    pointLight.position.set(1280 / 2, 720 / 2, 50);
+    scene.add(pointLight);
 
     // TRACK: Ajouter des contrôles Trackball
     const controls = new TrackballControls(camera, renderer.domElement);
@@ -106,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 camera.position.set(game.ball.x, game.ball.y, 1000);
                 controls.target.set(game.ball.x, game.ball.y, 0);
                 controls.update();
-                game_object = new Game(scene, game.width, game.height, game.paddles, game.ball, camera);
+                game_object = new Game(scene, game.width, game.height, game.paddles, game.ball, camera,renderer);
                 if (!local_user) return;
                 my_id = game.id;
                 addPlayerList(local_user.username, (my_id % 2 == 0) ? 'l' : 'r');
@@ -190,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
             game_object.updateAnimation(camera);
         }
         // Rendu de la scène
-        renderer.render(scene, camera);
+        // renderer.render(scene, camera);
     }
     //LIST OF PLAYERS
 
