@@ -14,7 +14,7 @@ export class Menu {
         this.renderer = renderer;
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
-
+        // this.controls = controls;
         this.fontLoader = new FontLoader();
         this.composer = null;
         this.outlinePass = null;
@@ -36,7 +36,7 @@ export class Menu {
         const size = 2000; // Taille de la grille
         const divisions = 200; // Nombre de divisions
         const gridHelper = new THREE.GridHelper(size, divisions);
-        gridHelper.position.set(0, 0, -200);
+        gridHelper.position.set(0, 0, 0);
         gridHelper.rotation.x = Math.PI / 2;
         scene.add(gridHelper);
 
@@ -95,9 +95,20 @@ export class Menu {
     onMouseMove(event) {
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        // console.log(this.mouse);
 
+        // CAMERA
+        const maxRotationX = Math.PI / 12;
+        const maxRotationY = Math.PI / 12;
+        const targetRotationX = this.mouse.x * maxRotationX;
+        const targetRotationY = this.mouse.y * maxRotationY;
+        
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        this.camera.rotateY(-targetRotationX); // Appliquer la rotation autour de l'axe Y
+        this.camera.rotateX(targetRotationY); 
+    
+        // RAYCASTER
         this.raycaster.setFromCamera(this.mouse, this.camera);
-
         let intersects = [];
         this.menuItems.forEach(item => {
             item.updateBoundingBox(); // Assurez-vous que la bounding box est mise à jour

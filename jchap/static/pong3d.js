@@ -33,21 +33,22 @@ document.addEventListener('DOMContentLoaded', function() {
     scene.add(pointLight);
 
     // TRACK: Ajouter des contrôles Trackball
-    const controls = new TrackballControls(camera, renderer.domElement);
-    controls.rotateSpeed = 5.0;
-    controls.zoomSpeed = 1.2;
-    controls.panSpeed = 0.8;
-    controls.noZoom = false;
-    controls.noPan = false;
-    controls.staticMoving = true;
-    controls.dynamicDampingFactor = 0.3;
+    // const controls = new TrackballControls(camera, renderer.domElement);
+    // controls.rotateSpeed = 5.0;
+    // controls.zoomSpeed = 1.2;
+    // controls.panSpeed = 0.8;
+    // controls.noZoom = false;
+    // controls.noPan = false;
+    // controls.staticMoving = true;
+    // controls.dynamicDampingFactor = 0.3;
 
 
 
     // Position initiale de la caméra
-    camera.position.set(0, 0, 1000);
-    controls.target.set(0, 0, 0);
-    controls.update();
+    camera.position.set(0, -750, 0);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    // controls.target.set(0, 0, 0);
+    // controls.update();
 
     let ws = new WebSocket(`ws://${window.location.host}/ws/pong/${game_id}/`);
 
@@ -117,9 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case "init":
                 console.log("init");
-                camera.position.set(game.ball.x, game.ball.y, 1000);
-                controls.target.set(game.ball.x, game.ball.y, 0);
-                controls.update();
+                // camera.position.set(game.ball.x, game.ball.y, 1000);
+                // controls.target.set(game.ball.x, game.ball.y, 0);
+                // controls.update();
                 menu_object = new Menu(scene, camera, renderer);
                 // game_object = new Game(scene, game.width, game.height, game.paddles, game.ball, camera,renderer);
                 if (!local_user) return;
@@ -199,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function animate() {
         requestAnimationFrame(animate);
         
-        controls.update();
+        // controls.update();
         // game_object.updateGame(game, camera);
         if (game_object) {
             console.log("Animate Game");
