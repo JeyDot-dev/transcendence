@@ -7,6 +7,7 @@ import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/p
 import { OutlinePass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/OutlinePass.js';
 import { ShaderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/ShaderPass.js';
 import { FXAAShader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/shaders/FXAAShader.js';
+import { Menu } from './GameObjects/menu.js'
 
 console.log("Pong3d.js loading");
 document.addEventListener('DOMContentLoaded', function() {
@@ -60,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     let game_object;
+    let menu_object;
 
     let my_id = -1;
 
@@ -118,7 +120,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 camera.position.set(game.ball.x, game.ball.y, 1000);
                 controls.target.set(game.ball.x, game.ball.y, 0);
                 controls.update();
-                game_object = new Game(scene, game.width, game.height, game.paddles, game.ball, camera,renderer);
+                menu_object = new Menu(scene, camera, renderer);
+                // game_object = new Game(scene, game.width, game.height, game.paddles, game.ball, camera,renderer);
                 if (!local_user) return;
                 my_id = game.id;
                 addPlayerList(local_user.username, (my_id % 2 == 0) ? 'l' : 'r');
@@ -199,7 +202,12 @@ document.addEventListener('DOMContentLoaded', function() {
         controls.update();
         // game_object.updateGame(game, camera);
         if (game_object) {
+            console.log("Animate Game");
             game_object.updateAnimation(camera);
+        }
+        if (menu_object) {
+            console.log("Animate Menu");
+            menu_object.render(camera);
         }
         // Rendu de la scène
         // renderer.render(scene, camera);
