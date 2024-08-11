@@ -32,7 +32,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			#asyncio.create_task(game_update(self))
 			print("Game created")
 		else:
-			try: 
+			try:
 				await new_player(self, self.user)
 			except Exception as e:
 				print(f'Error: {e}')

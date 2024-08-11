@@ -33,6 +33,8 @@ ALLOWED_HOSTS = ["transcendence.jjorge.ch", "195.15.214.88", "localhost"]
 
 INSTALLED_APPS = [
     "daphne",
+    "channels",
+
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -40,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "database.apps.DatabaseConfig",
-    "channels",
+	
     "pong",
 	"chat"
 ]
