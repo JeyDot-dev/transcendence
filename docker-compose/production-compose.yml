@@ -1,77 +1,26 @@
 name:     transcendence
 
 services:
-  
-  # elastic-search:
-  #   container_name:   "elasticsearch"
-  #   image:            elasticsearch:8.14.1
-  #   environment:
-  #     - discovery.type=single-node
-  #   volumes:
-  #     - elastic_data:/usr/share/elasticsearch/data
-  #   ports:
-  #     - 9200:9200
-  #   networks:
-  #     - elastic_network
-  #   restart:        always
+  #********************************************************************************
   es_setup:
     container_name: es_setup
     image: elasticsearch:8.14.3
     volumes:
       - certs_data:/usr/share/elasticsearch/config/certs
+      - ${PWD}/containers/scripts/setup_elk.sh:/setup_elk.sh
     networks:
       - elk
     user: "0"
-    command: >
-      bash -c '
-        if [ x${ELASTIC_PASSWORD} == x ]; then
-          echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
-          exit 1;
-        elif [ x${KIBANA_PASSWORD} == x ]; then
-          echo "Set the KIBANA_PASSWORD environment variable in the .env file";
-          exit 1;
-        fi;
-        if [ ! -f config/certs/ca.zip ]; then
-          echo "Creating CA";
-          bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
-          unzip config/certs/ca.zip -d config/certs;
-        fi;
-        if [ ! -f config/certs/certs.zip ]; then
-          echo "Creating certs";
-          echo -ne \
-          "instances:\n"\
-          "  - name: es01\n"\
-          "    dns:\n"\
-          "      - es01\n"\
-          "      - localhost\n"\
-          "    ip:\n"\
-          "      - 127.0.0.1\n"\
-          "  - name: kibana\n"\
-          "    dns:\n"\
-          "      - kibana\n"\
-          "      - localhost\n"\
-          "    ip:\n"\
-          "      - 127.0.0.1\n"\
-          > config/certs/instances.yml;
-          bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
-          unzip config/certs/certs.zip -d config/certs;
-        fi;
-        echo "Setting file permissions"
-        chown -R root:root config/certs;
-        find . -type d -exec chmod 750 \{\} \;;
-        find . -type f -exec chmod 640 \{\} \;;
-        echo "Waiting for Elasticsearch availability";
-        until curl -s --cacert config/certs/ca/ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
-        echo "Setting kibana_system password";
-        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
-        echo "All done!";
-      '
+    command:  ["/setup_elk.sh"]
+    environment:
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     healthcheck:
       test: ["CMD-SHELL", "[ -f config/certs/es01/es01.crt ]"]
       interval: 1s
       timeout: 5s
       retries: 120
-
+  #********************************************************************************
   logstash:
     container_name: logstash
     image: logstash:8.14.3
@@ -85,8 +34,8 @@ services:
     volumes:
       - certs_data:/usr/share/logstash/certs
       - logstash_data:/usr/share/logstash/data
-      # - "./logstash_ingest_data/:/usr/share/logstash/ingest_data/"
       - "../containers/logstash/:/usr/share/logstash/pipeline:ro"
+      # - "./logstash_ingest_data/:/usr/share/logstash/ingest_data/"
     environment:
       - xpack.monitoring.enabled=false
       - ELASTIC_USER=elastic
@@ -101,19 +50,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+  #********************************************************************************
   nginx:
     container_name: nginx
+    image: nginx:1.27.0
     restart:        always
-
-    build:
-      dockerfile:     ../containers/nginx/Dockerfile
-      context:        ../containers 
     healthcheck:
       test:         ["CMD", "curl", "-f", "http://localhost"]
       interval:     1m30s
       timeout:      10s
       retries:      3
+    command: ["/nginx.sh", "nginx", "-g", "daemon off;"]
     depends_on:
       logstash:
         condition: service_healthy
@@ -123,13 +70,14 @@ services:
         condition: service_started
       kibana:
         condition: service_healthy
-
     ports:
       - 80:80
       - 443:443
       - 447:447
     volumes:
       - ../project/static_production:/static
+      - ${PWD}/containers/scripts/nginx.sh:/nginx.sh
+      - ${PWD}/containers/nginx/nginx.conf:/etc/nginx/nginx.conf
     networks:
         - backend
         - frontend
@@ -138,7 +86,7 @@ services:
       driver: gelf
       options:
         gelf-address: udp://localhost:12201
-    
+  #********************************************************************************
   redis:
     container_name: redis
     image:          redis:7.2.5
@@ -159,7 +107,7 @@ services:
       driver: gelf
       options:
         gelf-address: udp://localhost:12201
-
+  #********************************************************************************
   db:
     container_name: postgres
     image:          postgres:16.3-bookworm
@@ -175,8 +123,7 @@ services:
       retries: 5
     volumes:
         - postgres_data:/var/lib/postgresql/data
-
-    environment: #To change to secrets
+    environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER} 
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -187,7 +134,7 @@ services:
       driver: gelf
       options:
         gelf-address: udp://localhost:12201
-
+  #********************************************************************************
   daphne:
     container_name: daphne
     build:
@@ -220,7 +167,7 @@ services:
       driver: gelf
       options:
         gelf-address: udp://localhost:12201
-
+  #********************************************************************************
   gunicorn:
     container_name: gunicorn
     build:          ../containers/gunicorn
@@ -246,7 +193,7 @@ services:
       driver: gelf
       options:
         gelf-address: udp://localhost:12201
-
+  #********************************************************************************
   es01:
     container_name: es01
     restart:        always
@@ -279,7 +226,7 @@ services:
       - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
       - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
       - xpack.security.transport.ssl.verification_mode=certificate
-      # - xpack.license.self_generated.type=basic
+      - xpack.license.self_generated.type=basic
     mem_limit: 2g
     ulimits:
       memlock:
@@ -294,7 +241,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
-
+  #********************************************************************************
   kibana:
     container_name: kibana
     restart:        always
@@ -320,7 +267,7 @@ services:
       - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
       - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
       - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
-      #TODO: Script to create encryption key for production using "/bin/kibana-encryption-keys generate" and setting it in the environment
+      #TODO: bin/kibana-encryption-keys generate replace 3 keys for prod
     mem_limit: 1g
     healthcheck:
       test:
@@ -339,7 +286,6 @@ volumes:
   es_data:
   kibana_data:
   logstash_data:
-
 
 
 networks:
