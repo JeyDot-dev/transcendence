@@ -1,3 +1,4 @@
+{% load static %}
 <div class="container">
     <h1>Start a New Game</h1>
     <form method="post">
@@ -10,9 +11,8 @@
                 </div>
             {% endfor %}
         </div>
-        {% load static %}
-        <script type="module" src="{% static 'js/addPlayerForm.js' %}"></script>
-        <button type="button" class="btn btn-secondary" onclick="addPlayerForm()">Add Players</button>
+        <button type="button" class="btn btn-secondary" id="addPlayerBtn">Add Players</button>
         <input type="submit" class="btn btn-primary" value="Save">
     </form>
+    <script src="{% static 'js/addPlayerForm.js' %}"></script>
 </div>

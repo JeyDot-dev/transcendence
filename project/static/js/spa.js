@@ -1,5 +1,4 @@
 let loadedCSS = [];
-let loadedJS = [];
 let defaultTitle = document.title;
 
 // Listener for browser navigation management
@@ -40,7 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // It also loads the CSS and JS files and unloads the previous ones
 async function spa(url, data = null) {
     unloadCSS();
-    unloadJS();
     unloadTitle();
 
     url = makeURL(url);
@@ -48,8 +46,9 @@ async function spa(url, data = null) {
     const mainElement = document.querySelector("main");
     mainElement.innerHTML = content;
 
+    handleJS(mainElement);
+
     loadCSS(mainElement);
-    loadJS(mainElement);
     loadTitle(mainElement);
 }
 
@@ -60,15 +59,16 @@ async function spa(url, data = null) {
 function makeURL(url) {
     try {
         // Delete the last slash if there is one
-        if (url.endsWith("/")) {
-            url = url.slice(0, -1);
+        if (!url.endsWith("/")) {
+            // url = url.slice(1, -1);
+            url += "/";
         }
         // Create a new URL object
         let newURL = new URL(url, window.location.origin);
 
         // If the pathname is empty, set it to "/home"
         if (newURL.pathname === "/") {
-            newURL.pathname = "/home";
+            newURL.pathname = "/home/";
         }
         // Add the "/api" prefix to the pathname
         newURL.pathname = "api" + newURL.pathname;
@@ -100,7 +100,7 @@ async function fetchHTML(url, data = null) {
             options.headers['X-CSRFToken'] = getCookie('csrftoken');
             options.body = data;
         }
-
+        console.log(destination, options);
         // Fetch the destination
         const response = await fetch(destination, options);
 
@@ -153,44 +153,24 @@ function unloadCSS() {
 }
 
 // Function to load the JS files
-function loadJS(mainElement) {
+async function handleJS(mainElement) {
     // Get all the scripts in the content
     const scripts = mainElement.querySelectorAll('script');
 
-    scripts.forEach(script => {
+    for (let script of scripts) {
         // Check if the script is already loaded
         if (!document.head.querySelector(`script[src="${script.src}"]`)) {
-            // Create a new script element
-            const newScript = document.createElement('script');
-            // If the script has a src attribute, set the src attribute of the new script element
+            // If the script has a src attribute, dynamically import the script
             if (script.src) {
-                newScript.src = script.src;
-                loadedJS.push(script.src);
+                await import(script.src);
             }
-            else { // If the script doesn't have a src attribute, set the text content of the new script element
-                newScript.textContent = `(function() { ${script.textContent} })();`;
+            else { // If the script doesn't have a src attribute, evaluate the script content
+                new Function(script.textContent)();
             }
-            // Append the new script element to the head
-            document.head.appendChild(newScript);
         }
         // Remove the original script element in any case
-        script.remove();
-    });
-}
-
-// Function to unload the JS files
-function unloadJS() {
-    // Remove all the loaded JS files
-    loadedJS.forEach(src => {
-        // Get the script element with the src
-        const script = document.head.querySelector(`script[src="${src}"]`);
-        // If the script exists, remove it
-        if (script) {
-            script.parentNode.removeChild(script);
-        }
-    });
-    // Clear the list of loaded CSS
-    loadedJS = [];
+        //script.remove();
+    }
 }
 
 // Function to load the title
