@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     "database.apps.DatabaseConfig",
     "channels",
     "pong",
-    "testTree",
 ]
 
 MIDDLEWARE = [
@@ -142,7 +141,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static_production")
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     BASE_DIR / "pong/static/pong",
-    BASE_DIR / "testTree/static/testTree",
 ]
 
 
