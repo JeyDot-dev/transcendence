@@ -59,15 +59,15 @@ async function spa(url, data = null) {
 function makeURL(url) {
     try {
         // Delete the last slash if there is one
-        if (url.endsWith("/")) {
-            url = url.slice(0, -1);
+        if (!url.endsWith("/")) {
+            url += "/";
         }
         // Create a new URL object
         let newURL = new URL(url, window.location.origin);
 
         // If the pathname is empty, set it to "/home"
         if (newURL.pathname === "/") {
-            newURL.pathname = "/home";
+            newURL.pathname = "/home/";
         }
         // Add the "/api" prefix to the pathname
         newURL.pathname = "api" + newURL.pathname;
