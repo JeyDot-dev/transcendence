@@ -119,19 +119,23 @@ export class SocketManager {
                 this.my_id = game.id;
                 // addPlayerList(local_user.username, (this.my_id % 2 == 0) ? 'l' : 'r');
                 break;
-            case "new_player":
-                addPlayerList(data.name, (data.side >= 640) ? 'r' : 'l');
-                updatePlayerCount(data.nb_players, data.nb_players);
-                break;
-            case "player_left":
-                updatePlayerCount(data.nb_players, data.nb_players);
-                console.log("Player left: " + data.who);
-                break;
+            // case "new_player":
+            //     addPlayerList(data.name, (data.side >= 640) ? 'r' : 'l');
+            //     updatePlayerCount(data.nb_players, data.nb_players);
+            //     break;
+            // case "player_left":
+            //     updatePlayerCount(data.nb_players, data.nb_players);
+            //     console.log("Player left: " + data.who);
+            //     break;
         }
     }
 
     // Implémentation par défaut pour le onOpenCallback
     defaultOnOpenCallback() {
         console.log("WebSocket connection opened (default handler)");
+    }
+
+    setOnMessageCallback(callbackRoutine) {
+        this.onMessageCallback = callbackRoutine.bind(this);
     }
 }

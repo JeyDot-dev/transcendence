@@ -41,3 +41,6 @@ def create_tournament(request):
 
 def index(request):
     return render(request, "pong/pong_old.html")
+
+def launchLocalGame(request):
+    return render(request, "pong/localGame.html")
