@@ -1,0 +1,39 @@
+<div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="createAccountModalPage" aria-hidden="true" style="color: #000">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="createAccountModalPage">Please, tel us who you are</h5>
+				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form id="signupForm">
+					{% csrf_token %}
+					<label for="username">Username</label>
+					<input type="text" class="form-control" name="username" id="username" required>
+
+					<label for="email">Email</label>
+					<input type="email" class="form-control" name="email" id="email" required>
+
+					<label for="password">Password</label>
+					<input type="password" class="form-control" name="password" id="password" required>
+					
+					<label for="password2">Confirm Password</label>
+					<input type="password" class="form-control" name="password2" id="password2" required>
+
+					<input type="submit" class="btn btn-primary m-4" value="Signup" />
+				</form>
+			</div>
+		</div>
+ 	</div>
+</div>
+
+<script>
+	document.getElementById('signupForm').addEventListener('submit', function(e) {
+		e.preventDefault();
+		var form = document.getElementById('signupForm');
+		var formData = new FormData(form);
+		
+		createAccount(formData);
+		
+	});
+</script>
