@@ -1,3 +1,41 @@
-#pongCanvas {
-	background-color: #333;
+#camera-control-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 160px;
+    background: rgba(30, 30, 30, 0.9);
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    z-index: 10000;
+    border: 1px solid #444;
+}
+
+#camera-control-panel h3 {
+    margin: 0 0 10px 0;
+    font-size: 12px;
+    text-align: center;
+    color: #0077ae;
+}
+
+#camera-control-panel label {
+    font-size: 10px;
+    margin-right: 5px;
+}
+
+#camera-control-panel input {
+    width: 60px;
+    margin-bottom: 5px;
+    font-size: 10px;
+    color: #000;
+}
+
+#camera-control-panel button {
+    width: 100%;
+    background: #ae00a9;
+    color: #000;
+    font-size: 10px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
 }

@@ -1,16 +1,8 @@
-from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
-from django.urls import path
-from pong.consumers import PongConsumer
+from django.urls import re_path
+from .consumers import PongConsumer
+from .local_consumers import LocalPongConsumer
 
 websocket_urlpatterns = [
-    path('ws/pong/<uuid:game_id>/', PongConsumer.as_asgi()),  # Utilisez <uuid:game_id> pour capturer l'UUID dans l'URL
+	re_path(r'ws/pong/(?P<game_id>\w+)/$', PongConsumer.as_asgi()),
+	re_path(r'ws/pong/local/(?P<game_id>\w+)/$', LocalPongConsumer.as_asgi()),
 ]
-
-application = ProtocolTypeRouter({
-    'websocket': AuthMiddlewareStack(
-        URLRouter(
-            websocket_urlpatterns
-        )
-    ),
-})

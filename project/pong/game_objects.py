@@ -1,68 +1,130 @@
-# pong/game_objects.py
+import asyncio
+import random
+from userManager.models import UserInfos
 
 class Paddle:
-    def __init__(self, x, y, width, height, canvas_height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.canvas_height = canvas_height
+	def __init__(self, x, color, user_id):
+		self.x = x
+		self.y = 780 / 2 # Middle of the screen
+		self.width = 200
+		self.color = color # #FFFFFF
+		self.speed = 15
+		self.bounce = 1
+		self.keys = { "up": 0, "down": 0 }
+		self.side: int = 0 if x <= 1280 / 2 else 1 # 0 = left, 1 = right
+		self.user_id = user_id
 
-    def move(self, new_y):
-        self.y = new_y
-        if self.y < 0:
-            self.y = 0
-        elif self.y + self.height > self.canvas_height:
-            self.y = self.canvas_height - self.height
+	def move(self, dy):
+		self.y += dy
 
-    def is_ball_approaching(self, ball):
-        paddle_x = self.x  # Position x du paddle
-        paddle_width = self.width  # Largeur du paddle
-        ball_x = ball.x  # Position x de la balle
-
-        # Vérifier si la balle se trouve dans la plage définie par le paddle +/- 10
-        return paddle_x - paddle_width - 10 <= ball_x <= paddle_x + paddle_width + 10
-
-
-    def handle_collision_left(self, ball):
-        if (ball.x - ball.radius <= self.x + self.width and
-            self.y <= ball.y <= self.y + self.height):
-            # Collision détectée sur le côté gauche du paddle
-            ball.speed_x = abs(ball.speed_x)  # Inverser la direction horizontale de la balle
-            # Calculer le changement de vitesse vertical basé sur la position de la collision
-            hit_position = (ball.y - self.y) / self.height
-            ball.speed_y = (hit_position - 0.5) * 10  # Ajustez ce facteur selon vos besoins
-
-    def handle_collision_right(self, ball):
-        if (ball.x + ball.radius >= self.x and
-            self.y <= ball.y <= self.y + self.height):
-            # Collision détectée sur le côté droit du paddle
-            ball.speed_x = -abs(ball.speed_x)  # Inverser la direction horizontale de la balle
-            # Calculer le changement de vitesse vertical basé sur la position de la collision
-            hit_position = (ball.y - self.y) / self.height
-            ball.speed_y = (hit_position - 0.5) * 10  # Ajustez ce facteur selon vos besoins
-
-
+	def get_position(self):
+		return (self.x, self.y)
 
 class Ball:
-    def __init__(self, x, y, radius, speed_x, speed_y, canvas_width, canvas_height):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.speed_x = speed_x
-        self.speed_y = speed_y
-        self.canvas_width = canvas_width
-        self.canvas_height = canvas_height
+	def __init__(self, x, y, color):
+		self.x = x
+		self.y = y
+		self.speed = 10
+		self.vel_x = -1
+		self.vel_y = 1
+		self.bounce = 1
+		self.size = 14
+		self.color = color
 
-    def move(self):
-        self.x += self.speed_x
-        self.y += self.speed_y
+	def get_position(self):
+		return (self.x, self.y)
 
-        if self.y - self.radius < 0 or self.y + self.radius > self.canvas_height:
-            self.speed_y = -self.speed_y
+	def add_speed(self, speed):
+		self.speed += speed
+	
+	def reset(self):
+		self.x = 1280 / 2 - self.size / 2
+		self.y = 720 / 2  - self.size / 2
+		self.speed = 10
+	
+	def collision(self, paddle):
+		paddle_x, paddle_y = paddle.get_position()
+		if self.vel_x > 0 and paddle_x < 1280 / 2: return False
+		elif self.vel_x < 0 and paddle_x > 1280 / 2: return False
 
-    def reset(self):
-        self.x = self.canvas_width / 2
-        self.y = self.canvas_height / 2
-        self.speed_x = -self.speed_x
-        self.speed_y = 5  # Reset the speed_y or any default value
+		if self.x > paddle_x + paddle.width or self.x + self.size < paddle_x: return False # Ball is not in the same x range as the paddle
+		if self.y + self.size < paddle_y or self.y > paddle_y + (self.size * 20): return False # Ball is not in the same y range as the paddle
+
+		self.x = paddle_x + paddle.width + 1 if self.vel_x < 0 else paddle_x - self.size - 1
+		self.vel_x = -self.vel_x
+		self.add_speed(1)
+		return True
+	
+	def wall_collision(self, score):
+		if self.y <= 0:
+			self.y = 1
+			self.vel_y = -self.vel_y
+			return True
+		elif self.y >= 720 - self.size:
+			self.y = 720 - self.size - 1
+			self.vel_y = -self.vel_y
+			return True
+		
+		if self.x <= 0:
+			score[1] += 1
+			self.reset()
+			return True
+		elif self.x >= 1280:
+			score[0] += 1
+			self.reset()
+			return True
+		return False
+	
+	async def physics(self, paddles, score):
+		if not self.wall_collision(score):
+			for paddle in paddles:
+				if self.collision(paddle):
+					break
+
+		self.x += self.speed * self.vel_x
+		self.y += self.speed * self.vel_y
+
+class Game:
+	def __init__(self, id, players, ball, nb_max_players=100):
+		self.id = id
+		self.players:list[UserInfos] = players 
+		self.paddles:list[Paddle] = []
+		self.ball = ball
+		self.score = [0, 0]
+		self.timer = 0
+		self.running = False
+		self.nb_max_players = nb_max_players
+		self.winners = []
+	
+	def add_player(self, player: UserInfos, side: int):
+		if len(self.players) < self.nb_max_players:
+			
+			self.players.append(player)
+			self.paddles.append(Paddle(100 if side == 0 else 1280 - 100, player.skin, player.id))
+		else:
+			raise ValueError("Game is full")
+	
+	async def physics(self):
+		while not self.running:
+			await asyncio.sleep(1)
+		while self.running:
+			await asyncio.sleep(60 / 1000)
+			for paddle in self.paddles:
+				if paddle.keys["up"] == 1:
+					paddle.move(-paddle.speed)
+				elif paddle.keys["down"] == 1:
+					paddle.move(paddle.speed)
+				if paddle.y < 0:
+					paddle.y = 0
+				elif paddle.y > 432:
+					paddle.y = 432
+			await self.ball.physics(self.paddles, self.score)
+			if self.score[0] >= 5 or self.score[1] >= 5:
+				self.running = False
+						
+
+
+class Player:
+	def __init__(self, id, skin):
+		self.id = id
+		self.skin = skin
