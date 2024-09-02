@@ -4,7 +4,8 @@ import { TextGeometry } from "../TextGeometry.js";
 export class Text3d {
     constructor(camera, scene, font, size = 0.5, depth = 0.1, color = 0xfffff, text = "NULL", glow = 0,
             position = new THREE.Vector3(0, 0, 0),
-            rotation = new THREE.Vector3(-Math.PI / 2, 0, 0)) {
+            rotation = new THREE.Vector3(Math.PI / 2, 0, 0)) {
+        this.camera = camera;
         this.font = font;
         this.text = text;
         this.size = size;
@@ -104,5 +105,7 @@ export class Text3d {
         }
 
         this.setPosition(this.position); // Mettre à jour la position avec le nouveau texte
+        // this.mesh.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
+
     }
 }

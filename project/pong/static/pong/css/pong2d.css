@@ -1,0 +1,31 @@
+/* style pour le canvas 2d */
+
+main {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000; /* Fond noir pour l'ensemble de la page */
+    color: #fff; /* Couleur blanche pour le texte, si nécessaire */
+    font-family: Arial, sans-serif;
+}
+
+#container_game {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #222; /* Fond légèrement plus clair pour le conteneur du jeu */
+    width: 1280px;
+    height: 720px;
+    border: 5px solid #fff; /* Bordure blanche autour du conteneur du jeu */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* Ombre pour donner un effet de relief */
+}
+
+canvas {
+    display: block;
+    background-color: #000; /* Fond noir pour le canvas du jeu */
+    width: 100%;
+    height: 100%;
+}

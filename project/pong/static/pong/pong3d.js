@@ -14,23 +14,23 @@ import { BouncingBallInCube } from './Classes/background.js';
 console.log("Pong3d.js LOADING");
 
 // Fonction pour consigner tous les événements
-function logEvent(event) {
-    console.log(`Event: ${event.type}`, event);
-}
+// function logEvent(event) {
+//     console.log(`Event: ${event.type}`, event);
+// }
 
 // Liste des types d'événements que vous souhaitez surveiller
-const eventsToMonitor = [
-    'click', 'keydown', 'keyup', 'load', 'unload', 
-    'resize', 'scroll', 'submit', 'focus', 'blur', 'change',
-    'input', 'contextmenu', 'dblclick', 'error', 'wheel',
-    'loadView',
-    // Ajoutez ici d'autres événements que vous souhaitez surveiller
-];
+// const eventsToMonitor = [
+//     'click', 'keydown', 'keyup', 'load', 'unload', 
+//     'resize', 'scroll', 'submit', 'focus', 'blur', 'change',
+//     'input', 'contextmenu', 'dblclick', 'error', 'wheel',
+//     'loadView',
+//     // Ajoutez ici d'autres événements que vous souhaitez surveiller
+// ];
 
 // Ajouter un écouteur pour chaque type d'événement
-eventsToMonitor.forEach(eventType => {
-    document.addEventListener(eventType, logEvent, true);
-});
+// eventsToMonitor.forEach(eventType => {
+//     document.addEventListener(eventType, logEvent, true);
+// });
 
 // TODO:
 // First time: Charger les objects et init le canavas FLAG = 1
