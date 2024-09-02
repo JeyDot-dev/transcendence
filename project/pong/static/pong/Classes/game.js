@@ -316,10 +316,10 @@ export class Game {
         // console.log('wsMessageManager: ', data);
         switch (data.type) {
             case 'scoreChange0':
-                this.p1Text.updateText(data.score.toString());
+                this.p1Text.updateText(data.score[0].toString());
                 break;
             case 'scoreChange1':
-                this.p2Text.updateText(data.score.toString());
+                this.p2Text.updateText(data.score[1].toString());
                 break;
             case 'ballMove':
                 // -y Car dans three js y est orienter differement
@@ -334,6 +334,9 @@ export class Game {
         }
         if (data.type != 'ballMove') {
             // console.log(data);
+        }
+        if (data.type == 'scoreChange0' || data.type == 'scoreChange') {
+            console.log('New score Front end: ', data.score);
         }
     }
 

@@ -100,7 +100,7 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
 
     async def game_update(self):
         while self.game.running:
-            await asyncio.sleep(1 / 30)
+            await asyncio.sleep(1 / 60)
             await self.send(text_data=json.dumps(await update_game_state(self.game)))
 
     async def disconnect(self, close_code):
@@ -109,17 +109,26 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
         # Retirer le client du groupe
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
-        # Décrémenter le nombre de connexions
         if self.game_id in local_games:
             local_games[self.game_id]['connections'] -= 1
 
             # Attendre un délai pour permettre aux clients de se reconnecter
-            await asyncio.sleep(10)  # Attendre 10 secondes
+            await asyncio.sleep(10)
 
             # Vérifier s'il reste des connexions après le délai
         if self.game_id in local_games and local_games[self.game_id]['connections'] <= 0:
                 logger.info(f"No more connections for game {self.game_id}. Cleaning up.")
+
+            # Annuler la tâche de physique si elle est en cours d'exécution
+                if hasattr(self, 'physics_task') and not self.physics_task.done():
+                    self.physics_task.cancel()
+                    try:
+                        await self.physics_task
+                    except asyncio.CancelledError:
+                        logger.info(f"Physics task for game {self.game_id} has been cancelled.")
+
                 local_games.pop(self.game_id, None)
+                logger.info(f"Current local_games state after cleanup: {local_games}")
 
 async def handle_key(game, types, key, who):
     # logger.debug(f"Input received - Game: {game}, Type: {types}, Key: {key}, Who: {who}")

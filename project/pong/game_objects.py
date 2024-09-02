@@ -151,7 +151,7 @@ class Ball:
             if self.updateCallBack:
                 asyncio.create_task(self.updateCallBack({
                     'type': 'scoreChange1',
-                    'score': score[1]
+                    'score': score
                 }))
             return True
         elif self.x >= self.arenaWidth:
@@ -161,7 +161,7 @@ class Ball:
             if self.updateCallBack:
                 asyncio.create_task(self.updateCallBack({
                     'type': 'scoreChange0',
-                    'score': score[0]
+                    'score': score
                 }))
             return True
         return False
