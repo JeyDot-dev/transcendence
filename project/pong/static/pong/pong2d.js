@@ -43,7 +43,7 @@ document.addEventListener('keyup', event => {
         console.log('keyup: w s');
         ws.send(JSON.stringify({ type: 'keyup', key: key, who: 0 }));
     }
-    if (['arrowup', 'arrowdown'].includes(key)) {
+   else if (['arrowup', 'arrowdown'].includes(key)) {
         console.log('keyup: arrow');
         ws.send(JSON.stringify({ type: 'keyup', key: key, who: 1 }));
     }

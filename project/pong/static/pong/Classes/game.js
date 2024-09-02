@@ -13,17 +13,18 @@ import { ShaderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/p
 import { FXAAShader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/shaders/FXAAShader.js';
 
 export class Game {
-    constructor(threeRoot, arena_width, arnena_height, playersParam, ball_param, socketManager) {
+    constructor(threeRoot, gameData, socketManager) {
+    // constructor(threeRoot, arena_width, arnena_height, playersParam, ball_param, socketManager) {
         this.scene = threeRoot.scene;
         this.camera = threeRoot.camera;
         this.renderer = threeRoot.renderer;
         this.composer = threeRoot.composer;
         this.socketManager = socketManager;
-        console.log('Socket Manager: ', socketManager);
+        console.log('gameData: ', gameData);
         this.playerId = 0;
         this.pressedKeys = [];
         this.players = [];
-        this.offSet = new THREE.Vector2(ball_param.x, ball_param.y);
+        this.offSet = new THREE.Vector2(gameData.width / 2, gameData.height / 2);
 
         this.colorPalette = [
             new THREE.Color(0xff00c1),
@@ -37,16 +38,16 @@ export class Game {
         this.p1Text = null;
         this.p2Text = null;
 
-        console.log("Init Arena:", arena_width, arnena_height, ball_param);
-        this.initArena(1280, 720, ball_param);
+        console.log("Init Arena:", gameData.width, gameData.height);
+        this.initArena(gameData.width, gameData.height);
         console.log("Init Lightning");
         this.initLighting();
         console.log("Init Text");
         this.initText();
         console.log("Init Ball");
-        this.initBall(ball_param);
+        this.initBall(gameData.ball);
         console.log("Init Paddles");
-        this.initPaddles(playersParam);
+        this.initPaddles(gameData.players);
 
         const size = 720; // Taille de la grille
         const divisions = 4; // Nombre de divisions
@@ -79,8 +80,9 @@ export class Game {
         console.log("End of Game constructor")
     }
 
-    initArena(width, height, ball_param) {
+    initArena(width, height) {
 
+        // console.log(width, height);
         this.arena = new Arena(width, 25, height, 0x1c9e97, 0x5a407b, 25, 25, 0xde95d0);
         this.arena.addToScene(this.scene);
         // this.arena.group.translateX(ball_param.x);
@@ -300,10 +302,10 @@ export class Game {
 
     updateGame(game) {
         console.log('Update Game(Reconnection)', game);
-        this.ball.move(game.ball.x - this.offSet.x, -game.ball.y + this.offSet.y);
+        this.ball.move(game.ball.x, -game.ball.y);
         // console.log(game.score);
         game.players.forEach(element => {
-            this.players[element.id].move(element.position[0] - this.offSet.x, -element.position[1] + this.offSet.y);
+            this.players[element.id].move(element.position[0], -element.position[1]);
         });
         // this.timeText.updateText('0s');
         this.p1Text.updateText(game.score[0].toString());

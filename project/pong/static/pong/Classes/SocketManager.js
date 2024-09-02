@@ -126,7 +126,7 @@ export class SocketManager {
                     // }
         let gameData = data.game ? data.game : data;
         if (gameData.type == "initGame" && !this.gameInitilized) {
-            console.log("Initialisation du jeu");
+            console.log("Initialisation du jeu", gameData);
             this.threeRoot.updateCameraSettings({
                 fov: 60,
                 near: 0.5,
@@ -134,10 +134,11 @@ export class SocketManager {
                 position: { x: 0, y: -500, z: 1000 },
                 lookAt: { x: 0, y: 0, z: 0 }
             });
-            this.game = new Game(this.threeRoot, gameData.width, gameData.height, gameData.players, gameData.ball, this);
+            this.game = new Game(this.threeRoot, gameData, this);
             this.my_id = gameData.id;
             this.gameInitilized = true;
         } else if (gameData.type == "initGame" && this.gameInitilized) {
+            console.log("Update in Front End");
             this.game.updateGame(gameData);
         } else {
             // console.log('defaultOnMessageCallback ELSE:', data);

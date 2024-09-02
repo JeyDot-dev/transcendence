@@ -44,7 +44,7 @@ class Ball:
         self.speed = 5
         self.initialSpeed = self.speed
         self.vel_x = -1
-        self.vel_y = 0.5
+        self.vel_y = 0
         self.bounce = 1
         self.size = 14
         self.color = color
@@ -66,7 +66,7 @@ class Ball:
         self.y = self.arenaHeight / 2
         self.speed = self.initialSpeed
         self.vel_x = -1 if random.choice([True, False]) else 1
-        self.vel_y = random.choice([-1, 1])
+        self.vel_y = 0
         if self.updateCallBack:
             asyncio.create_task(self.updateCallBack({
                 'type': 'ballMove',
