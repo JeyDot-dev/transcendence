@@ -56,11 +56,11 @@ export class Menu {
         );
 
         // Ajout des sources de lumière
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(500, -500, 1000);
-        directionalLight.castShadow = true;
-        this.scene.add(directionalLight);
-        this.scene.add(directionalLight.target);
+        this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        this.directionalLight.position.set(500, -500, 1000);
+        this.directionalLight.castShadow = true;
+        this.scene.add(this.directionalLight);
+        this.scene.add(this.directionalLight.target);
 
         // Ajouter le menu à `threeRoot`
         threeRoot.addAnimatedObject(this);
@@ -76,16 +76,20 @@ export class Menu {
         this.matchmaking = new MenuItem(this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 200), () => {
             console.log("Clicked On: Matchmaking");
         });
-        this.tournament = new MenuItem(this.scene, this.camera, this.font, 'Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, 0), () => {
+        this.localTournament = new MenuItem(this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, 0), () => {
+            console.log("Clicked On: Local Tournament");
+        });
+        this.tournament = new MenuItem(this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -200), () => {
             console.log("Clicked On: Tournament");
         });
-        this.options = new MenuItem(this.scene, this.camera, this.font, 'Options', this.colorPalette[3], new THREE.Vector3(0, 0, -200), () => {
+        this.options = new MenuItem(this.scene, this.camera, this.font, 'Options', this.colorPalette[4], new THREE.Vector3(0, 0, -400), () => {
             console.log("Clicked On: Options");
         });
 
         this.menuItems = [
             this.local,
             this.matchmaking,
+            this.localTournament,
             this.tournament,
             this.options
         ];
@@ -104,6 +108,9 @@ export class Menu {
         if (this.background) {
             this.background.show();
         }
+        if (this.directionalLight) {
+            this.directionalLight.visible = true;
+        }
     }
 
     hide() {
@@ -120,6 +127,9 @@ export class Menu {
         // Masquer le background
         if (this.background) {
             this.background.hide();
+        }
+        if (this.directionalLight) {
+            this.directionalLight.visible = false;
         }
     }
 

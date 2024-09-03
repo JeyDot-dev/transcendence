@@ -99,7 +99,7 @@ export class BouncingBallInCube {
                 varying float intensity;
                 void main() {
                     vec3 glow = glowColor * intensity;
-                    gl_FragColor = vec4( glow, 0.6 );
+                    gl_FragColor = vec4( glow, 0.7 );
                 }
             `,
             side: THREE.BackSide,

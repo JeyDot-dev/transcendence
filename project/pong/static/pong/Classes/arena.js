@@ -7,9 +7,9 @@ import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/
 
 export class Arena {
     constructor(width, height, depth, color, wallColor, wallThickness, borderRadius, innerWallColor) {
-        this.width = width;
+        this.width = width + wallThickness;
         this.height = height;
-        this.depth = depth;
+        this.depth = depth + wallThickness;
         this.color = 0x00b8ff;
         this.wallColor = 0x9600ff;
         this.wallThickness = wallThickness;
