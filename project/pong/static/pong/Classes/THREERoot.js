@@ -31,9 +31,9 @@ export class THREERoot {
 
 
         // Initialize FPS counter
-        this.stats = new Stats();
-        this.stats.showPanel(0); // 0 = FPS, 1 = ms/frame, 2 = memory usage
-        this.container.appendChild(this.stats.dom);
+        // this.stats = new Stats();
+        // this.stats.showPanel(0); // 0 = FPS, 1 = ms/frame, 2 = memory usage
+        // this.container.appendChild(this.stats.dom);
 
         // Create a render target with MSAA for post-processing
         this.renderTarget = new THREE.WebGLMultisampleRenderTarget(this.width, this.height, { format: THREE.RGBAFormat });
@@ -43,6 +43,7 @@ export class THREERoot {
         const renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(renderPass);
 
+        this.onWindowResize(this);
         window.addEventListener('resize', this.onWindowResize.bind(this));
     }
 
