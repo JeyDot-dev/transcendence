@@ -22,6 +22,8 @@ export class BouncingBallInCube {
                 this.togglePause();
             }
         });
+        
+        this.addToGroup(group);
     }
 
     createCubeWithGrid() {

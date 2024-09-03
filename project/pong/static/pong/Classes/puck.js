@@ -22,7 +22,6 @@ export class Puck {
     }
 
     createGlowMesh(camera, color, glow) {
-        return ;
         const shaderMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 "c": { type: "f", value: 1.0 },

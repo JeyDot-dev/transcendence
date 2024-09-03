@@ -131,23 +131,35 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
                 logger.info(f"Current local_games state after cleanup: {local_games}")
 
 async def handle_key(game, types, key, who):
-    # logger.debug(f"Input received - Game: {game}, Type: {types}, Key: {key}, Who: {who}")
-    if types != "keydown" and types != "keyup":
+    if types not in ["keydown", "keyup"]:
         return
 
-    if key == "w":
-        key = "up"
-    elif key == "s":
-        key = "down"
-    elif key == "arrowup":
-        key = "up"
-    elif key == "arrowdown":
-        key = "down"
 
-    game.paddles[who].keys[key] = 1 if types == "keydown" else 0
-    # logger.debug(f"Paddle update - Player: {who}, Key: {key}, Type: {types}, New State: {game.paddles[who].keys[key]}")
+    if key in ["w", "arrowup"]:
+        action = "up"
+    elif key in ["s", "arrowdown"]:
+        action = "down"
+    else:
+        # TODO: Implementer deux side sur le paddle et une touche pour switch
+        return
+
+    if types == "keydown":
+        if action == "up":
+            game.paddles[who].velocity = -1
+        elif action == "down":
+            game.paddles[who].velocity = 1
+    elif types == "keyup":
+        if action in ["up", "down"]:
+            game.paddles[who].velocity = 0
+
+    # Mettez à jour l'état de la touche dans le dictionnaire de clés
+    # game.paddles[who].keys[action] = 1 if types == "keydown" else 0
+
+    # Vous pouvez ajouter des logs pour le débogage si nécessaire
+    # logger.debug(f"Paddle update - Player: {who}, Action: {action}, Type: {types}, New Velocity: {game.paddles[who].velocity}")
     # logger.debug(f"New Paddle0 Position: x={game.paddles[0].x} y={game.paddles[0].y}")
     # logger.debug(f"New Paddle1 Position: x={game.paddles[1].x} y={game.paddles[1].y}")
+
 
 async def build_game_state(game):
     return {

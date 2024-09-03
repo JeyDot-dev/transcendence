@@ -35,6 +35,9 @@ export class Paddle {
     addToScene(scene) {
         scene.add(this.mesh);
     }
+    addToGroup(group) {
+        group.add(this.mesh);
+    }
     update() {
         this.mesh.position.add(this.velocity);
     }

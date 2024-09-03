@@ -1,12 +1,11 @@
 import asyncio
 import random
-import time  # Ajout de l'importation du module time
+import time
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from userManager.models import UserInfos
 
 logger2 = logging.getLogger(__name__)
-
 
 class Paddle:
     def __init__(self, x, color, userId, arenaWidth, arenaHeight, updateCallBack=None):
@@ -16,13 +15,15 @@ class Paddle:
         self.y = arenaHeight / 2
         self.color = color
         self.speed = 15
+        self.velocity = 0
         self.bounce = 1
         self.keys = {"up": 0, "down": 0}
         self.side = 0 if x <= arenaWidth / 2 else 1  # 0 = gauche, 1 = droite
         self.user_id = userId
         self.updateCallBack = updateCallBack
 
-    def move(self, dy):
+    def move(self):
+        self.y += self.speed * self.velocity
         if self.updateCallBack:
             asyncio.create_task(self.updateCallBack({
                 'type': 'paddleMove',
@@ -32,14 +33,23 @@ class Paddle:
                     'y': self.y
                 }
             }))
-        self.y += dy
 
     def get_position(self):
-        return (self.x, self.y)
+        return self.x, self.y
+
+    def get_bounds(self):
+        half_width = self.width / 2
+        half_height = self.height / 2
+        return {
+            'left': self.x - half_width,
+            'right': self.x + half_width,
+            'top': self.y - half_height,
+            'bottom': self.y + half_height
+        }
 
 class Ball:
-    def __init__(self, color, arenaWidht, arenaHeight, updateCallBack=None):
-        self.x = arenaWidht / 2
+    def __init__(self, color, arenaWidth, arenaHeight, updateCallBack=None):
+        self.x = arenaWidth / 2
         self.y = arenaHeight / 2
         self.speed = 5
         self.initialSpeed = self.speed
@@ -48,18 +58,24 @@ class Ball:
         self.bounce = 1
         self.size = 14
         self.color = color
-        self.arenaWidth = arenaWidht
+        self.arenaWidth = arenaWidth
         self.arenaHeight = arenaHeight
         self.updateCallBack = updateCallBack
 
     def get_position(self):
-        return (self.x, self.y)
+        return self.x, self.y
+
+    def get_bounds(self):
+        half_size = self.size / 2
+        return {
+            'left': self.x - half_size,
+            'right': self.x + half_size,
+            'top': self.y - half_size,
+            'bottom': self.y + half_size
+        }
 
     def add_speed(self, speed):
-        self.speed += speed
-        max_speed = 20  # Limite de vitesse maximale
-        if self.speed > max_speed:
-            self.speed = max_speed
+        self.speed = min(self.speed + speed, 20)  # Limite la vitesse maximale à 20
 
     def reset(self):
         self.x = self.arenaWidth / 2
@@ -76,78 +92,72 @@ class Ball:
                 }
             }))
 
-    # Calcule du rebond de la balle pour la frame d'apres, aide si la balle vas trop vite
     def predict_collision(self, paddle):
-        # Position future de la balle
         future_x = self.x + self.vel_x * self.speed
         future_y = self.y + self.vel_y * self.speed
+        ball_bounds = self._calculate_future_bounds(future_x, future_y)
+        paddle_bounds = paddle.get_bounds()
 
-        paddle_x, paddle_y = paddle.get_position()
-
-        # Calculer les bords du paddle
-        paddle_left = paddle_x - paddle.width / 2
-        paddle_right = paddle_x + paddle.width / 2
-        paddle_top = paddle_y - paddle.height / 2
-        paddle_bottom = paddle_y + paddle.height / 2
-
-        # Vérification de la collision prédite
-        if (future_x + self.size / 2 >= paddle_left and future_x - self.size / 2 <= paddle_right):
-            if (future_y + self.size / 2 >= paddle_top and future_y - self.size / 2 <= paddle_bottom):
-                return True
-
-        return False
+        return self._check_collision(ball_bounds, paddle_bounds)
 
     def collision(self, paddle):
-        # Vérification de la collision actuelle
-        paddle_x, paddle_y = paddle.get_position()
+        ball_bounds = self.get_bounds()
+        paddle_bounds = paddle.get_bounds()
 
-        # Calculer les bords du paddle
-        paddle_left = paddle_x - paddle.width / 2
-        paddle_right = paddle_x + paddle.width / 2
-        paddle_top = paddle_y - paddle.height / 2
-        paddle_bottom = paddle_y + paddle.height / 2
-
-        # Calculer les bords de la balle
-        ball_left = self.x - self.size / 2
-        ball_right = self.x + self.size / 2
-        ball_top = self.y - self.size / 2
-        ball_bottom = self.y + self.size / 2
-
-        # Vérification de la collision horizontale (balle entre les côtés du paddle)
-        if ball_right >= paddle_left and ball_left <= paddle_right:
-            # Vérification de la collision verticale (balle entre le haut et le bas du paddle)
-            if ball_bottom >= paddle_top and ball_top <= paddle_bottom:
-                # Inverser la direction horizontale de la balle
-                self.vel_x = -self.vel_x
-
-                # Repositionner la balle pour qu'elle soit juste à l'extérieur du paddle
-                if self.vel_x > 0:  # Balle se déplace vers la droite
-                    self.x = paddle_right + self.size / 2 + 1
-                else:  # Balle se déplace vers la gauche
-                    self.x = paddle_left - self.size / 2 - 1
-
-                # Ajouter de la vitesse à la balle après la collision
-                self.add_speed(1)
-                return True
-
+        if self._check_collision(ball_bounds, paddle_bounds):
+            self._handle_collision(paddle, paddle_bounds)
+            return True
         return False
 
+    def _calculate_future_bounds(self, future_x, future_y):
+        half_size = self.size / 2
+        return {
+            'left': future_x - half_size,
+            'right': future_x + half_size,
+            'top': future_y - half_size,
+            'bottom': future_y + half_size
+        }
+
+    def _check_collision(self, ball_bounds, paddle_bounds):
+        return (
+            ball_bounds['right'] >= paddle_bounds['left'] and
+            ball_bounds['left'] <= paddle_bounds['right'] and
+            ball_bounds['bottom'] >= paddle_bounds['top'] and
+            ball_bounds['top'] <= paddle_bounds['bottom']
+        )
+
+    def _handle_collision(self, paddle, paddle_bounds):
+        # Inverser la direction horizontale de la balle
+        self.vel_x = -self.vel_x
+
+        # Calcul de l'influence de la vélocité du paddle sur la balle
+        impact_factor = 0.5  # Facteur d'influence, ajustable
+        self.vel_y += paddle.velocity * impact_factor
+
+        # Ajuster la vitesse totale de la balle en fonction de la vélocité du paddle
+        speed_influence = 1 + abs(paddle.velocity) * 0.2
+        self.vel_x *= speed_influence
+        self.vel_y *= speed_influence
+
+        # Repositionner la balle pour qu'elle soit juste à l'extérieur du paddle
+        if self.vel_x > 0:
+            self.x = paddle_bounds['right'] + self.size / 2 + 1
+        else:
+            self.x = paddle_bounds['left'] - self.size / 2 - 1
+
     def wall_collision(self, score):
-        # Collision avec les murs haut et bas
         if self.y - self.size / 2 <= 0:
             self.y = self.size / 2
             self.vel_y = -self.vel_y
             return True
-        elif self.y + self.size / 2 >= 720:
-            self.y = 720 - self.size / 2
+        elif self.y + self.size / 2 >= self.arenaHeight:
+            self.y = self.arenaHeight - self.size / 2
             self.vel_y = -self.vel_y
             return True
 
-        # Collision avec les murs gauche et droit (score)
         if self.x <= 0:
             score[1] += 1
             self.reset()
-            # Appeler le callback pour notifier le consumer
             if self.updateCallBack:
                 asyncio.create_task(self.updateCallBack({
                     'type': 'scoreChange1',
@@ -157,7 +167,6 @@ class Ball:
         elif self.x >= self.arenaWidth:
             score[0] += 1
             self.reset()
-            # Appeler le callback pour notifier le consumer
             if self.updateCallBack:
                 asyncio.create_task(self.updateCallBack({
                     'type': 'scoreChange0',
@@ -184,7 +193,7 @@ class Ball:
             }))
 
 class Game:
-    def __init__(self, id, players, nb_max_players=100, width = 1280, height = 720, updateCallBack=None):
+    def __init__(self, id, players, nb_max_players=100, width=1280, height=720, updateCallBack=None):
         self.id = id
         self.timer = 0
         self.score = [0, 0]
@@ -194,16 +203,16 @@ class Game:
         self.height = height
         self.nb_max_players = nb_max_players
         self.updateCallBack = updateCallBack
-        self.players: list[UserInfos] = players
-        self.paddles: list[Paddle] = []
+        self.players = players
+        self.paddles = []
         self.ball = Ball((255, 255, 255), width, height, updateCallBack)
-        # self.lastActive = time.time()
-        logger2.debug(f"Backend Game Constructor")
+        logger2.debug("Backend Game Constructor")
 
     def addPlayer(self, player: UserInfos, side: int):
         if len(self.players) < self.nb_max_players:
             self.players.append(player)
-            paddle = Paddle(100 if side == 0 else self.width - 100, player.skin, player.id, self.width, self.height, self.updateCallBack)
+            paddle_x = 100 if side == 0 else self.width - 100
+            paddle = Paddle(paddle_x, player.skin, player.id, self.width, self.height, self.updateCallBack)
             self.paddles.append(paddle)
         else:
             raise ValueError("Le jeu est complet")
@@ -223,31 +232,23 @@ class Game:
             accumulator += frame_time
 
             while accumulator >= fixed_time_step:
-                # Mettre à jour la physique avec le temps fixe
                 await self.update_physics(fixed_time_step)
                 accumulator -= fixed_time_step
 
-            # Optionnel : Ajouter un petit sommeil pour éviter une boucle trop rapide
             await asyncio.sleep(0.001)
 
     async def update_physics(self, delta_time):
-        # Déplacement des paddles
         for paddle in self.paddles:
-            if paddle.keys["up"] == 1:
-                paddle.move(-paddle.speed)
-            elif paddle.keys["down"] == 1:
-                paddle.move(paddle.speed)
+            if paddle.velocity != 0:
+                paddle.move()
 
-            # Empêcher les paddles de sortir de l'écran
             if paddle.y - paddle.height / 2 < 0:
                 paddle.y = paddle.height / 2
             elif paddle.y + paddle.height / 2 > self.height:
                 paddle.y = self.height - paddle.height / 2
 
-        # Mettre à jour la physique de la balle
         await self.ball.physics_update(self.paddles, self.score)
 
-        # Vérifier les conditions de victoire
         if self.score[0] >= 50 or self.score[1] >= 50:
             self.running = False
 
