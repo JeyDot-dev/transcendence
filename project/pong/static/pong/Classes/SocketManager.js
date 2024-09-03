@@ -5,7 +5,8 @@ export class SocketManager {
         this.ws = null;
         this.gameId = null;
         this.type = null;  // 'local' ou 'remote'
-        this.game_object = null;
+        this.game = null;
+        this.gameInitilized = false;
         this.threeRoot = threeRoot;
         // this.menu_object = null;
         this.my_id = -1;
@@ -85,7 +86,7 @@ export class SocketManager {
     }
 
     setGameObject(game_object) {
-        this.game_object = game_object;
+        this.game = game_object;
     }
 
     // setMenuObject(menu_object) {
@@ -94,44 +95,65 @@ export class SocketManager {
 
     // Implémentation par défaut pour le onMessageCallback
     defaultOnMessageCallback(data) {
-        let game = data.game ? data.game : data;
+        // console.log('defaultOnMessageCallback: ', data);
+        // let gameData = data.game ? data.game : data;
+        
+        // console.log(game);
 
-        console.log(game);
-
-        switch (data.type) {
-            case "game_state":
-                if (this.game_object) {
-                    // this.game_object.updateGame(game);
-                }
-                break;
-            case "init":
-                console.log("Initialisation du jeu");
-                // this.menu_object = new Menu(scene, camera, renderer);
-                this.threeRoot.updateCameraSettings({
-                    fov: 60,
-                    near: 0.5,
-                    far: 10000,
-                    position: { x: 1280 / 2, y: 780 / 2 - 500, z: 1000 },
-                    lookAt: { x: 1280 / 2, y: 780 / 2, z: 0 }
-                });
-                this.game_object = new Game(this.threeRoot, game.width, game.height, game.players, game.ball);
-                if (!local_user) return;
-                this.my_id = game.id;
-                // addPlayerList(local_user.username, (this.my_id % 2 == 0) ? 'l' : 'r');
-                break;
-            case "new_player":
-                addPlayerList(data.name, (data.side >= 640) ? 'r' : 'l');
-                updatePlayerCount(data.nb_players, data.nb_players);
-                break;
-            case "player_left":
-                updatePlayerCount(data.nb_players, data.nb_players);
-                console.log("Player left: " + data.who);
-                break;
+        // switch (data.type) {
+            //     case "update":
+            //         // console.log("Game State");
+            //         if (this.game_object) {
+                //             this.game_object.updateGame(game);
+                //         }
+                //         break;
+                //     case "init":
+                //         console.log("Initialisation du jeu");
+                //         // this.menu_object = new Menu(scene, camera, renderer);
+                //         this.threeRoot.updateCameraSettings({
+                    //             fov: 60,
+                    //             near: 0.5,
+                    //             far: 10000,
+                    //             position: { x: 0, y: -500, z: 1000 },
+                    //             lookAt: { x: 0, y: 0, z: 0 }
+                    //         });
+                    //         this.game_object = new Game(this.threeRoot, game.width, game.height, game.players, game.ball, this);
+                    //         // if (!local_user) return;
+                    //         this.my_id = game.id;
+                    //         // addPlayerList(local_user.username, (this.my_id % 2 == 0) ? 'l' : 'r');
+                    //         break;
+                    //     default:
+                    // }
+        let gameData = data.game ? data.game : data;
+        if (gameData.type == "initGame" && !this.gameInitilized) {
+            console.log("Initialisation du jeu", gameData);
+            this.threeRoot.updateCameraSettings({
+                fov: 60,
+                near: 0.5,
+                far: 10000,
+                position: { x: 0, y: -500, z: 1000 },
+                lookAt: { x: 0, y: 0, z: 0 }
+            });
+            this.game = new Game(this.threeRoot, gameData, this);
+            this.my_id = gameData.id;
+            this.gameInitilized = true;
+        } else if (gameData.type == "initGame" && this.gameInitilized) {
+            console.log("Update in Front End");
+            this.game.updateGame(gameData);
+        } else {
+            // console.log('defaultOnMessageCallback ELSE:', data);
+            if (this.game) {
+                this.game.wsMessageManager(data);
+            }
         }
     }
 
     // Implémentation par défaut pour le onOpenCallback
     defaultOnOpenCallback() {
         console.log("WebSocket connection opened (default handler)");
+    }
+
+    setOnMessageCallback(callbackRoutine) {
+        this.onMessageCallback = callbackRoutine.bind(this);
     }
 }

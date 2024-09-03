@@ -13,74 +13,46 @@ import { BouncingBallInCube } from './Classes/background.js';
 
 console.log("Pong3d.js LOADING");
 
-// document.addEventListener('DOMContentLoaded', function() {
-    // console.log("DOMContentLoaded");
-    const mainElement = document.querySelector("#container_game");
-    const threeRoot = new THREERoot(mainElement);
-    const socketManager = new SocketManager(threeRoot);
-    let menu = new Menu(threeRoot, socketManager);
+// Fonction pour consigner tous les événements
+// function logEvent(event) {
+//     console.log(`Event: ${event.type}`, event);
+// }
 
-    menu.show();
+// Liste des types d'événements que vous souhaitez surveiller
+// const eventsToMonitor = [
+//     'click', 'keydown', 'keyup', 'load', 'unload', 
+//     'resize', 'scroll', 'submit', 'focus', 'blur', 'change',
+//     'input', 'contextmenu', 'dblclick', 'error', 'wheel',
+//     'loadView',
+//     // Ajoutez ici d'autres événements que vous souhaitez surveiller
+// ];
 
-
-    // // const socketManager = new SocketManager();
-    // // socketManager.setType('remote');
-    // // socketManager.setGameId('some_game_id');
-
-
-    // // Masque le menu après une certaine condition (par exemple, lorsque le jeu commence)
-    // setTimeout(() => {
-    //     menu.hide();
-    //     console.log('Menu hidden');
-    // }, 20000);  // Masquer après 5 secondes
-
-    // // Montre le menu à nouveau après un autre événement (par exemple, à la fin du jeu)
-    // setTimeout(() => {
-    //     menu.show();
-    //     console.log('Menu shown again');
-    // }, 40000);  // Réafficher après 10 secondes
-
-    // threeRoot.setRenderFunction(() => {
-    //     menu.render();
-    // });
-    // threeRoot.setRenderFunction(function() {
-    //     menu.render();
-    // });
-
-
-
-    threeRoot.animate();
-    // function animate() {
-    //     requestAnimationFrame(animate);
-    //     if (menu_object) {
-    //         menu_object.render(camera);
-    //     }
-    //     if (game_object) {
-    //         game_object.updateAnimation();
-    //     }
-    // }
-
-    // animate();
+// Ajouter un écouteur pour chaque type d'événement
+// eventsToMonitor.forEach(eventType => {
+//     document.addEventListener(eventType, logEvent, true);
 // });
 
-    // // Événements pour rejoindre une équipe
-    // const joinLeftTeamButton = document.getElementById('joinLeftTeam');
-    // const joinRightTeamButton = document.getElementById('joinRightTeam');
+// TODO:
+// First time: Charger les objects et init le canavas FLAG = 1
+// Si FLAG == 1: Init le canvas
 
-    // function joinLeftTeam() {
-    //     let message_form = {
-    //         type: 'join_team',
-    //         team: 'left',
-    //         player_id: local_user.id
-    //     };
-    //     socketManager.sendMessage(message_form);
-    // }
+let isRunning = false;
 
-    // function joinRightTeam() {
-    //     let message_form = {
-    //         type: 'join_team',
-    //         team: 'right',
-    //         player_id: local_user.id
-    //     };
-    //     socketManager.sendMessage(message_form);
-    // }
+const threeRoot = new THREERoot();
+document.addEventListener('loadView', function(event) {
+    console.log("localGame.js LOADED");
+    console.log("DEDEDEDETAIL: ", event.detail);
+    threeRoot.initCanvas();
+    if (!isRunning) {
+        const socketManager = new SocketManager(threeRoot);
+        let menu = new Menu(threeRoot, socketManager);
+        
+        menu.show();
+    }
+    isRunning = true;
+});
+
+
+threeRoot.animate();
+// if (flag == 1) {
+// }

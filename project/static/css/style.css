@@ -1,6 +1,4 @@
-body {
-	font-family: sans-serif;
-}
+body { font-family: sans-serif; }
 
 nav {
 	height: 6vh;
@@ -44,9 +42,9 @@ footer {
 	font-style: italic;
 }
 
-footer:hover {
-	text-decoration: dotted red underline 2px;
-}
+/* footer:hover { */
+/* 	text-decoration: dotted red underline 2px; */
+/* } */
 
 h1 {
 	padding-bottom: 1rem;

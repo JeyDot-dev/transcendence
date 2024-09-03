@@ -37,16 +37,24 @@ document.addEventListener("DOMContentLoaded", () => {
 // Main function for SPA
 // It fetches the content of the page and replaces the current content
 // It also loads the CSS and JS files and unloads the previous ones
-async function spa(url, data = null) {
+async function spa(urlRaw, data = null) {
     unloadCSS();
     unloadTitle();
 
-    url = makeURL(url);
+    url = makeURL(urlRaw);
     const content = await fetchHTML(url, data);
     const mainElement = document.querySelector("main");
     mainElement.innerHTML = content;
 
-    handleJS(mainElement);
+    
+    // Attendre que handleJS soit complètement exécuté
+    await handleJS(mainElement);
+
+    // Une fois handleJS terminé, dispatcher l'événement loadView
+    const appName = "test";
+    const loadViewEvent = new CustomEvent('loadView', { detail: urlRaw });
+    document.dispatchEvent(loadViewEvent);
+    console.log("IN SPA - loadViewEvent dispatched");
 
     loadCSS(mainElement);
     loadTitle(mainElement);
