@@ -74,8 +74,7 @@ function makeURL(url) {
 
         return newURL;
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error("Error while creating URL object");
     }
 }
 
@@ -86,6 +85,9 @@ async function fetchHTML(url, data = null) {
         // Build fetch destination
         const destination = url.pathname + url.search;
 
+        if (url.origin !== window.location.origin) {
+            throw new Error("XSS");
+        }
         // Add the X-Requested-With header to the request
         const options = {
             headers: {
@@ -105,8 +107,7 @@ async function fetchHTML(url, data = null) {
 
         return await response.text();
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error("Error while loading content");
     }
 }
 
@@ -167,8 +168,6 @@ async function handleJS(mainElement) {
                 new Function(script.textContent)();
             }
         }
-        // Remove the original script element in any case
-        //script.remove();
     }
 }
 
@@ -195,8 +194,12 @@ function unloadTitle() {
 
 // Function to navigate to a new URL
 function navigateTo(url, data = null) {
-    history.pushState(data, null, url);
-    spa(url, data);
+    try {
+        history.pushState(data, "", url);
+        spa(url, data);
+    } catch (err) {
+        console.error("Unable to load external resources from SPA");
+    }
 };
 
 // Function to get a cookie by name
