@@ -44,7 +44,7 @@ export class Game {
         console.log("Init Lightning");
         this.initLighting();
         console.log("Init Text");
-        this.initText();
+        this.initText(gameData.score);
         console.log("Init Ball");
         this.initBall(gameData.ball);
         console.log("Init Paddles");
@@ -151,7 +151,7 @@ export class Game {
         this.gameGroup.add(ambientLight);
     }
 
-    initText() {
+    initText(score) {
         const fontLoader = new FontLoader();
         fontLoader.load(
             'https://threejs.org/examples/fonts/helvetiker_bold.typeface.json',
@@ -160,17 +160,17 @@ export class Game {
                     this.camera,
                     this.scene,
                     font,
-                    125,
+                    105,
                     10,
                     0xffffff,
                     '0s',
                     1.05,
                     new THREE.Vector3(0, 125 / 2, 300)
                 );
-                this.p1Text = new Text3d(this.camera, this.scene, font, 100, 10, 0x33ccff, '0', 1.05,
+                this.p1Text = new Text3d(this.camera, this.scene, font, 100, 10, 0x33ccff, score[0].toString(), 1.05,
                     new THREE.Vector3(-200, 100 / 2, 300)
                 );
-                this.p2Text = new Text3d(this.camera, this.scene, font, 100, 10, 0xff2975, '0', 1.05,
+                this.p2Text = new Text3d(this.camera, this.scene, font, 100, 10, 0xff2975, score[1].toString(), 1.05,
                     new THREE.Vector3(200, 100 / 2, 300)
                 );
                 // TODO: Text3d au group ?
@@ -335,10 +335,10 @@ export class Game {
         // console.log('wsMessageManager: ', data);
         switch (data.type) {
             case 'scoreChange0':
-                this.p1Text.updateText(data.score[0].toString());
+                this.p1Text.updateText(data.score[0].toString(), this.gameGroup);
                 break;
             case 'scoreChange1':
-                this.p2Text.updateText(data.score[1].toString());
+                this.p2Text.updateText(data.score[1].toString(), this.gameGroup);
                 break;
             case 'ballMove':
                 // -y Car dans three js y est orienter differement

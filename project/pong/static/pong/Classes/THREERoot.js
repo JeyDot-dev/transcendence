@@ -19,6 +19,7 @@ export class THREERoot {
     
     initCanvas() {
         this.container = document.querySelector("#container_game");
+        if (!this.container) return ;
         console.log("Container: ", this.container);
         
         // Enable MSAA in the WebGLRenderer
