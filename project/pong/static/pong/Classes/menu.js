@@ -10,9 +10,10 @@ export class Menu {
         this.camera = threeRoot.camera;
         this.renderer = threeRoot.renderer;
         this.socketManager = socketManager;
+        this.menuGroup = new THREE.Group();
 
-        this.mouseControlEnabled = true;  // Variable pour suivre l'état du mouvement de la caméra
-        this.showMenuEnabled = true;  // Variable pour suivre l'état de l'affichage du menu
+        this.mouseControlEnabled = true;
+        this.showMenuEnabled = true;
 
         // Configuration de la caméra pour le menu
         threeRoot.updateCameraSettings({
@@ -30,7 +31,7 @@ export class Menu {
 
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseClick = this.onMouseClick.bind(this);
-        this.onKeyDown = this.onKeyDown.bind(this);  // Lier la méthode onKeyDown
+        this.onKeyDown = this.onKeyDown.bind(this);
 
         this.colorPalette = [
             new THREE.Color(0xff00c1),
@@ -59,8 +60,10 @@ export class Menu {
         this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         this.directionalLight.position.set(500, -500, 1000);
         this.directionalLight.castShadow = true;
-        this.scene.add(this.directionalLight);
-        this.scene.add(this.directionalLight.target);
+        // this.scene.add(this.directionalLight);
+        // this.scene.add(this.directionalLight.target);
+        this.menuGroup.add(this.directionalLight);
+        this.menuGroup.add(this.directionalLight.target);
 
         // Ajouter le menu à `threeRoot`
         threeRoot.addAnimatedObject(this);
@@ -68,7 +71,7 @@ export class Menu {
         // Activer l'écoute des événements de clavier
         window.addEventListener('keydown', this.onKeyDown);
     }
-
+    // TODO: hauteur du canvas 
     createMenuItems() {
         this.local = new MenuItem(this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 400), () => {
             this.newLocalGame();
@@ -218,7 +221,8 @@ export class Menu {
 }
 
 class MenuItem {
-    constructor(scene, camera, font, text, color, position, onClick) {
+    constructor(group, scene, camera, font, text, color, position, onClick) {
+        this.groupRef = group;
         this.scene = scene;
         this.camera = camera;
         this.font = font;
@@ -231,7 +235,9 @@ class MenuItem {
     }
 
     createText(text, color) {
+        // TDODO:
         this.text3d = new Text3d(this.camera, this.scene, this.font, 100, 25, color, text, 1.02, this.position, new THREE.Vector3(Math.PI / 2, 0, 0));
+        this.text3d.addToGroup(this.groupRef);
         this.textMesh = this.text3d.mesh;
         this.textGlowTextMesh = this.text3d.glowTextMesh;
 
@@ -288,18 +294,21 @@ class MenuItem {
         // Créer le paddle gauche
         const leftPaddle = new THREE.Mesh(paddleGeometry, shaderMaterial);
         leftPaddle.position.set(this.boundingBox.min.x - 50, this.position.y - 80, this.position.z + paddleSize.z / 2);
-        this.scene.add(leftPaddle);
+        // this.scene.add(leftPaddle);
+        this.groupRef.add(leftPaddle);
+
 
         // Créer le paddle droit
         const rightPaddle = new THREE.Mesh(paddleGeometry, shaderMaterial);
         rightPaddle.position.set(this.boundingBox.max.x + 50, this.position.y - 80, this.position.z + paddleSize.z / 2);
-        this.scene.add(rightPaddle);
+        // this.scene.add(rightPaddle);
+        this.groupRef.add(rightPaddle);
 
         this.paddles.push(leftPaddle, rightPaddle);
     }
 
     removePaddles() {
-        this.paddles.forEach(paddle => this.scene.remove(paddle));
+        this.paddles.forEach(paddle => this.groupRef.remove(paddle));
         this.paddles = [];
     }
 }

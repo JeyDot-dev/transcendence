@@ -23,8 +23,9 @@ export class Game {
         console.log('gameData: ', gameData);
         this.playerId = 0;
         this.pressedKeys = [];
-        this.players = [];
+        this.paddles = [];
         this.offSet = new THREE.Vector2(gameData.width / 2, gameData.height / 2);
+        this.gameGroup = new THREE.Group();
 
         this.colorPalette = [
             new THREE.Color(0xff00c1),
@@ -49,42 +50,45 @@ export class Game {
         console.log("Init Paddles");
         this.initPaddles(gameData.players);
 
-        const size = 720; // Taille de la grille
-        const divisions = 4; // Nombre de divisions
-        const gridHelper = new THREE.GridHelper(size, divisions);
-        gridHelper.position.set(0, 0, 0);
-        gridHelper.rotation.x = Math.PI / 2;
-        this.scene.add(gridHelper);
+
+        // const size = 720; // Taille de la grille
+        // const divisions = 4; // Nombre de divisions
+        // const gridHelper = new THREE.GridHelper(size, divisions);
+        // gridHelper.position.set(0, 0, 0);
+        // gridHelper.rotation.x = Math.PI / 2;
+        // this.scene.add(gridHelper);
         
-        const gridHelperTop = new THREE.GridHelper(1400, 8);
-        gridHelperTop.position.set(0, 720 / 2, 0);
-        gridHelperTop.scale.set(1, 1, 0.2);
-        this.scene.add(gridHelperTop);
-        const gridHelperBot = new THREE.GridHelper(1400, 8);
-        gridHelperBot.position.set(0, -720 / 2, 0);
-        gridHelperBot.scale.set(1, 1, 0.2);
-        this.scene.add(gridHelperBot);
-        const gridHelperLeft = new THREE.GridHelper(1280, 8);
-        gridHelperLeft.position.set(-1280 / 2, 0, 0);
-        gridHelperLeft.scale.set(1, 1, 0.2);
-        gridHelperLeft.rotation.z = Math.PI / 2;
-        this.scene.add(gridHelperLeft);
-        const gridHelperRight = new THREE.GridHelper(1280, 8);
-        gridHelperRight.position.set(1280 / 2, 0, 0);
-        gridHelperRight.scale.set(1, 1, 0.2);
-        gridHelperRight.rotation.z = Math.PI / 2;
-        this.scene.add(gridHelperRight);
+        // const gridHelperTop = new THREE.GridHelper(1400, 8);
+        // gridHelperTop.position.set(0, 720 / 2, 0);
+        // gridHelperTop.scale.set(1, 1, 0.2);
+        // this.scene.add(gridHelperTop);
+        // const gridHelperBot = new THREE.GridHelper(1400, 8);
+        // gridHelperBot.position.set(0, -720 / 2, 0);
+        // gridHelperBot.scale.set(1, 1, 0.2);
+        // this.scene.add(gridHelperBot);
+        // const gridHelperLeft = new THREE.GridHelper(1280, 8);
+        // gridHelperLeft.position.set(-1280 / 2, 0, 0);
+        // gridHelperLeft.scale.set(1, 1, 0.2);
+        // gridHelperLeft.rotation.z = Math.PI / 2;
+        // this.scene.add(gridHelperLeft);
+        // const gridHelperRight = new THREE.GridHelper(1280, 8);
+        // gridHelperRight.position.set(1280 / 2, 0, 0);
+        // gridHelperRight.scale.set(1, 1, 0.2);
+        // gridHelperRight.rotation.z = Math.PI / 2;
+        // this.scene.add(gridHelperRight);
         
         console.log("Init Input Handling");
         this.initInputHandling(); // Initialisation des événements clavier
         console.log("End of Game constructor")
+        this.scene.add(this.gameGroup);
     }
 
     initArena(width, height) {
 
         // console.log(width, height);
         this.arena = new Arena(width, 25, height, 0x1c9e97, 0x5a407b, 25, 25, 0xde95d0);
-        this.arena.addToScene(this.scene);
+        this.arena.addToGroup(this.gameGroup);
+        // this.arena.addToScene(this.scene);
         // this.arena.group.translateX(ball_param.x);
         // this.arena.group.translateY(ball_param.y);
 
@@ -117,26 +121,34 @@ export class Game {
         directionalLight1.castShadow = true;
         const targetObject1 = new THREE.Object3D();
         targetObject1.position.set(400, 0, 0);
-        this.scene.add(directionalLight1);
+        // this.scene.add(directionalLight1);
         directionalLight1.target = targetObject1;
         directionalLight1.target.updateMatrixWorld();     
-        this.scene.add(targetObject1);
+        // this.scene.add(targetObject1);
+        this.gameGroup.add(directionalLight1);
+        this.gameGroup.add(targetObject1);
+
         // Light 2
         const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
         directionalLight2.position.set(400, 0, 800);
         directionalLight2.castShadow = true;
         const targetObject2 = new THREE.Object3D();
         targetObject2.position.set(-400, 0, 0); // Positionner la cible à l'origine (0, 0, 0)
-        this.scene.add(directionalLight2);
+        // this.scene.add(directionalLight2);
         directionalLight2.target = targetObject2;
         directionalLight2.target.updateMatrixWorld();     
-        this.scene.add(targetObject2);
+        // this.scene.add(targetObject2);
+        this.gameGroup.add(directionalLight2);
+        this.gameGroup.add(targetObject2);
 
         const directionalLightHelper1 = new THREE.DirectionalLightHelper(directionalLight1, 1);
         const directionalLightHelper2 = new THREE.DirectionalLightHelper(directionalLight2, 1);
-        this.scene.add(directionalLightHelper1);
-        this.scene.add(directionalLightHelper2);
-        this.scene.add(ambientLight);
+        // this.scene.add(directionalLightHelper1);
+        // this.scene.add(directionalLightHelper2);
+        // this.scene.add(ambientLight);
+        this.gameGroup.add(directionalLightHelper1);
+        this.gameGroup.add(directionalLightHelper2);
+        this.gameGroup.add(ambientLight);
     }
 
     initText() {
@@ -161,6 +173,10 @@ export class Game {
                 this.p2Text = new Text3d(this.camera, this.scene, font, 100, 10, 0xff2975, '0', 1.05,
                     new THREE.Vector3(200, 100 / 2, 300)
                 );
+                // TODO: Text3d au group ?
+                this.timeText.addToGroup(this.gameGroup);
+                this.p1Text.addToGroup(this.gameGroup);
+                this.p2Text.addToGroup(this.gameGroup);
             },
             undefined, // onProgress callback (optional)
             (error) => {
@@ -180,14 +196,16 @@ export class Game {
             new THREE.Vector2(ball_param.speed, ball_param.speed),
             this.camera
         );
-        this.ball.addToScene(this.scene);
+        // this.ball.addToScene(this.scene);
+        this.ball.addToGroup(this.gameGroup);
+
     }
 
     initPaddles(playersParam) {
         console.log("----Paddles Params of type: ", typeof playersParam);
         playersParam.forEach(element => {
             console.log("Player:", element);
-            const newPlayer = new Paddle(
+            const newPaddle = new Paddle(
                 element.width,
                 element.height,
                 0xffffff,
@@ -195,8 +213,9 @@ export class Game {
                 element.position[1] - this.offSet.y,
                 element.id
             );
-            newPlayer.addToScene(this.scene);
-            this.players.push(newPlayer);
+            // newPlayer.addToScene(this.scene);
+            newPaddle.addToGroup(this.gameGroup);
+            this.paddles.push(newPaddle);
         });
 
     }
@@ -302,14 +321,14 @@ export class Game {
 
     updateGame(game) {
         console.log('Update Game(Reconnection)', game);
-        this.ball.move(game.ball.x, -game.ball.y);
+        this.ball.move(game.ball.x - this.offSet.x, -game.ball.y + this.offSet.y);
         // console.log(game.score);
-        game.players.forEach(element => {
-            this.players[element.id].move(element.position[0], -element.position[1]);
+        game.paddles.forEach(element => {
+            this.paddles[element.id].move(element.position[0] - this.offSet.x, -element.position[1] + this.offSet.y);
         });
         // this.timeText.updateText('0s');
-        this.p1Text.updateText(game.score[0].toString());
-        this.p2Text.updateText(game.score[1].toString());
+        this.p1Text.updateText(game.score[0].toString(), this.gameGroup);
+        this.p2Text.updateText(game.score[1].toString(), this.gameGroup);
     }
 
     wsMessageManager(data) {
@@ -327,7 +346,7 @@ export class Game {
                 break;
                 case 'paddleMove':
                 // -y Car dans three js y est orienter differement
-                this.players[data.paddle.side].move(data.paddle.x - this.offSet.x, -data.paddle.y + this.offSet.y)
+                this.paddles[data.paddle.side].move(data.paddle.x - this.offSet.x, -data.paddle.y + this.offSet.y)
                 break;
             default:
                 break;
