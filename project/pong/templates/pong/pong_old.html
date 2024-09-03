@@ -1,6 +1,7 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'pong/css/style.css' %}"><title>Pong 3D</title>
-<div id="container_game" class="container ratio ratio-16x9 shadow bg-body-primary mx-auto px-0" style="max-width=98%">
+<div class="d-sm-none inline">Please somehow make your screen bigger (or turn your phone to landscape mode)</div>
+<div id="container_game" class="container d-none d-sm-block ratio mx-auto shadow bg-body-primary mx-auto mw-auto px-0 mb-100" style="min-width: 95%; min-height: 90%; max-width: 92%; max-height: 95%; --bs-aspect-ratio: 50%;">
 </div>
 <div id="camera-control-panel">
     <h3>Camera Control</h3>
