@@ -135,4 +135,7 @@ export class Arena {
     addToScene(scene) {
         scene.add(this.group);
     }
+    addToGroup(group) {
+        group.add(this.group);
+    }
 }

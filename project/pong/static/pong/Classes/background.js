@@ -1,11 +1,13 @@
 import { THREE } from '../three.module.js';
 
 export class BouncingBallInCube {
-    constructor(size, division, threeRoot) {
+    constructor(size, division, threeRoot, group) {
         this.size = size;
         this.division = division;
         this.scene = threeRoot.scene;
         this.camera = threeRoot.camera;
+        this.groupRef = group;
+
         this.ballVelocity = new THREE.Vector3(15, 14, 13); // Vitesse initiale
         this.gridSegmentsList = [];
         this.pointsSet = new Set(); // Pour éviter les doublons de points
@@ -79,7 +81,7 @@ export class BouncingBallInCube {
             uniforms: {
                 "c": { type: "f", value: 1.0 },
                 "p": { type: "f", value: 1.4 },
-                glowColor: { type: "c", value: randomColor }, // Choisissez la couleur du glow ici
+                glowColor: { type: "c", value: randomColor },
                 viewVector: { type: "v3", value: this.camera.position }
             },
             vertexShader: `
@@ -110,7 +112,7 @@ export class BouncingBallInCube {
         const lineGeometry = new THREE.BufferGeometry().setFromPoints([transformedStart, transformedEnd]);
         const lineSegment = new THREE.Line(lineGeometry, lineMaterial);
     
-        this.scene.add(lineSegment);
+        // this.scene.add(lineSegment);
         this.gridSegmentsList.push(lineSegment);
     }
 
@@ -128,7 +130,7 @@ export class BouncingBallInCube {
     
         point.position.copy(transformedPosition);
     
-        this.scene.add(point);
+        // this.scene.add(point);
     
         // Remplacer le stockage par l'objet Three.js lui-même
         this.pointsSet.add(point);
@@ -140,7 +142,7 @@ export class BouncingBallInCube {
         const ballMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
         this.ball = new THREE.Mesh(ballGeometry, ballMaterial);
         this.ball.position.set(0, 0, 0);
-        this.scene.add(this.ball);
+        // this.scene.add(this.ball);
         this.ballRadius = ballRadius;
     }
 
@@ -211,5 +213,19 @@ export class BouncingBallInCube {
         this.pointsSet.forEach(point => {
             point.visible = true;
         });
+    }
+
+    addToGroup(group) {
+        // this.scene.add(this.ball);
+        group.add(this.ball);
+        this.pointsSet.forEach(point => {
+            group.add(point);
+        });
+        this.gridSegmentsList.forEach(segment => {
+            group.add(segment);
+        });
+        // this.scene.add(point);
+        // this.scene.add(lineSegment);
+
     }
 }
