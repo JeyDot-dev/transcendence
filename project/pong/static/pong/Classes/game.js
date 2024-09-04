@@ -234,6 +234,7 @@ export class Game {
                 }
                 if (['arrowup', 'arrowdown'].includes(key)) {
                     // console.log('keydown: arrow');
+                    event.preventDefault(); // Empêche le comportement par défaut (scrolling)
                     this.socketManager.sendMessage({ type: 'keydown', key: key, who: 1 });
                 }
                 if (['k'].includes(key)) {
