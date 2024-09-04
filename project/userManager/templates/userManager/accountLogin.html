@@ -1,0 +1,33 @@
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalPage" aria-hidden="true" style="color: #000">
+<div class="modal-dialog">
+	<div class="modal-content">
+	<div class="modal-header">
+		<h5 class="modal-title" id="loginModalPage">Welcome back!</h5>
+		<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+	</div>
+	<div class="modal-body">
+		<form id="loginForm">
+			{% csrf_token %}
+			<label for="username" class="form-label">Username</label>
+			<input type="text" class="form-control" id="username" name="username" required>
+
+			<label for="password" class="form-label">Password</label>
+			<input type="password" class="form-control" id="password" name="password" required>
+
+			<input type="submit" class="btn btn-primary m-4" value="Login" />
+		</form>
+	</div>
+	</div>
+</div>
+</div>
+
+<script>
+	document.getElementById('loginForm').addEventListener('submit', function(e) {
+		e.preventDefault();
+		var form = document.getElementById('loginForm');
+		var formData = new FormData(form);
+		
+		login(formData);
+		
+	});
+</script>

@@ -8,13 +8,14 @@
 	{% load static %}
 	<link rel="stylesheet" href="{% static 'css/reset.css' %}">
 	<link rel="stylesheet" href="{% static 'css/style.css' %}">
-	<script type="module" src="{% static 'js/spa.js' %}"></script>
+	<script src="{% static 'js/spa.js' %}"></script>
 </head>
 <body>
 	<nav>
 		<span class="title">Transcendence</span>
 		<a href="/" data-link>Home</a>
 		<a href="/pong" data-link>Pong</a>
+		<a href="/userManager" data-link>User</a>
 		<a href="/about" data-link>About</a>
 		<a href="/test" data-link>Test</a>
 	</nav>

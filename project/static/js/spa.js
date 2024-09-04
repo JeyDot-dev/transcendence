@@ -60,7 +60,6 @@ function makeURL(url) {
     try {
         // Delete the last slash if there is one
         if (!url.endsWith("/")) {
-            // url = url.slice(1, -1);
             url += "/";
         }
         // Create a new URL object

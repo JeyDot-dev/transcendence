@@ -33,6 +33,9 @@ ALLOWED_HOSTS = ["transcendence.jjorge.ch", "195.15.214.88", "localhost"]
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+	'rest_framework',
+	'rest_framework.authtoken',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -43,6 +46,7 @@ INSTALLED_APPS = [
     "database.apps.DatabaseConfig",
     "channels",
     "pong",
+    "userManager",
 ]
 
 MIDDLEWARE = [
@@ -112,6 +116,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'userManager.UserInfos'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
 
 CHANNEL_LAYERS = {
     "default": {
@@ -144,6 +156,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static_production")
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     BASE_DIR / "pong/static/pong",
+    BASE_DIR / "userManager/static/userManager",
 ]
 
 
