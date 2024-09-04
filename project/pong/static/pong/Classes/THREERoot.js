@@ -44,6 +44,7 @@ export class THREERoot {
         const renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(renderPass);
 
+        document.getElementById("fidget-spinner").style.display = "none";
         this.onWindowResize(this);
         window.addEventListener('resize', this.onWindowResize.bind(this));
     }
