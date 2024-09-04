@@ -253,11 +253,12 @@ export class Game {
                     // console.log('keyup: arrow');
                     this.socketManager.sendMessage({ type: 'keyup', key: key, who: 1 });
                 }
-            });           
-        // } else {
-        //     document.addEventListener('keydown', this.handleKeyDown.bind(this));
-        //     document.addEventListener('keyup', this.handleKeyUp.bind(this));
-        // }
+            });
+
+        // Ajout des boutons si l'utilisateur est sur mobile
+        if (this.isMobile()) {
+            this.addMobileControls();
+        }
     }
 
     handleKeyDown(e) {
@@ -384,4 +385,125 @@ export class Game {
         document.removeEventListener('keydown', this.handleKeyDown.bind(this));
         document.removeEventListener('keyup', this.handleKeyUp.bind(this));
     }
+
+    // TODO: Mobile
+    isMobile() {
+        return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    isScreenTooNarrow() {
+        return window.innerWidth < 576; // Par exemple, 576px correspond au point de rupture "small" dans Bootstrap
+    }
+    
+    toggleMobileControlsVisibility() {
+        const leftControls = document.getElementById('mobile-controls-left');
+        const rightControls = document.getElementById('mobile-controls-right');
+    
+        if (this.isScreenTooNarrow()) {
+            if (leftControls) leftControls.style.display = 'none';
+            if (rightControls) rightControls.style.display = 'none';
+        } else {
+            if (leftControls) leftControls.style.display = 'block';
+            if (rightControls) rightControls.style.display = 'block';
+        }
+    }
+
+    addMobileControls() {
+        // Crée dynamiquement les boutons pour monter et descendre
+        const leftControls = document.createElement('div');
+        leftControls.id = 'mobile-controls-left';
+        leftControls.innerHTML = `
+            <div class="btn-group-vertical">
+                <button id="btn-up-left" class="btn btn-primary btn-lg rounded-circle shadow">
+                    <i class="bi bi-arrow-up"></i>
+                </button>
+                <button id="btn-down-left" class="btn btn-primary btn-lg rounded-circle shadow mt-3">
+                    <i class="bi bi-arrow-down"></i>
+                </button>
+            </div>
+        `;
+        
+        const rightControls = document.createElement('div');
+        rightControls.id = 'mobile-controls-right';
+        rightControls.innerHTML = `
+            <div class="btn-group-vertical">
+                <button id="btn-up-right" class="btn btn-success btn-lg rounded-circle shadow">
+                    <i class="bi bi-arrow-up"></i>
+                </button>
+                <button id="btn-down-right" class="btn btn-success btn-lg rounded-circle shadow mt-3">
+                    <i class="bi bi-arrow-down"></i>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(leftControls);
+        document.body.appendChild(rightControls);
+        
+        // Ajoute les styles pour positionner les boutons
+        const style = document.createElement('style');
+        style.innerHTML = `
+            #mobile-controls-left, #mobile-controls-right {
+                position: fixed;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 1000;
+            }
+            #mobile-controls-left {
+                left: 20px;
+            }
+            #mobile-controls-right {
+                right: 20px;
+            }
+            .btn {
+                width: 70px;
+                height: 70px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 32px;
+                transition: transform 0.2s;
+            }
+            .btn:hover {
+                transform: scale(1.1);
+            }
+            .btn i {
+                font-size: 32px;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Vérification initiale de la visibilité des boutons
+        this.toggleMobileControlsVisibility();
+
+        // Écoute les changements de taille d'écran et ajuste les boutons
+        window.addEventListener('resize', () => {
+            this.toggleMobileControlsVisibility();
+        });
+        
+        // Gestion des événements tactiles
+        this.handleMobileControls();
+    }
+    
+    
+    
+    handleMobileControls() {
+        const handleTouchStart = (key, who) => {
+            this.socketManager.sendMessage({ type: 'keydown', key: key, who: who });
+        };
+    
+        const handleTouchEnd = (key, who) => {
+            this.socketManager.sendMessage({ type: 'keyup', key: key, who: who });
+        };
+    
+        // Ajoute les événements aux boutons
+        document.getElementById('btn-up-left').addEventListener('touchstart', () => handleTouchStart('w', 0));
+        document.getElementById('btn-down-left').addEventListener('touchstart', () => handleTouchStart('s', 0));
+        document.getElementById('btn-up-right').addEventListener('touchstart', () => handleTouchStart('arrowup', 1));
+        document.getElementById('btn-down-right').addEventListener('touchstart', () => handleTouchStart('arrowdown', 1));
+    
+        document.getElementById('btn-up-left').addEventListener('touchend', () => handleTouchEnd('w', 0));
+        document.getElementById('btn-down-left').addEventListener('touchend', () => handleTouchEnd('s', 0));
+        document.getElementById('btn-up-right').addEventListener('touchend', () => handleTouchEnd('arrowup', 1));
+        document.getElementById('btn-down-right').addEventListener('touchend', () => handleTouchEnd('arrowdown', 1));
+    }    
 }
