@@ -1,5 +1,5 @@
 function login(formData) {
-	const url = 'api/login/';
+	const url = 'api/userManager/login/';
 
 	fetch(url, {
 		method: 'POST',
@@ -24,7 +24,7 @@ function login(formData) {
 }
 
 function createAccount(formData) {
-	const url = 'api/signup/';
+	const url = 'api/userManager/signup/';
 
 	if (formData.get('password') !== formData.get('password2')) {
 		alert('Passwords do not match');
@@ -47,14 +47,14 @@ function createAccount(formData) {
 		if (data.error) {
 			alert(data.error);
 		} else {
-			alert('Account created successfully');
+			alert(data.message);
 			location.reload();
 		}
 	})
 }
 
 function testToken(token) {
-	const url = 'api/test_token/';
+	const url = 'api/userManager/test_token/';
 
 	fetch(url, {
 		method: 'GET',
@@ -74,7 +74,7 @@ function testToken(token) {
 }
 
 function logout() {
-	const url = 'api/logout/';
+	const url = 'api/userManager/logout/';
 	const token = getToken();
 
 	fetch(url, {
@@ -97,7 +97,7 @@ function logout() {
 }
 
 function changePassword(){
-	const url = 'api/change_password/';
+	const url = 'api/userManager/change_password/';
 	const token = document.cookie.split('=')[1];
 
 	fetch(url, {
@@ -123,7 +123,7 @@ function changePassword(){
 }
 
 function changeSkin(newColor) {
-	const url = 'api/change_skin/';
+	const url = 'api/userManager/change_skin/';
 	const token = getToken();
 
 	fetch(url, {

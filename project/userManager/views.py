@@ -13,6 +13,7 @@ from rest_framework.authentication import TokenAuthentication, SessionAuthentica
 
 @api_view(['POST'])
 def login_view(request):
+	print("LOGIN")
 	user = get_object_or_404(UserInfos, username=request.data['username'])
 	if user.check_password(request.data['password']):
 		token, created = Token.objects.get_or_create(user=user)
@@ -23,7 +24,6 @@ def login_view(request):
 
 @api_view(['POST'])
 def logout_view(request):
-
 	try:
 		request.user.auth_token.delete()
 	except:
@@ -35,6 +35,7 @@ def logout_view(request):
 
 @api_view(['POST'])
 def signup(request):
+	print("SIGNUP")
 	serializer = UserSerializer(data=request.data)
 	if serializer.is_valid():
 		user = serializer.save()
@@ -63,4 +64,4 @@ def change_skin(request):
 	return Response({'message': 'Skin changed successfully'}, status=status.HTTP_200_OK)
 
 def index(request):
-	return render(request, "userManager/index.html")
+	return render(request, "index.html")
