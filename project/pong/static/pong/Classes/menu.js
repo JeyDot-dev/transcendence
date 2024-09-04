@@ -73,22 +73,29 @@ export class Menu {
 
         // Activer l'écoute des événements de clavier
         window.addEventListener('keydown', this.onKeyDown);
+        if (this.isMobile()) {
+            this.mouseControlEnabled = false;
+        }
+    }
+    // MOBILE
+    isMobile() {
+        return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
     // TODO: hauteur du canvas 
     createMenuItems() {
-        this.local = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 400), () => {
+        this.local = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
             this.newLocalGame();
         });
-        this.matchmaking = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 200), () => {
+        this.matchmaking = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 180), () => {
             console.log("Clicked On: Matchmaking");
         });
-        this.localTournament = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, 0), () => {
+        this.localTournament = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
             console.log("Clicked On: Local Tournament");
         });
-        this.tournament = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -200), () => {
+        this.tournament = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
         });
-        this.options = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[4], new THREE.Vector3(0, 0, -400), () => {
+        this.options = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[4], new THREE.Vector3(0, 0, -440), () => {
             console.log("Clicked On: Options");
         });
 
@@ -220,7 +227,12 @@ export class Menu {
         this.socketManager.setGameId(666);
         this.socketManager.setType('local');
         this.hide();
-    } 
+    }
+
+    returnToMenu() {
+        // this.socketManager
+        this.show();
+    }
 }
 
 class MenuItem {
