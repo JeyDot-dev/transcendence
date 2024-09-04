@@ -86,7 +86,9 @@ export class THREERoot {
         });
 
         // End FPS counter
-        this.stats.end();
+        if (this.stats) {
+            this.stats.end();
+        }
         this.render();
     }
 
