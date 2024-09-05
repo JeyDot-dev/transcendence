@@ -46,15 +46,12 @@ async function spa(urlRaw, data = null) {
     const mainElement = document.querySelector("main");
     mainElement.innerHTML = content;
 
-    
     // Attendre que handleJS soit complètement exécuté
     await handleJS(mainElement);
 
     // Une fois handleJS terminé, dispatcher l'événement loadView
-    const appName = "test";
     const loadViewEvent = new CustomEvent('loadView', { detail: urlRaw });
     document.dispatchEvent(loadViewEvent);
-    console.log("IN SPA - loadViewEvent dispatched");
 
     loadCSS(mainElement);
     loadTitle(mainElement);
@@ -86,6 +83,7 @@ function makeURL(url) {
     }
 }
 
+
 // Function to fetch the HTML content of the page
 // It sends an XMLHttpRequest to the server
 async function fetchHTML(url, data = null) {
@@ -115,7 +113,7 @@ async function fetchHTML(url, data = null) {
 
         return await response.text();
     } catch (err) {
-        console.error("Error while loading content");
+        console.error("Error while loading HTML");
     }
 }
 
@@ -226,4 +224,19 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+// Function to fetch JSON from a source
+async function fetchJSON(url) {
+    try {
+        const options = {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }
+        const response = await fetch(url, options);
+        return await response.json();
+    } catch (err) {
+        console.error("Error while loading JSON");
+    }
 }
