@@ -41,7 +41,8 @@ async function spa(urlRaw, data = null) {
     unloadCSS();
     unloadTitle();
 
-    url = makeURL(urlRaw);
+    const url = makeURL(urlRaw);
+    const viewName = getViewName(urlRaw);
     const content = await fetchHTML(url, data);
     const mainElement = document.querySelector("main");
     mainElement.innerHTML = content;
@@ -50,7 +51,7 @@ async function spa(urlRaw, data = null) {
     await handleJS(mainElement);
 
     // Une fois handleJS terminé, dispatcher l'événement loadView
-    const loadViewEvent = new CustomEvent('loadView', { detail: urlRaw });
+    const loadViewEvent = new CustomEvent('loadView', { detail: viewName });
     document.dispatchEvent(loadViewEvent);
 
     loadCSS(mainElement);
@@ -80,6 +81,29 @@ function makeURL(url) {
         return newURL;
     } catch (err) {
         console.error("Error while creating URL object");
+    }
+}
+
+// Function to get the view name from the URL
+function getViewName(url) {
+    try {
+        let newURL = new URL(url, window.location.origin);
+        let viewName = newURL.pathname;
+
+        if (viewName === "/") {
+            viewName = "home";
+        }
+
+        if (viewName.startsWith("/")) {
+            viewName = viewName.slice(1);
+        }
+        if (viewName.endsWith("/")) {
+            viewName = viewName.slice(0, -1);
+        }
+
+        return viewName;
+    } catch (err) {
+        console.error("Error while getting view name");
     }
 }
 
