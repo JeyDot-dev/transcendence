@@ -4,37 +4,49 @@ import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/p
 import Stats from 'https://cdnjs.cloudflare.com/ajax/libs/stats.js/17/Stats.js';
 
 export class THREERoot {
-    constructor(container = document.body, fov = 75, width = window.innerWidth, height = window.innerHeight, near = 0.1, far = 10000) {
-        this.container = container;
-        console.log("Container: ", this.container);
+    constructor(fov = 75, width = window.innerWidth, height = window.innerHeight, near = 0.1, far = 10000) {
+        // this.container = container;
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
+        this.width = width;
+        this.height = height;
+        this.animatedObjects = []; // Liste des objets animés
+        this.stats = null;
+        this.renderer = null;
 
+        // this.initCameraControls();
+    }
+    
+    initCanvas() {
+        this.container = document.querySelector("#container_game");
+        if (!this.container) return ;
+        console.log("Container: ", this.container);
+        
         // Enable MSAA in the WebGLRenderer
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setSize(width, height);
+        this.renderer.setSize(this.width, this.height);
         this.renderer.shadowMap.enabled = true;
         this.composer = new EffectComposer(this.renderer);
         this.container.appendChild(this.renderer.domElement);
 
-        this.animatedObjects = []; // Liste des objets animés
 
         // Initialize FPS counter
-        this.stats = new Stats();
-        this.stats.showPanel(0); // 0 = FPS, 1 = ms/frame, 2 = memory usage
-        document.body.appendChild(this.stats.dom);
+        // this.stats = new Stats();
+        // this.stats.showPanel(0); // 0 = FPS, 1 = ms/frame, 2 = memory usage
+        // this.container.appendChild(this.stats.dom);
 
         // Create a render target with MSAA for post-processing
-        this.renderTarget = new THREE.WebGLMultisampleRenderTarget(width, height, { format: THREE.RGBAFormat });
+        this.renderTarget = new THREE.WebGLMultisampleRenderTarget(this.width, this.height, { format: THREE.RGBAFormat });
         
         // Create the EffectComposer with the MSAA render target
         this.composer = new EffectComposer(this.renderer, this.renderTarget);
         const renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(renderPass);
 
+        document.getElementById("fidget-spinner").style.display = "none";
+        this.onWindowResize(this);
         window.addEventListener('resize', this.onWindowResize.bind(this));
-        this.initCameraControls();
     }
 
     addAnimatedObject(object) {
@@ -57,9 +69,12 @@ export class THREERoot {
 
     animate() {
         requestAnimationFrame(this.animate.bind(this));
+        if (!this.renderer) return ;
 
         // Start FPS counter
-        this.stats.begin();
+        if (this.stats) {
+            this.stats.begin();
+        }
         
         // Call the update method of each animated object
         this.animatedObjects.forEach(obj => {
@@ -72,7 +87,9 @@ export class THREERoot {
         });
 
         // End FPS counter
-        this.stats.end();
+        if (this.stats) {
+            this.stats.end();
+        }
         this.render();
     }
 

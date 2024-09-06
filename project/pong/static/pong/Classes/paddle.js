@@ -3,16 +3,20 @@
 import { THREE } from '../three.module.js';
 
 export class Paddle {
-    constructor(width, color, x, y, id) {
+    constructor(width, height, color, x, y, velocity = new THREE.Vector2(0, 0), id) {
         // Création de la géométrie et du matériau du paddle
+        this.velocity = velocity;
         this.geometry = new THREE.BoxGeometry(1, 1, 1);
         this.material = new THREE.MeshStandardMaterial({ color: color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        const height = width / 5;
-        const depth = width / 10;
-        this.mesh.scale.set(depth, width, height);
+        // const height = width / 5;
+        // const depth = width / 10;
+        this.mesh.scale.set(width, height, width);
         this.user_id = id;
-        this.mesh.position.set(x, y, height / 2);
+        this.mesh.position.set(x, y, width / 2);
+
+        this.axesHelper = new THREE.AxesHelper(50); // La taille des axes peut être ajustée
+        this.mesh.add(this.axesHelper);
     }
 
     logMeshData() {
@@ -26,10 +30,16 @@ export class Paddle {
         console.log('Max:', this.boxHelper.max);
     }
     move(x, y) {
-        this.mesh.position.set(x, y, 7.5);
+        this.mesh.position.set(x, y);
     }
     addToScene(scene) {
         scene.add(this.mesh);
+    }
+    addToGroup(group) {
+        group.add(this.mesh);
+    }
+    update() {
+        this.mesh.position.add(this.velocity);
     }
     // move(direction) {
     //     // Calculer le mouvement dans le système de coordonnées local

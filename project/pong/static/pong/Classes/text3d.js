@@ -4,7 +4,8 @@ import { TextGeometry } from "../TextGeometry.js";
 export class Text3d {
     constructor(camera, scene, font, size = 0.5, depth = 0.1, color = 0xfffff, text = "NULL", glow = 0,
             position = new THREE.Vector3(0, 0, 0),
-            rotation = new THREE.Vector3(-Math.PI / 2, 0, 0)) {
+            rotation = new THREE.Vector3(Math.PI / 2, 0, 0)) {
+        this.camera = camera;
         this.font = font;
         this.text = text;
         this.size = size;
@@ -22,8 +23,9 @@ export class Text3d {
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.rotation.set(rotation.x, rotation.y, rotation.z);
-        scene.add(this.mesh);
+        // scene.add(this.mesh);
 
+        this.glowTextMesh = null;
         if (glow != 0) {
             this.createGlowMesh(camera, scene, color, glow);
         }
@@ -67,7 +69,7 @@ export class Text3d {
         this.glowTextMesh = new THREE.Mesh(this.geometry.clone(), shaderMaterial);
         this.glowTextMesh.scale.multiplyScalar(glow);
         this.glowTextMesh.rotation.copy(this.mesh.rotation);
-        scene.add(this.glowTextMesh);
+        // scene.add(this.glowTextMesh);
     }
 
     setPosition(position) {
@@ -86,9 +88,23 @@ export class Text3d {
         }
     }
 
-    updateText(text) {
-        this.scene.remove(this.mesh);
-        this.scene.remove(this.glowTextMesh);
+    addToGroup(group) {
+        group.add(this.mesh);
+        if (this.glowTextMesh) {
+            group.add(this.glowTextMesh);
+        }
+    }
+    removeFromGroup(group) {
+        group.remove(this.mesh);
+        if (this.glowTextMesh) {
+            group.remove(this.glowTextMesh);
+        }
+    }
+
+    updateText(text, group) {
+        // this.scene.remove(this.mesh);
+        // this.scene.remove(this.glowTextMesh);
+        this.removeFromGroup(group);
         this.geometry = new TextGeometry(text, {
             font: this.font,
             size: this.size,
@@ -97,12 +113,14 @@ export class Text3d {
         });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
-        this.scene.add(this.mesh);
-
+        // this.scene.add(this.mesh);
         if (this.glowTextMesh) {
             this.createGlowMesh(this.camera, this.scene, this.color, this.glowTextMesh.scale.x);
         }
+        this.addToGroup(group);
 
         this.setPosition(this.position); // Mettre à jour la position avec le nouveau texte
+        // this.mesh.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
+
     }
 }

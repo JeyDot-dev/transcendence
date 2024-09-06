@@ -35,8 +35,7 @@ ALLOWED_HOSTS = ["transcendence.jjorge.ch", "195.15.214.88", "localhost"]
 INSTALLED_APPS = [
     "daphne",
     "rest_framework",
-	'rest_framework',
-	'rest_framework.authtoken',
+    "rest_framework.authtoken",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -117,12 +116,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'userManager.UserInfos'
+AUTH_USER_MODEL = "userManager.UserInfos"
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ]
 }
 
@@ -157,6 +156,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "pong/static/pong",
     BASE_DIR / "database/static/database"
     BASE_DIR / "userManager/static/userManager",
+    BASE_DIR / "database/static/database",
 ]
 
 
@@ -164,3 +164,28 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',  # Change this to DEBUG if needed for Django messages
+        },
+        # Ajoutez votre module spécifique si nécessaire
+        'pong.local_consumers': {  # Remplacez 'myapp.consumers' par le chemin correct de votre consumer
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,  # Cela empêchera les logs de remonter aux autres loggers
+        },
+
+    },
+}

@@ -36,6 +36,8 @@ prod-re: prod-clean cp-prod
 	docker compose -f docker-compose/production-compose.yml up --build
 prod-fre: prod-fclean cp-prod
 	docker compose -f docker-compose/production-compose.yml up --build
+nuke:
+	docker system prune -a -f
 help:
 	@echo "commands for DEV setup:\n\
 	\t dev-up | dev-down | dev-clean | dev-re | makemigrations | migrate | collectstatic\n\

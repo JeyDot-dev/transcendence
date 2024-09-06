@@ -37,16 +37,22 @@ document.addEventListener("DOMContentLoaded", () => {
 // Main function for SPA
 // It fetches the content of the page and replaces the current content
 // It also loads the CSS and JS files and unloads the previous ones
-async function spa(url, data = null) {
+async function spa(urlRaw, data = null) {
     unloadCSS();
     unloadTitle();
 
-    url = makeURL(url);
+    const url = makeURL(urlRaw);
+    const viewName = getViewName(urlRaw);
     const content = await fetchHTML(url, data);
     const mainElement = document.querySelector("main");
     mainElement.innerHTML = content;
 
-    handleJS(mainElement);
+    // Attendre que handleJS soit complètement exécuté
+    await handleJS(mainElement);
+
+    // Une fois handleJS terminé, dispatcher l'événement loadView
+    const loadViewEvent = new CustomEvent('loadView', { detail: viewName });
+    document.dispatchEvent(loadViewEvent);
 
     loadCSS(mainElement);
     loadTitle(mainElement);
@@ -74,10 +80,33 @@ function makeURL(url) {
 
         return newURL;
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error("Error while creating URL object");
     }
 }
+
+// Function to get the view name from the URL
+function getViewName(url) {
+    try {
+        let newURL = new URL(url, window.location.origin);
+        let viewName = newURL.pathname;
+
+        if (viewName === "/") {
+            viewName = "home";
+        }
+
+        if (viewName.startsWith("/")) {
+            viewName = viewName.slice(1);
+        }
+        if (viewName.endsWith("/")) {
+            viewName = viewName.slice(0, -1);
+        }
+
+        return viewName;
+    } catch (err) {
+        console.error("Error while getting view name");
+    }
+}
+
 
 // Function to fetch the HTML content of the page
 // It sends an XMLHttpRequest to the server
@@ -86,6 +115,9 @@ async function fetchHTML(url, data = null) {
         // Build fetch destination
         const destination = url.pathname + url.search;
 
+        if (url.origin !== window.location.origin) {
+            throw new Error("XSS");
+        }
         // Add the X-Requested-With header to the request
         const options = {
             headers: {
@@ -105,8 +137,7 @@ async function fetchHTML(url, data = null) {
 
         return await response.text();
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error("Error while loading HTML");
     }
 }
 
@@ -167,8 +198,6 @@ async function handleJS(mainElement) {
                 new Function(script.textContent)();
             }
         }
-        // Remove the original script element in any case
-        //script.remove();
     }
 }
 
@@ -195,8 +224,12 @@ function unloadTitle() {
 
 // Function to navigate to a new URL
 function navigateTo(url, data = null) {
-    history.pushState(data, null, url);
-    spa(url, data);
+    try {
+        history.pushState(data, "", url);
+        spa(url, data);
+    } catch (err) {
+        console.error("Unable to load external resources from SPA");
+    }
 };
 
 // Function to get a cookie by name
@@ -215,4 +248,19 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+// Function to fetch JSON from a source
+async function fetchJSON(url) {
+    try {
+        const options = {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }
+        const response = await fetch(url, options);
+        return await response.json();
+    } catch (err) {
+        console.error("Error while loading JSON");
+    }
 }
