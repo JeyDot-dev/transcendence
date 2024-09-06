@@ -77,6 +77,8 @@ function logout() {
 	const url = 'api/logout/';
 	const token = getToken();
 
+	if (!token ) return;
+
 	fetch(url, {
 		method: 'POST',
 		headers: {
@@ -140,5 +142,8 @@ function changeSkin(newColor) {
 }
 
 function getToken() {
+	if (!document.cookie.includes('logintoken')) {
+		return null;
+	}
 	return document.cookie.split(';').find(cookie => cookie.includes('logintoken')).split('=')[1];
 }
