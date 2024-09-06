@@ -80,7 +80,7 @@ function makeURL(url) {
 
         return newURL;
     } catch (err) {
-        console.error("Error while creating URL object");
+        console.error("Error while creating URL object: ", err);
     }
 }
 
@@ -103,7 +103,7 @@ function getViewName(url) {
 
         return viewName;
     } catch (err) {
-        console.error("Error while getting view name");
+        console.error("Error while getting view name: ", err);
     }
 }
 
@@ -137,7 +137,7 @@ async function fetchHTML(url, data = null) {
 
         return await response.text();
     } catch (err) {
-        console.error("Error while loading HTML");
+        console.error("Error while loading HTML: ", err);
     }
 }
 
@@ -184,20 +184,24 @@ function unloadCSS() {
 
 // Function to load the JS files
 async function handleJS(mainElement) {
-    // Get all the scripts in the content
-    const scripts = mainElement.querySelectorAll('script');
+    try {
+        // Get all the scripts in the content
+        const scripts = mainElement.querySelectorAll('script');
 
-    for (let script of scripts) {
-        // Check if the script is already loaded
-        if (!document.head.querySelector(`script[src="${script.src}"]`)) {
-            // If the script has a src attribute, dynamically import the script
-            if (script.src) {
-                await import(script.src);
-            }
-            else { // If the script doesn't have a src attribute, evaluate the script content
-                new Function(script.textContent)();
+        for (let script of scripts) {
+            // Check if the script is already loaded
+            if (!document.head.querySelector(`script[src="${script.src}"]`)) {
+                // If the script has a src attribute, dynamically import the script
+                if (script.src) {
+                    await import(script.src);
+                }
+                else { // If the script doesn't have a src attribute, evaluate the script content
+                    new Function(script.textContent)();
+                }
             }
         }
+    } catch (err) {
+        console.error("Error while handling JS ", err);
     }
 }
 
@@ -228,7 +232,7 @@ function navigateTo(url, data = null) {
         history.pushState(data, "", url);
         spa(url, data);
     } catch (err) {
-        console.error("Unable to load external resources from SPA");
+        console.error("Unable to load external resources from SPA:", err);
     }
 };
 
@@ -261,6 +265,20 @@ async function fetchJSON(url) {
         const response = await fetch(url, options);
         return await response.json();
     } catch (err) {
-        console.error("Error while loading JSON");
+        console.error("Error while loading JSON: ", err);
+    }
+}
+
+async function sendJSON(view, data) {
+    try {
+        let formData = new FormData();
+        for (let key in data) {
+            formData.append(key, data[key]);
+        }
+        let url = makeURL(view);
+        let result = await fetchHTML(url, formData);
+        return result;
+    } catch (err) {
+        console.error("Error while sending JSON:  ", err);
     }
 }
