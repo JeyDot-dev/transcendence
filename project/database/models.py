@@ -1,5 +1,7 @@
 from django.db import models
 import random
+import requests
+import math
 
 # Create your models here.
 
@@ -23,16 +25,38 @@ class Tournament(models.Model):
         return self.name
     
     def add_player(self, player):
+        player.is_winner = True
         self.players.add(player)
 
     def make_games(self):
         #after start, make pairs, cannot add more players
         winners = [player for player in list(self.players.all()) if player.is_winner]
-        print("Winners:", winners)
         random.shuffle(winners)
         #since is_winner doesn't change if you don't play, the player left out will automaticly rise
         while len(winners) >= 2:
             self.games.create(player1=winners.pop(), player2=winners.pop())
+
+    def play_set(self):
+        for game in self.games.filter(is_played=False):
+            gamedata = {
+                "p1": game.player1,
+                "p2": game.player2,
+            }
+            response = requests.post(???, json=gamedata)
+            answer = ??? #wait for JSON info on player who won
+            game.is_played = True
+            winner = self.players.filter(name=answer.winner).first()
+            winner.is_winner = 1
+            loser = self.players.object(id = answer.loser)
+            loser.is_winner = 0
+
+    def play_tournament(self):
+        set_total = math.ceil(math.log(self.players.count()))
+        for i in range(set_total):
+            self.make_games()
+            self.play_set()
+
+
 
 
 class Game(models.Model):

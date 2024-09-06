@@ -24,6 +24,10 @@ def play(request, game_id):
         return redirect('play', game_id=game.id)
     return render(request, 'database/play.html', {'game': game})
 
+def get_game_result(request, game_id):
+    if request.method == 'POST':
+
+
 def winner(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
     game.is_played = True
