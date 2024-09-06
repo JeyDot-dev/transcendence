@@ -3,9 +3,11 @@ import { FontLoader } from '../FontLoader.js';
 import { Text3d } from './text3d.js';
 import { BouncingBallInCube } from './background.js';
 import { SocketManager } from './SocketManager.js';
+import { TournamentMenu } from './Tournament.js';
 
 export class Menu {
     constructor(threeRoot, socketManager) {
+        this.threeRoot = threeRoot;
         this.scene = threeRoot.scene;
         this.camera = threeRoot.camera;
         this.renderer = threeRoot.renderer;
@@ -23,7 +25,11 @@ export class Menu {
             position: { x: 0, y: -1000, z: 0 },
             lookAt: { x: 0, y: 0, z: 0 }
         });
-
+        // // Charger une image en tant que fond
+        // const loader = new THREE.TextureLoader();
+        // loader.load('/static/assets/saturne.jpg', function(texture) {
+        //     threeRoot.scene.background = texture;
+        // });
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
         this.fontLoader = new FontLoader();
@@ -83,28 +89,28 @@ export class Menu {
     }
     // TODO: hauteur du canvas 
     createMenuItems() {
-        this.local = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
+        this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
             this.newLocalGame();
         });
-        this.matchmaking = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 180), () => {
+        this.matchmakingMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 180), () => {
             console.log("Clicked On: Matchmaking");
         });
-        this.localTournament = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
-            console.log("Clicked On: Local Tournament");
+        this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
+            this.newLocalTournament();
         });
-        this.tournament = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
+        this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
         });
-        this.options = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[4], new THREE.Vector3(0, 0, -440), () => {
+        this.optionsMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[4], new THREE.Vector3(0, 0, -440), () => {
             console.log("Clicked On: Options");
         });
 
         this.menuItems = [
-            this.local,
-            this.matchmaking,
-            this.localTournament,
-            this.tournament,
-            this.options
+            this.localMenuMain,
+            this.matchmakingMenuMain,
+            this.localTournamentMenuMain,
+            this.tournamentMenuMain,
+            this.optionsMenuMain
         ];
     }
 
@@ -144,6 +150,18 @@ export class Menu {
         if (this.directionalLight) {
             this.directionalLight.visible = false;
         }
+    }
+    hideText() {
+        // Désactiver les écouteurs d'événements
+        window.removeEventListener('mousemove', this.onMouseMove, false);
+        window.removeEventListener('click', this.onMouseClick, false);
+
+        // Masquer les éléments du menu
+        this.menuItems.forEach(item => {
+            item.textMesh.visible = false;
+            item.textGlowTextMesh.visible = false;
+            item.removePaddles();
+        });
     }
 
     onMouseMove(event) {
@@ -228,7 +246,12 @@ export class Menu {
         this.socketManager.setType('local');
         this.hide();
     }
-
+    
+    newLocalTournament() {
+        console.log("Clicked On: Tournament");
+        this.hideText();
+        this.tournamentLocal = new TournamentMenu(this.threeRoot);
+    }
     returnToMenu() {
         // this.socketManager
         this.show();

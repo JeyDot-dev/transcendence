@@ -6,11 +6,7 @@ import { Arena } from './arena.js';
 import { Puck } from './puck.js';
 import { FontLoader } from '../FontLoader.js';
 import { Text3d } from './text3d.js';
-import { EffectComposer } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/RenderPass.js';
-import { OutlinePass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/OutlinePass.js';
-import { ShaderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/ShaderPass.js';
-import { FXAAShader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/shaders/FXAAShader.js';
+import { TournamentMenu } from './Tournament.js';
 
 export class Game {
     constructor(threeRoot, gameData, socketManager) {
@@ -86,7 +82,7 @@ export class Game {
     initArena(width, height) {
 
         // console.log(width, height);
-        this.arena = new Arena(width, 25, height, 0x1c9e97, 0x5a407b, 25, 25, 0xde95d0);
+        this.arena = new Arena(width, 25, height, this.colorPalette[3], this.colorPalette[0], 25, 25, 0xde95d0);
         this.arena.addToGroup(this.gameGroup);
         // this.arena.addToScene(this.scene);
         // this.arena.group.translateX(ball_param.x);
@@ -218,6 +214,27 @@ export class Game {
             this.paddles.push(newPaddle);
         });
 
+    }
+
+    initPlayerName(player1Name, player2Name) {
+        const fontLoader = new FontLoader();
+        fontLoader.load(
+            'https://threejs.org/examples/fonts/helvetiker_bold.typeface.json',
+            (font) => {
+                this.p1NameText = new Text3d(this.camera, this.scene, font, 35, 10, 0x33ccff, player1Name, 1.05,
+                    new THREE.Vector3(-600, 300, 300)
+                );
+                this.p2NameText = new Text3d(this.camera, this.scene, font, 35, 10, 0xff2975, player2Name, 1.05,
+                    new THREE.Vector3(600, 300, 300)
+                );
+                this.p1NameText.addToGroup(this.gameGroup);
+                this.p2NameText.addToGroup(this.gameGroup);
+            },
+            undefined, // onProgress callback (optional)
+            (error) => {
+                console.error('An error occurred loading the font:', error);
+            }
+        );
     }
 
     initInputHandling() {

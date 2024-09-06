@@ -135,6 +135,14 @@ export class SocketManager {
                 lookAt: { x: 0, y: 0, z: 0 }
             });
             this.game = new Game(this.threeRoot, gameData, this);
+            // document.addEventListener('DOMContentLoaded', function () {
+            const gameDataScript = document.getElementById('game-data');
+            const data = JSON.parse(gameDataScript.textContent);
+            console.log('------------------------JSON DATA:', data);
+            // console.log('Player Data:', gameData.player_data);
+            // console.log('Game Info:', gameData.game_info);
+            // });
+            this.game.initPlayerName('Toto', 'Titi');
             this.my_id = gameData.id;
             this.gameInitilized = true;
         } else if (gameData.type == "initGame" && this.gameInitilized) {

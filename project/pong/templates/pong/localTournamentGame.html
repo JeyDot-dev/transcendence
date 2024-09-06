@@ -1,6 +1,8 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'pong/css/style.css' %}"><title>Pong 3D</title>
-<div id="container_game"></div>
+<div class="d-sm-none inline">Please somehow make your screen bigger (or turn your phone to landscape mode)</div>
+<div id="container_game" class="container d-none d-sm-block ratio mx-auto shadow bg-body-primary mx-auto mw-auto px-0 mb-100" style="min-width: 95%; min-height: 90%; max-width: 92%; max-height: 95%; --bs-aspect-ratio: 50%;">
+</div>
 <div id="camera-control-panel">
     <h3>Camera Control</h3>
     <label for="camera-pos-x">Pos X:</label>
@@ -17,4 +19,10 @@
     <input id="camera-lookat-z" type="number" step="1" value="0"><br>
     <button id="update-camera">Update Camera</button>
 </div>
-<script type="module" src="{% static 'localGame.js' %}"></script>
+<script type="module" src="{% static 'localTournamentGame.js' %}"></script>
+<script id="game-data" type="application/json">
+        const data = {
+            "p1": "playerOneFoo",
+            "p2": "playerTwoBar"
+          };
+</script>

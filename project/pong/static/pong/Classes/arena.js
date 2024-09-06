@@ -10,8 +10,8 @@ export class Arena {
         this.width = width + wallThickness;
         this.height = height;
         this.depth = depth + wallThickness;
-        this.color = 0x00b8ff;
-        this.wallColor = 0x9600ff;
+        this.color = color;
+        this.wallColor = wallColor;
         this.wallThickness = wallThickness;
         this.borderRadius = borderRadius;
         this.innerWallColor = 0xff00c1;

@@ -14,7 +14,7 @@ export class THREERoot {
         this.stats = null;
         this.renderer = null;
 
-        // this.initCameraControls();
+        this.initCameraControls();
     }
     
     initCanvas() {
