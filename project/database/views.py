@@ -1,10 +1,9 @@
 from django.shortcuts import render
 from django.db.models import F
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.template import loader
-
 
 
 from .models import Game, Player, Tournament
@@ -92,3 +91,6 @@ def startTournament(request, t_id):
     tournament.make_games()
     for game in tournament.games.all():
         return redirect("play", game_id = game.id)
+
+def testTournament(request):
+    return JsonResponse({'message': 'Bonjour'})
