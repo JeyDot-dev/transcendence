@@ -2,6 +2,12 @@
 <link rel="stylesheet" href="{% static 'pong/css/style.css' %}"><title>Pong 3D</title>
 <div class="d-sm-none inline">Please somehow make your screen bigger (or turn your phone to landscape mode)</div>
 <div id="container_game" class="container d-none d-sm-block ratio mx-auto shadow bg-body-primary mx-auto mw-auto px-0 mb-100" style="min-width: 95%; min-height: 90%; max-width: 92%; max-height: 95%; --bs-aspect-ratio: 50%;">
+    <div class="d-flex justify-content-center align-items-center" >
+        <div class="spinner-grow" style="width: 30rem; height: 30rem; color: #4900ff" role="status" id="fidget-spinner">
+
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
 </div>
 <div id="camera-control-panel">
     <h3>Camera Control</h3>

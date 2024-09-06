@@ -41,20 +41,18 @@ async function spa(urlRaw, data = null) {
     unloadCSS();
     unloadTitle();
 
-    url = makeURL(urlRaw);
+    const url = makeURL(urlRaw);
+    const viewName = getViewName(urlRaw);
     const content = await fetchHTML(url, data);
     const mainElement = document.querySelector("main");
     mainElement.innerHTML = content;
 
-    
     // Attendre que handleJS soit complètement exécuté
     await handleJS(mainElement);
 
     // Une fois handleJS terminé, dispatcher l'événement loadView
-    const appName = "test";
-    const loadViewEvent = new CustomEvent('loadView', { detail: urlRaw });
+    const loadViewEvent = new CustomEvent('loadView', { detail: viewName });
     document.dispatchEvent(loadViewEvent);
-    console.log("IN SPA - loadViewEvent dispatched");
 
     loadCSS(mainElement);
     loadTitle(mainElement);
@@ -82,9 +80,33 @@ function makeURL(url) {
 
         return newURL;
     } catch (err) {
-        console.error("Error while creating URL object");
+        console.error("Error while creating URL object: ", err);
     }
 }
+
+// Function to get the view name from the URL
+function getViewName(url) {
+    try {
+        let newURL = new URL(url, window.location.origin);
+        let viewName = newURL.pathname;
+
+        if (viewName === "/") {
+            viewName = "home";
+        }
+
+        if (viewName.startsWith("/")) {
+            viewName = viewName.slice(1);
+        }
+        if (viewName.endsWith("/")) {
+            viewName = viewName.slice(0, -1);
+        }
+
+        return viewName;
+    } catch (err) {
+        console.error("Error while getting view name: ", err);
+    }
+}
+
 
 // Function to fetch the HTML content of the page
 // It sends an XMLHttpRequest to the server
@@ -115,7 +137,7 @@ async function fetchHTML(url, data = null) {
 
         return await response.text();
     } catch (err) {
-        console.error("Error while loading content");
+        console.error("Error while loading HTML: ", err);
     }
 }
 
@@ -162,20 +184,24 @@ function unloadCSS() {
 
 // Function to load the JS files
 async function handleJS(mainElement) {
-    // Get all the scripts in the content
-    const scripts = mainElement.querySelectorAll('script');
+    try {
+        // Get all the scripts in the content
+        const scripts = mainElement.querySelectorAll('script');
 
-    for (let script of scripts) {
-        // Check if the script is already loaded
-        if (!document.head.querySelector(`script[src="${script.src}"]`)) {
-            // If the script has a src attribute, dynamically import the script
-            if (script.src) {
-                await import(script.src);
-            }
-            else { // If the script doesn't have a src attribute, evaluate the script content
-                new Function(script.textContent)();
+        for (let script of scripts) {
+            // Check if the script is already loaded
+            if (!document.head.querySelector(`script[src="${script.src}"]`)) {
+                // If the script has a src attribute, dynamically import the script
+                if (script.src) {
+                    await import(script.src);
+                }
+                else { // If the script doesn't have a src attribute, evaluate the script content
+                    new Function(script.textContent)();
+                }
             }
         }
+    } catch (err) {
+        console.error("Error while handling JS ", err);
     }
 }
 
@@ -206,7 +232,7 @@ function navigateTo(url, data = null) {
         history.pushState(data, "", url);
         spa(url, data);
     } catch (err) {
-        console.error("Unable to load external resources from SPA");
+        console.error("Unable to load external resources from SPA:", err);
     }
 };
 
@@ -226,4 +252,33 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+// Function to fetch JSON from a source
+async function fetchJSON(url) {
+    try {
+        const options = {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }
+        const response = await fetch(url, options);
+        return await response.json();
+    } catch (err) {
+        console.error("Error while loading JSON: ", err);
+    }
+}
+
+async function sendJSON(view, data) {
+    try {
+        let formData = new FormData();
+        for (let key in data) {
+            formData.append(key, data[key]);
+        }
+        let url = makeURL(view);
+        let result = await fetchHTML(url, formData);
+        return result;
+    } catch (err) {
+        console.error("Error while sending JSON:  ", err);
+    }
 }
