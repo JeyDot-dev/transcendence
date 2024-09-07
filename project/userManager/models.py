@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class UserInfos(AbstractUser):
-	profile_pic = models.CharField(max_length=200)
+	profile_pic = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.jpg', blank=True, null=True)
 	status = models.CharField(max_length=20)
 	is_online = models.BooleanField(default=False)
 	is_playing = models.BooleanField(default=False)
@@ -21,7 +21,7 @@ class UserInfos(AbstractUser):
 	def to_dict(self):
 		return {
 			'username': self.username,
-			'profile_pic': self.profile_pic,
+			'profile_pic': self.profile_pic.url,
 			'status': self.status,
 			'is_online': self.is_online,
 			'is_playing': self.is_playing,

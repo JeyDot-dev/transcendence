@@ -1,7 +1,8 @@
 from django.contrib.auth import login, logout
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes, parser_classes
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .serializers import UserSerializer
 from rest_framework.authtoken.models import Token
@@ -63,5 +64,21 @@ def change_skin(request):
 	user.set_skin(request.data['color'])
 	return Response({'message': 'Skin changed successfully'}, status=status.HTTP_200_OK)
 
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@parser_classes([MultiPartParser, FormParser])
+def change_profile_pic(request):
+    user = get_object_or_404(UserInfos, username=request.data.get('username'))
+    if not user:
+        return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if 'profile_pic' not in request.FILES:
+        return Response({'message': 'No profile picture provided'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    user.profile_pic = request.FILES['profile_pic']
+    user.save()
+    return Response({'message': 'Profile picture changed successfully'}, status=status.HTTP_200_OK)
+
 def index(request):
-	return render(request, "index.html")
+	return render(request, "index.html", {'user': request.user})
