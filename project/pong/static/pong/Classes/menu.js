@@ -251,6 +251,8 @@ export class Menu {
         console.log("Clicked On: Tournament");
         this.hideText();
         this.tournamentLocal = new TournamentMenu(this.threeRoot);
+        // this.tournamentLocal.createTournament();
+        // this.tournamentLocal.getNextPool();
     }
     returnToMenu() {
         // this.socketManager

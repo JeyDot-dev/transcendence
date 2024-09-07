@@ -9,3 +9,6 @@ class addPlayer(forms.Form):
 
 class newTournamentForm(forms.Form):
     tournament_title = forms.CharField(label='Tournament Title', max_length=100)
+
+class tournamentIdForm(forms.Form):
+    tournamentId = forms.CharField(label='Tournament Id', max_length=100)

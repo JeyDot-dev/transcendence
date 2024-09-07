@@ -278,7 +278,7 @@ async function sendJSON(view, data) {
         }
         let url = makeURL(view);
         let result = await fetchHTML(url, formData);
-        return result;
+        return result
     } catch (err) {
         console.error("Error while sending JSON:  ", err);
     }
