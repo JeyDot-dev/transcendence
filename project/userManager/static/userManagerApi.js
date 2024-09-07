@@ -1,6 +1,7 @@
 function login(formData) {
 	const url = 'api/userManager/login/';
 	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+	console.log(csrftoken);
 
 	fetch(url, {
 		method: 'POST',
@@ -21,7 +22,7 @@ function login(formData) {
 		} else {
 			document.cookie = `logintoken=${data.token}; SameSite=Strict; Secure`;
 			localStorage.setItem('user', JSON.stringify(data.user));
-			// location.reload();
+			location.reload();
 		}
 	})
 }
@@ -51,7 +52,7 @@ function createAccount(formData) {
 			alert(data.error);
 		} else {
 			alert(data.message);
-			// location.reload();
+			location.reload();
 		}
 	})
 }
