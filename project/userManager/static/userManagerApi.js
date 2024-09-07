@@ -1,24 +1,27 @@
 function login(formData) {
 	const url = 'api/userManager/login/';
+	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 	fetch(url, {
 		method: 'POST',
 		body: JSON.stringify({
-			username: formData.get('username'),
-			password: formData.get('password')
+			username: formData.get('login_username'),
+			password: formData.get('login_password')
 		}),
 		headers: {
-			'Content-Type': 'application/json'
+			'Content-Type': 'application/json',
+			'X-CSRFToken': csrftoken
 		}
 	})
 	.then(response => response.json())
 	.then(data => {
+		console.log(data);
 		if (!data.token) {
 			alert('Invalid login');
 		} else {
 			document.cookie = `logintoken=${data.token}; SameSite=Strict; Secure`;
 			localStorage.setItem('user', JSON.stringify(data.user));
-			location.reload();
+			// location.reload();
 		}
 	})
 }
@@ -48,7 +51,7 @@ function createAccount(formData) {
 			alert(data.error);
 		} else {
 			alert(data.message);
-			location.reload();
+			// location.reload();
 		}
 	})
 }
@@ -74,6 +77,7 @@ function testToken(token) {
 }
 
 function logout() {
+	console.log("Logout");
 	const url = 'api/userManager/logout/';
 	const token = getToken();
 
