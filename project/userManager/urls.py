@@ -8,5 +8,6 @@ urlpatterns = [
 	path('logout/', views.logout_view, name='logout'),
 	path('change_skin/', views.change_skin, name='change_skin'),
 	path('change_profile_pic/', views.change_profile_pic, name='change_profile_pic'),
+	path('change_values/<str:field>/', views.change_value, name='change_value'),
     path('', views.index, name='index')
 ]

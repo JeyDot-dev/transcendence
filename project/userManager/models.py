@@ -34,7 +34,47 @@ class UserInfos(AbstractUser):
 	def get_last_tournament_id(self):
 		return self.last_tournament_id
 
+	def set_username(self, username: str):
+		self.username = username
+		self.save()
+
+	def set_email(self, email: str):
+		self.email = email
+		self.save()
+
 	def set_skin(self, skin: str):
 		self.skin = skin
+		self.save()
+	
+	def set_status(self, status: str):
+		self.status = status
+		self.save()
+	
+	def set_online(self, is_online: bool):
+		self.is_online = is_online
+		self.save()
+	
+	def set_playing(self, is_playing: bool):
+		self.is_playing = is_playing
+		self.save()
+	
+	def set_grade(self, grade: int):
+		self.grade = grade
+		self.save()
+	
+	def set_total_games(self, total_games: int):
+		self.total_games = total_games
+		self.save()
+	
+	def set_total_victories(self, total_victories: int):
+		self.total_victories = total_victories
+		self.save()
+	
+	def set_last_tournament_id(self, last_tournament_id: str):
+		self.last_tournament_id = last_tournament_id
+		self.save()
+	
+	def set_3d(self, is_3d: bool):
+		self.is_3d = is_3d
 		self.save()
 	

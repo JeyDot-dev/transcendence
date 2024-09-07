@@ -20,7 +20,6 @@ function login(formData) {
 		if (!data.token) {
 			alert('Invalid login');
 		} else {
-			document.cookie = `logintoken=${data.token}; SameSite=Strict; Secure`;
 			localStorage.setItem('user', JSON.stringify(data.user));
 			location.reload();
 		}
@@ -78,17 +77,15 @@ function testToken(token) {
 }
 
 function logout() {
-	console.log("Logout");
 	const url = 'api/userManager/logout/';
-	const token = getToken();
-
-	if (!token ) return;
+	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+	console.log(csrftoken);
 
 	fetch(url, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			'Authorization': `Token ${token}`
+			'X-CSRFToken': csrftoken
 		}
 	})
 	.then(response => response.json())
@@ -103,54 +100,22 @@ function logout() {
 	})
 }
 
-function changePassword(){
-	const url = 'api/userManager/change_password/';
-	const token = document.cookie.split('=')[1];
-
-	fetch(url, {
-		method: 'POST',
-		body: JSON.stringify({
-			old_password: formData.get('old_password'),
-			new_password: formData.get('new_password')
-		}),
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Token ${token}`
-		}
-	})
-	.then(response => response.json())
-	.then(data => {
-		if (data.error) {
-			alert(data.error);
-		} else {
-			alert('Password changed successfully');
-			location.reload();
-		}
-	})
-}
-
-function changeSkin(newColor) {
-	const url = 'api/userManager/change_skin/';
-	const token = getToken();
+function changeUserValue(url_key, value, username) {
+	const url = `api/userManager/${url_key}/`;
+	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+	console.log(csrftoken);
 
 	fetch(url, {
 		method: "POST",
 		headers: {
 			"Content-Type": 'application/json',
-			"Authorization": `Token ${token}`,
+			"X-CSRFToken": csrftoken
 		},
 		body: JSON.stringify({
-			"username": local_user.username,
-			"color": newColor
+			"username": username,
+			"new_value": value
 		})
 	});
-}
-
-function getToken() {
-	if (!document.cookie.includes('logintoken')) {
-		return null;
-	}
-	return document.cookie.split(';').find(cookie => cookie.includes('logintoken')).split('=')[1];
 }
 
 function getCookie(name) {

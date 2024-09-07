@@ -54,6 +54,8 @@ def signup(request):
 def test_token(request):
 	return Response({'message': 'Token is valid'})
 
+# ALL USER RELATED VIEWS LIKE PROFILE, FRIENDS, ETC. GO HERE
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
@@ -61,7 +63,7 @@ def change_skin(request):
 	user = get_object_or_404(UserInfos, username=request.data.get('username'))
 	if not user:
 		return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-	user.set_skin(request.data['color'])
+	user.set_skin(request.data['new_value'])
 	return Response({'message': 'Skin changed successfully'}, status=status.HTTP_200_OK)
 
 @api_view(['PATCH'])
@@ -79,6 +81,37 @@ def change_profile_pic(request):
     user.profile_pic = request.FILES['profile_pic']
     user.save()
     return Response({'message': 'Profile picture changed successfully'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+def change_value(request, field):
+	user = get_object_or_404(UserInfos, username=request.data.get('username'))
+	if not user:
+		return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+	
+	if field == 'new_username':
+		user.set_username(request.data['new_value'])
+	elif field == 'new_email':
+		user.set_email(request.data['new_value'])
+	elif field == 'new_password':
+		user.set_password(request.data['new_value'])
+	elif field == 'new_status':
+		user.set_status(request.data['new_value'])
+	elif field == 'set_online':
+		user.set_online(request.data['new_value'])
+	elif field == 'set_playing':
+		user.set_playing(request.data['new_value'])
+	elif field == 'set_grade':
+		user.set_grade(request.data['new_value'])
+	elif field == 'set_total_games':
+		user.set_total_games(request.data['new_value'])
+	elif field == 'set_total_victories':
+		user.set_total_victories(request.data['new_value'])
+	else:
+		return Response({'message': 'Field not found'}, status=status.HTTP_404_NOT_FOUND)
+	
+	return Response({'message': 'Values changed successfully'}, status=status.HTTP_200_OK)
 
 def index(request):
 	return render(request, "index.html", {'user': request.user})

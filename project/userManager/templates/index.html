@@ -18,6 +18,13 @@
 	<img src="{% static user.profile_pic.url %}" alt="Profile Picture" style="width: 100px; height: 100px;" id="pp">
 	<p>Username: {{ user.username }}</p>
 	<p>Email: {{ user.email }}</p>
+	<p>Status: {{ user.status }}</p>
+	<p>Total games: {{ user.total_games }}</p>
+	<p>Wins: {{ user.total_victories }}</p>
+	<p>skin: {{ user.skin }}</p>
+	<p>Grade: {{ user.grade }}</p>
+	<p>Is online: {{ user.is_online }}</p>
+	<p>Is playing: {{ user.is_playing }}</p>
 
 	<form id="profilePictureForm" enctype="multipart/form-data">
 		{% csrf_token %}
@@ -38,6 +45,32 @@
 			uploadProfilePicture(formData);
 		});
 	</script>
+
+	<div>
+		<h2>Change email</h2>
+		<textarea id="email" placeholder="Email" required>{{ user.email }}</textarea>
+		<button onclick="changeUserValue('email', document.getElementById('email').value, '{{ user.username }}')">Change email</button>
+	</div>
+
+	<div>
+		<h2>Change password</h2>
+		<form id="changePasswordForm">
+			{% csrf_token %}
+			<input type="hidden" name="username" value={{ user.username }}>
+			<input type="password" name="old_password" placeholder="Old password" required>
+			<input type="password" name="new_password" placeholder="New password" required>
+			<input type="password" name="new_password_confirm" placeholder="Confirm new password" required>
+			<button type="submit">Change password</button>
+		</form>
+		<script>
+			document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+				e.preventDefault();
+				var form = document.getElementById('changePasswordForm');
+				var formData = new FormData(form);
+
+				changeUserValue("new_password", formData.get("new_password").toString());
+			});
+		</script>
 
 {% else %}
 	<p>User not connected</p>
