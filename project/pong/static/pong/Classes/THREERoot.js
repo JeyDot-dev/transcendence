@@ -14,11 +14,12 @@ export class THREERoot {
         this.stats = null;
         this.renderer = null;
 
-        this.initCameraControls();
+        // this.initCameraControls();
     }
     
     initCanvas() {
         this.container = document.querySelector("#container_game");
+        if (!this.container) return ;
         console.log("Container: ", this.container);
         
         // Enable MSAA in the WebGLRenderer
@@ -43,6 +44,7 @@ export class THREERoot {
         const renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(renderPass);
 
+        document.getElementById("fidget-spinner").style.display = "none";
         this.onWindowResize(this);
         window.addEventListener('resize', this.onWindowResize.bind(this));
     }
@@ -85,7 +87,9 @@ export class THREERoot {
         });
 
         // End FPS counter
-        this.stats.end();
+        if (this.stats) {
+            this.stats.end();
+        }
         this.render();
     }
 

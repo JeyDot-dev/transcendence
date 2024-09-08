@@ -18,11 +18,10 @@ export class Puck {
 
         this.mesh.rotation.x = Math.PI / 2;
         this.mesh.position.set(x, y, height / 2);
-        this.createGlowMesh(camera, 0xff00c1, 1.1);
+        // this.createGlowMesh(camera, 0xff00c1, 1.1);
     }
 
     createGlowMesh(camera, color, glow) {
-        return ;
         const shaderMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 "c": { type: "f", value: 1.0 },
@@ -64,6 +63,9 @@ export class Puck {
     addToScene(scene) {
         scene.add(this.mesh);
         // scene.add(this.glowMesh);
+    }
+    addToGroup(group) {
+        group.add(this.mesh);
     }
     move(x, y) {
         // console.log("Move Ball");
