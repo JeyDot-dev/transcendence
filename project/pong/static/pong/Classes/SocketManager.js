@@ -135,6 +135,7 @@ export class SocketManager {
                 lookAt: { x: 0, y: 0, z: 0 }
             });
             this.game = new Game(this.threeRoot, gameData, this);
+            this.game.initPlayerName('Toto', 'Titi');
             this.my_id = gameData.id;
             this.gameInitilized = true;
         } else if (gameData.type == "initGame" && this.gameInitilized) {

@@ -1,12 +1,14 @@
 from django.shortcuts import render
 from django.db.models import F
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.template import loader
+import random, string
+
 
 from .models import Game, Player, Tournament
-from .forms import newGameForm, addPlayer, newTournamentForm, PlayerFormSet, GameResultForm
+from .forms import *
 # Create your views here.
 
 def play(request, game_id):
@@ -126,3 +128,59 @@ def startTournament(request, t_id):
     tournament.make_games()
     for game in tournament.games.all():
         return redirect("play", game_id = game.id)
+
+def generate_unique_id():
+    """Génère un identifiant unique pour les jeux et le tournoi."""
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+
+def testTournament(request):
+    tournament_id = generate_unique_id()
+
+    player_pairs = [
+        ['To\'to', 'Titi'],
+        ['Dodo', 'Didi'],
+        ['Bobo', 'Bibi'],
+        ['Foo', 'Bar'],
+        ['BONJOUR', 'Bob'],
+        ['kkk', 'jjj'],
+        ['EEE', 'OOO'],
+        ['AAA', 'BBB']
+    ]
+    games = []
+    for index, pair in enumerate(player_pairs):
+        game_id = generate_unique_id()
+        games.append({
+            'game_id': game_id,
+            'players': pair
+        })
+    return JsonResponse({
+        'tournament_id': tournament_id,
+        'games': games
+    })
+
+def testNextPool(request):
+    tournament_id = 0
+    if request.method == 'POST':
+        form = tournamentIdForm(request.POST)
+        if form.is_valid():
+            tournament_id = form.cleaned_data['tournamentId']
+        else:
+            raise Http404('Page not found ou caca')
+            
+    player_pairs = [
+        ['Toto', 'Titi'],
+        ['Dodo', 'Didi'],
+        ['Bobo', 'Bibi'],
+        ['Foo', 'Bar']
+    ]
+    games = []
+    for index, pair in enumerate(player_pairs):
+        game_id = generate_unique_id()
+        games.append({
+            'game_id': game_id,
+            'players': pair
+        })
+    return JsonResponse({
+        'tournament_id': tournament_id,
+        'games': games
+    })

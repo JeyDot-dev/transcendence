@@ -1,5 +1,6 @@
 from django.shortcuts import render
 import json
+import json
 
 # Create your views here.
 
@@ -46,9 +47,9 @@ def index(request):
 def pong2d(request):
     return render(request, "pong/pong2d.html")
 
-def launchLocalGame(request):
+def launchTournamentLocalGame(request):
     data = {
           "p1": json.dumps({"name":"PlayerUno"}),
           "p2": json.dumps({"name":"PlayerDos"}),
-	}
-    return render(request, "pong/localGame.html", data)
+}
+    return render(request, "pong/localTournamentGame.html", data)

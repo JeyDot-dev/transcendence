@@ -1,17 +1,17 @@
 // import * as THREE from "../threejs/Three.js";
 // import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
 import { THREE } from '../three.module.js';
-import { EffectComposer } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/UnrealBloomPass.js';
+// import { EffectComposer } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/EffectComposer.js';
+// import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/RenderPass.js';
+// import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 export class Arena {
     constructor(width, height, depth, color, wallColor, wallThickness, borderRadius, innerWallColor) {
         this.width = width + wallThickness;
         this.height = height;
         this.depth = depth + wallThickness;
-        this.color = 0x00b8ff;
-        this.wallColor = 0x9600ff;
+        this.color = color;
+        this.wallColor = wallColor;
         this.wallThickness = wallThickness;
         this.borderRadius = borderRadius;
         this.innerWallColor = 0xff00c1;

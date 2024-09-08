@@ -18,3 +18,7 @@ class newTournamentForm(forms.Form):
 class GameResultForm(forms.Form):
     winner = forms.CharField(label='game winner', max_length=100)
     game = forms.IntegerField(label='gameId')
+
+
+class tournamentIdForm(forms.Form):
+    tournamentId = forms.CharField(label='Tournament Id', max_length=100)

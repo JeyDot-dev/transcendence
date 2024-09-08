@@ -9,6 +9,7 @@ logger2 = logging.getLogger(__name__)
 
 class Paddle:
     def __init__(self, x, color, userId, arenaWidth, arenaHeight, updateCallBack=None):
+        self.keys_pressed = {'up': False, 'down': False}
         self.width = 20
         self.height = 200
         self.x = x
@@ -131,11 +132,11 @@ class Ball:
         self.vel_x = -self.vel_x
 
         # Calcul de l'influence de la vélocité du paddle sur la balle
-        impact_factor = 0.5  # Facteur d'influence, ajustable
+        impact_factor = 0.6  # Facteur d'influence, ajustable
         self.vel_y += paddle.velocity * impact_factor
 
         # Ajuster la vitesse totale de la balle en fonction de la vélocité du paddle
-        speed_influence = 1 + abs(paddle.velocity) * 0.2
+        speed_influence = 1 + abs(paddle.velocity) * 0.1
         self.vel_x *= speed_influence
         self.vel_y *= speed_influence
 
