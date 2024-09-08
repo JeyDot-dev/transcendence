@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "database.apps.DatabaseConfig",
     "channels",
     "pong",
     "userManager",
@@ -152,7 +153,8 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     BASE_DIR / "pong/static/pong",
-    BASE_DIR / "userManager/static"
+    BASE_DIR / "userManager/static",
+    BASE_DIR / "database/static/database",
 ]
 
 
@@ -161,29 +163,29 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-MEDIA_URL = '/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'userManager/static')
+MEDIA_URL = "/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "userManager/static")
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',  # Change this to DEBUG if needed for Django messages
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",  # Change this to DEBUG if needed for Django messages
         },
         # Ajoutez votre module spécifique si nécessaire
-        'pong.local_consumers': {  # Remplacez 'myapp.consumers' par le chemin correct de votre consumer
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,  # Cela empêchera les logs de remonter aux autres loggers
+        "pong.local_consumers": {  # Remplacez 'myapp.consumers' par le chemin correct de votre consumer
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,  # Cela empêchera les logs de remonter aux autres loggers
         },
-
     },
 }
+
