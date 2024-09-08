@@ -18,3 +18,9 @@
     <button id="update-camera">Update Camera</button>
 </div>
 <script type="module" src="{% static 'localGame.js' %}"></script>
+<script id="game-data" type="application/json">
+    {
+        "p1": {{ p1|safe }},
+        "p2": {{ p2|safe }}
+    }
+</script>

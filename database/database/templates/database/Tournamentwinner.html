@@ -1,8 +1,0 @@
-<h1>winner: {{ tournament.winner }}</h1>
-{% if tournament %}
-<ul>
-    {% for game in tournament.games.all %}
-    <li>{{ game }} : {{ game.winner.name }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
