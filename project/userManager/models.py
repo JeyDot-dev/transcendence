@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import validate_email, ValidationError
 
 class UserInfos(AbstractUser):
 	profile_pic = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.jpg', blank=True, null=True)
@@ -12,11 +13,13 @@ class UserInfos(AbstractUser):
 	skin = models.CharField(max_length=7, default="#FFFFFF")
 	last_tournament_id = models.CharField(max_length=200, default="")
 	is_3d = models.BooleanField(default=False)
+	friends = models.ManyToManyField("self", blank=True)
+	friends_requests = models.ManyToManyField("self", blank=True)
 
 	REQUIRED_FIELDS = ['email', 'password'] 
 
 	def __str__(self):
-		return self.username
+		return f("{self.username} ({self.id})")
 	
 	def to_dict(self):
 		return {
@@ -28,7 +31,9 @@ class UserInfos(AbstractUser):
 			'grade': self.grade,
 			'total_games': self.total_games,
 			'total_victories': self.total_victories,
-			'skin': self.skin
+			'skin': self.skin,
+			'friends': [friend.id for friend in self.friends.all()],
+			'friends_requests': [friend.id for friend in self.friends_requests.all()],
 		}
 	
 	def get_last_tournament_id(self):
@@ -39,8 +44,13 @@ class UserInfos(AbstractUser):
 		self.save()
 
 	def set_email(self, email: str):
-		self.email = email
-		self.save()
+		try:
+			validate_email(email)
+			self.email = email
+			self.save()
+		except ValidationError:
+			# Gérer l'erreur de validation ici
+			raise ValueError("L'email fourni n'est pas valide.")
 
 	def set_skin(self, skin: str):
 		self.skin = skin
@@ -76,5 +86,21 @@ class UserInfos(AbstractUser):
 	
 	def set_3d(self, is_3d: bool):
 		self.is_3d = is_3d
+		self.save()
+	
+	def add_friend(self, friend_username: str):
+		friend = UserInfos.objects.get(username=friend_username)
+		if not friend:
+			raise ValueError("L'utilisateur n'existe pas.")
+		if friend in self.friends.all():
+			raise ValueError("L'utilisateur est déjà votre ami.")
+		if friend in self.friends_requests.all():
+			self.friends.add(friend)
+			friend.friends.add(self)
+			self.friends_requests.remove(friend)
+			friend.friends_requests.remove(self)
+		else:
+			friend.friends_requests.add(self)
+			
 		self.save()
 	

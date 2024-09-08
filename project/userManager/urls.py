@@ -6,8 +6,7 @@ urlpatterns = [
 	path('signup/', views.signup, name='signup'),
 	path('test_token/', views.test_token, name='test_token'),
 	path('logout/', views.logout_view, name='logout'),
-	path('change_skin/', views.change_skin, name='change_skin'),
 	path('change_profile_pic/', views.change_profile_pic, name='change_profile_pic'),
-	path('change_values/<str:field>/', views.change_value, name='change_value'),
+	path('change_value/<str:field>/', views.change_value, name='change_value'),
     path('', views.index, name='index')
 ]

@@ -203,7 +203,7 @@ function unloadTitle() {
 
 // Function to navigate to a new URL
 function navigateTo(url, data = null) {
-    // history.pushState(data, null, url);
+    history.pushState(data, null, url);
     spa(url, data);
 };
 

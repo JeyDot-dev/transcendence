@@ -101,7 +101,7 @@ function logout() {
 }
 
 function changeUserValue(url_key, value, username) {
-	const url = `api/userManager/${url_key}/`;
+	const url = `api/userManager/change_value/${url_key}/`;
 	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 	console.log(csrftoken);
 
@@ -115,7 +115,16 @@ function changeUserValue(url_key, value, username) {
 			"username": username,
 			"new_value": value
 		})
-	});
+	})
+	.then(response => response.json())
+	.then(data => {
+		if (data.error) {
+			alert(data.error);
+		} else {
+			alert(data.message);
+			// location.reload();
+		}
+	})
 }
 
 function getCookie(name) {
@@ -158,3 +167,12 @@ function uploadProfilePicture(formData) {
         alert('An error occurred during profile picture upload');
     });
 }
+
+document.getElementById('profilePictureForm').addEventListener('submit', function(e) {
+	e.preventDefault();
+	console.log('submitting');
+	var form = document.getElementById('profilePictureForm');
+	var formData = new FormData(form);
+
+	uploadProfilePicture(formData);
+});

@@ -12,13 +12,21 @@ from django.shortcuts import get_object_or_404, render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+# ==========================
+#         AUTH VIEWS
+# ==========================
+
 @api_view(['POST'])
 def login_view(request):
-	print("LOGIN")
 	user = get_object_or_404(UserInfos, username=request.data['username'])
 	if user.check_password(request.data['password']):
 		token, created = Token.objects.get_or_create(user=user)
 		login(request, user)
+		user.set_online(True)
 		return Response({'message': 'Login successful', 'token': token.key, 'user': user.to_dict()}, status=status.HTTP_200_OK)
 	
 	return Response({'message': 'Login failed'}, status=status.HTTP_400_BAD_REQUEST)
@@ -36,7 +44,6 @@ def logout_view(request):
 
 @api_view(['POST'])
 def signup(request):
-	print("SIGNUP")
 	serializer = UserSerializer(data=request.data)
 	if serializer.is_valid():
 		user = serializer.save()
@@ -45,7 +52,8 @@ def signup(request):
 		token = Token.objects.create(user=user)
 		login(request, user)
 		return Response({'message': 'User created successfully', 'token': token.key, 'user': user.to_dict()}, status=status.HTTP_201_CREATED)
-	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	error_messages = ' '.join([f'{field}: {error[0]}' for field, error in serializer.errors.items()])
+	return Response({'message': error_messages }, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -54,17 +62,11 @@ def signup(request):
 def test_token(request):
 	return Response({'message': 'Token is valid'})
 
-# ALL USER RELATED VIEWS LIKE PROFILE, FRIENDS, ETC. GO HERE
+# ==========================
+#         USER VIEWS
+# ==========================
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication, SessionAuthentication])
-def change_skin(request):
-	user = get_object_or_404(UserInfos, username=request.data.get('username'))
-	if not user:
-		return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-	user.set_skin(request.data['new_value'])
-	return Response({'message': 'Skin changed successfully'}, status=status.HTTP_200_OK)
+# ALL USER RELATED VIEWS LIKE PROFILE, FRIENDS, ETC. GO HERE
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
@@ -86,6 +88,7 @@ def change_profile_pic(request):
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 def change_value(request, field):
+	logger.info(f"Changing {field} for user {request.user.username}")
 	user = get_object_or_404(UserInfos, username=request.data.get('username'))
 	if not user:
 		return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -96,6 +99,7 @@ def change_value(request, field):
 		user.set_email(request.data['new_value'])
 	elif field == 'new_password':
 		user.set_password(request.data['new_value'])
+		logout(request)
 	elif field == 'new_status':
 		user.set_status(request.data['new_value'])
 	elif field == 'set_online':
@@ -108,10 +112,23 @@ def change_value(request, field):
 		user.set_total_games(request.data['new_value'])
 	elif field == 'set_total_victories':
 		user.set_total_victories(request.data['new_value'])
+	elif field == 'set_skin':
+		user.set_skin(request.data['new_value'])
+	elif field == 'add_friend':
+		try:
+			user.add_friend(request.data['new_value'])
+		except:
+			return Response({'message': 'Friend not found'}, status=status.HTTP_404_NOT_FOUND)
 	else:
 		return Response({'message': 'Field not found'}, status=status.HTTP_404_NOT_FOUND)
 	
-	return Response({'message': 'Values changed successfully'}, status=status.HTTP_200_OK)
+	return Response({'message': field + ' changed successfully'}, status=status.HTTP_200_OK)
+
+# ==========================
+#         HTML VIEWS
+# ==========================
+
+# ALL HTML VIEWS GO HERE
 
 def index(request):
 	return render(request, "index.html", {'user': request.user})
