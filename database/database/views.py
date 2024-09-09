@@ -80,7 +80,6 @@ def newTournament(request):
     else:
         formset = PlayerFormSet(queryset=Player.objects.none())
         form = newTournamentForm()
-    
     return render(request, 'database/newtournament.html', {'form': form, 'formset': formset})
 
 def addPlayers(request, t_id):

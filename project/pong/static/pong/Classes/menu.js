@@ -96,7 +96,41 @@ export class Menu {
             console.log("Clicked On: Matchmaking");
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
-            this.newLocalTournament();
+            console.log("Clicked On: Local Tournament");
+            const myModal = new bootstrap.Modal(document.getElementById('myModal'));
+            myModal.show();
+            document.getElementById('submitTournamentForm').addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent default form submission
+
+                // Use fetch API to submit the form via AJAX
+                const formElement = document.getElementById('newTournamentForm');
+                const formData = new FormData(formElement);
+
+                fetch(formElement.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'  // Ensure it's treated as an AJAX request
+                    }
+                })
+                .then(response => console.log(response))
+                .then(data => {
+                    console.log("data status = " + data.status)
+                    if (data.status === 'success') {
+                        // Close the modal
+                        myModal.hide();
+                        
+                        // Trigger your newLocalTournament() function
+                        this.newLocalTournament();
+                    } else {
+                        
+                        console.error('Form submission failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
         });
         this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
@@ -112,6 +146,10 @@ export class Menu {
             this.tournamentMenuMain,
             this.optionsMenuMain
         ];
+    }
+
+    ModalListner(){
+        
     }
 
     show() {
@@ -251,14 +289,14 @@ export class Menu {
         console.log("Clicked On: Tournament");
         this.hideText();
         this.tournamentLocal = new TournamentMenu(this.threeRoot);
-        // this.tournamentLocal.createTournament();
-        // this.tournamentLocal.getNextPool();
     }
     returnToMenu() {
         // this.socketManager
         this.show();
     }
 }
+
+
 
 class MenuItem {
     constructor(group, scene, camera, font, text, color, position, onClick) {

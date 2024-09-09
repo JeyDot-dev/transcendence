@@ -1,6 +1,6 @@
 from django.db import models
 import random
-import requests
+#import request
 import math
 
 # Create your models here.
@@ -36,6 +36,17 @@ class Tournament(models.Model):
         while len(winners) >= 2:
             self.games.create(player1=winners.pop(), player2=winners.pop())
 
+    def JSONgames(self):
+        pairs = []
+        for game in self.games.filter(is_played=False):
+            pairs.append({
+            'game_id': game.id,
+            'players': [game.player1.name, game.player2.name]
+            })
+        return pairs
+
+
+"""
     def play_set(self):
         for game in self.games.filter(is_played=False):
             gamedata = {
@@ -55,6 +66,7 @@ class Tournament(models.Model):
         for i in range(set_total):
             self.make_games()
             self.play_set()
+"""
 
 
 

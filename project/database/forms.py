@@ -10,7 +10,7 @@ class addPlayer(forms.ModelForm):
         model = Player
         fields = ['name']
 
-PlayerFormSet = forms.modelformset_factory(Player, form=addPlayer, fields=['name'], extra=2)
+PlayerFormSet = forms.modelformset_factory(Player, form=addPlayer, fields=['name'], extra=4)
 
 class newTournamentForm(forms.Form):
     tournament_title = forms.CharField(label='Tournament Title', max_length=100)

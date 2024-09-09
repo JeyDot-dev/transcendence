@@ -2,6 +2,7 @@ project/transcendence/settings.py
 project/static_production
 containers/scripts/django_setup.sh
 .DS_Store
+locallibrary/
 ### Django ###
 *.log
 *.pot

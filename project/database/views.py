@@ -100,14 +100,7 @@ def newGame(request):
         formset = PlayerFormSet(queryset=Player.objects.none())
     
     return render(request, 'database/newgame.html', {'formset': formset})
-    
-def newTournament(request):
-    form = newTournamentForm(request.POST)
-    if form.is_valid():
-        tournament = Tournament(name=form.cleaned_data['tournament_title'])
-        tournament.save()
-        return redirect("addPlayers", t_id=tournament.id)
-    return render(request, 'database/newtournament.html', {'form': form})
+
 
 def addPlayers(request, t_id):
     form = addPlayer(request.POST)
@@ -133,14 +126,45 @@ def generate_unique_id():
     """Génère un identifiant unique pour les jeux et le tournoi."""
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
+"""
+def newTournament(request):
+    form = newTournamentForm(request.POST)
+    if form.is_valid():
+        tournament = Tournament(name=form.cleaned_data['tournament_title'])
+        tournament.save()
+        return redirect("addPlayers", t_id=tournament.id)
+    return render(request, 'database/newtournament.html', {'form': form})
+"""
+
+def newTournament(request):
+    if request.method == 'POST':
+        form = newTournamentForm(request.POST)
+        if form.is_valid():
+            tournament = Tournament(name=form.cleaned_data['tournament_title'])
+            formset = PlayerFormSet(request.POST, queryset=Player.objects.none())
+            if formset.is_valid():
+                for form in formset:
+                    player = form.save()
+                    tournament.players.add(player)
+                tournament.make_games()
+                games = tournament.JSONgames()
+                return JsonResponse({
+                    'tournament_id': tournament.id,
+                    'games': games
+                })
+    else:
+        formset = PlayerFormSet(queryset=Player.objects.none())
+        form = newTournamentForm()
+    return render(request, 'database/newtournament.html', {'form': form, 'formset': formset})
+
 def testTournament(request):
     tournament_id = generate_unique_id()
 
     player_pairs = [
-        ['To\'to', 'Titi'],
-        ['Dodo', 'Didi'],
+        ['CBA', 'DEF'],
+        ['HJI', 'KLM'],
         ['Bobo', 'Bibi'],
-        ['Foo', 'Bar'],
+        ['Faa', 'Boot'],
         ['BONJOUR', 'Bob'],
         ['kkk', 'jjj'],
         ['EEE', 'OOO'],
