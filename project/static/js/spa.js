@@ -282,3 +282,18 @@ async function sendJSON(view, data) {
         console.error("Error while sending JSON:  ", err);
     }
 }
+
+async function checkView(urlRaw) {
+    try {
+        const url = makeURL(urlRaw);
+        const response = await fetch(url, { method: 'HEAD' });
+        const isDefaultView = response.headers.get('X-Default-View');
+        if (isDefaultView === 'True') {
+            return false;
+        } else {
+            return true;
+        }
+    } catch (err) {
+        console.error("Error while checking view: ", err);
+    }
+}
