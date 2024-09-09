@@ -15,7 +15,7 @@ def about_content(request):
 def test_content(request):
 	return render(request, 'test.html')
 
-def defautl_content(request):
+def default_content(request):
     reponse = home_content(request)
     reponse['X-Default-View'] = 'True'
     return reponse
