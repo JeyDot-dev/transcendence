@@ -256,13 +256,14 @@ function getCookie(name) {
 
 // Function to fetch JSON from a source
 async function fetchJSON(url) {
+    let view = makeURL(url);
     try {
         const options = {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         }
-        const response = await fetch(url, options);
+        const response = await fetch(view, options);
         return await response.json();
     } catch (err) {
         console.error("Error while loading JSON: ", err);
@@ -277,7 +278,7 @@ async function sendJSON(view, data) {
         }
         let url = makeURL(view);
         let result = await fetchHTML(url, formData);
-        return result;
+        return result
     } catch (err) {
         console.error("Error while sending JSON:  ", err);
     }

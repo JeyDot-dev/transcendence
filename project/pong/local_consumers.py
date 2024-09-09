@@ -4,6 +4,7 @@ import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from database.models import Game, Player
 
 local_games = {}
 logger = logging.getLogger(__name__)
@@ -21,9 +22,9 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
 
         if self.game_id not in local_games:
             logger.info(f"Creating a new game instance for game {self.game_id}")
-            self.game = Game(self.game_id, [], 2, 1280, 720, self.notifyEvent)
-            player1 = Player(id=0, skin="skin1")
-            player2 = Player(id=1, skin="skin2")
+            self.game = Game(self.game_id, [], 2, 1280, 720, self.notifyEvent, 'localGame')
+            player1 = Player(id=0, skin="skin1", name='Player1')
+            player2 = Player(id=1, skin="skin2", name='Player2')
             self.game.addPlayer(player1, 0)  # Joueur 1 (gauche)
             self.game.addPlayer(player2, 1)  # Joueur 2 (droite)
             # Demarer la phsyique une seule fois
@@ -143,27 +144,30 @@ async def handle_key(game, types, key, who):
     if types not in ["keydown", "keyup"]:
         return
 
+    action = None
     if key in ["w", "arrowup"]:
         action = "up"
     elif key in ["s", "arrowdown"]:
         action = "down"
-    else:
-        # TODO: Implementer deux side sur le paddle et une touche pour switch
+    
+    if action is None:
         return
 
+    paddle = game.paddles[who]
+
+    # Mettre à jour l'état de la touche dans le dictionnaire
     if types == "keydown":
-        if action == "up":
-            game.paddles[who].velocity = -1
-        elif action == "down":
-            game.paddles[who].velocity = 1
+        paddle.keys_pressed[action] = True
     elif types == "keyup":
-        if action in ["up", "down"]:
-            game.paddles[who].velocity = 0
+        paddle.keys_pressed[action] = False
 
-    # Mettez à jour l'état de la touche dans le dictionnaire de clés
-    # game.paddles[who].keys[action] = 1 if types == "keydown" else 0
-
-    # Vous pouvez ajouter des logs pour le débogage si nécessaire
+    # Gestion des mouvements en fonction des touches pressées
+    if paddle.keys_pressed['up'] and not paddle.keys_pressed['down']:
+        paddle.velocity = -1  # Monter
+    elif paddle.keys_pressed['down'] and not paddle.keys_pressed['up']:
+        paddle.velocity = 1  # Descendre
+    else:
+        paddle.velocity = 0  # Aucun mouvement si les deux touches sont relâchées ou pressées
     # logger.debug(f"Paddle update - Player: {who}, Action: {action}, Type: {types}, New Velocity: {game.paddles[who].velocity}")
     # logger.debug(f"New Paddle0 Position: x={game.paddles[0].x} y={game.paddles[0].y}")
     # logger.debug(f"New Paddle1 Position: x={game.paddles[1].x} y={game.paddles[1].y}")
@@ -175,6 +179,7 @@ async def build_game_state(game):
         "game_id": game.id,
         "width": game.width,
         "height": game.height,
+        "playerNames": [player.name for player in game.players],
         "players": [
             {
                 "id": paddle.user_id,
@@ -189,11 +194,14 @@ async def build_game_state(game):
         "ball": {
             "x": game.ball.x,
             "y": game.ball.y,
+            "vel_x": game.ball.vel_x,
+            "vel_y": game.ball.vel_y,
             "color": game.ball.color,
             "speed": game.ball.speed,
             "size": game.ball.size,
         },
         "score": game.score,
+        "isPlayed": game.isPlayed
     }
 
 
@@ -217,9 +225,12 @@ async def update_game_state(game):
         "ball": {
             "x": game.ball.x,
             "y": game.ball.y,
+            "vel_x": game.ball.vel_x,
+            "vel_y": game.ball.vel_y,
             "color": game.ball.color,
             "speed": game.ball.speed,
             "size": game.ball.size,
         },
         "score": game.score,
+        "isPlayed": game.isPlayed
     }

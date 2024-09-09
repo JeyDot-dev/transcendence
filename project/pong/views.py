@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import json
 
 # Create your views here.
 
@@ -40,10 +41,14 @@ def create_tournament(request):
 
 
 def index(request):
-    return render(request, "pong/pong_old.html")
+    return render(request, "pong/pong.html")
 
 def pong2d(request):
     return render(request, "pong/pong2d.html")
 
-def launchLocalGame(request):
-    return render(request, "pong/localGame.html")
+def launchTournamentLocalGame(request):
+    data = {
+          "p1": json.dumps({"name":"PlayerUno"}),
+          "p2": json.dumps({"name":"PlayerDos"}),
+}
+    return render(request, "pong/localTournamentGame.html", data)

@@ -6,15 +6,11 @@ import { Arena } from './arena.js';
 import { Puck } from './puck.js';
 import { FontLoader } from '../FontLoader.js';
 import { Text3d } from './text3d.js';
-import { EffectComposer } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/RenderPass.js';
-import { OutlinePass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/OutlinePass.js';
-import { ShaderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/ShaderPass.js';
-import { FXAAShader } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/shaders/FXAAShader.js';
+import { TournamentMenu } from './Tournament.js';
 
 export class Game {
     constructor(threeRoot, gameData, socketManager) {
-    // constructor(threeRoot, arena_width, arnena_height, playersParam, ball_param, socketManager) {
+        this.threeRoot = threeRoot;
         this.scene = threeRoot.scene;
         this.camera = threeRoot.camera;
         this.renderer = threeRoot.renderer;
@@ -47,10 +43,23 @@ export class Game {
         this.initText(gameData.score);
         console.log("Init Ball");
         this.initBall(gameData.ball);
-        console.log("Init Paddles");
+        console.log("Init Paddles: ", gameData.players);
         this.initPaddles(gameData.players);
+        console.log("Init Player Name: ", gameData.playerNames);
+        this.initPlayerName(gameData.playerNames);
 
+        // Création de la géométrie du cube (50x50x50)
+        const geometry = new THREE.BoxGeometry(50, 50, 50);
 
+        // Création du matériau (par exemple, un matériau de base en MeshBasicMaterial)
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });  // Couleur verte
+
+        // Création du mesh (combinaison de la géométrie et du matériau)
+        this.cube = new THREE.Mesh(geometry, material);
+        this.gameGroup.add(this.cube);
+        console.log('Init Physics');
+        this.initPhysics(gameData);
+        this.threeRoot.addAnimatedObject(this);
         // const size = 720; // Taille de la grille
         // const divisions = 4; // Nombre de divisions
         // const gridHelper = new THREE.GridHelper(size, divisions);
@@ -81,12 +90,21 @@ export class Game {
         this.initInputHandling(); // Initialisation des événements clavier
         console.log("End of Game constructor")
         this.scene.add(this.gameGroup);
+        this.tweenCameraToItem();
     }
-
+    tweenCameraToItem() {
+        this.threeRoot.tweenCamera({
+            fov: 60,
+            near: 0.5,
+            far: 3000,
+            position: { x: 0, y: -500, z: 1000 },
+            lookAt: { x: 0, y: 0, z: 0 }
+        }, 2000);
+    }
     initArena(width, height) {
 
         // console.log(width, height);
-        this.arena = new Arena(width, 25, height, 0x1c9e97, 0x5a407b, 25, 25, 0xde95d0);
+        this.arena = new Arena(width, 25, height, this.colorPalette[3], this.colorPalette[0], 25, 25, 0xde95d0);
         this.arena.addToGroup(this.gameGroup);
         // this.arena.addToScene(this.scene);
         // this.arena.group.translateX(ball_param.x);
@@ -144,7 +162,7 @@ export class Game {
         const directionalLightHelper1 = new THREE.DirectionalLightHelper(directionalLight1, 1);
         const directionalLightHelper2 = new THREE.DirectionalLightHelper(directionalLight2, 1);
         // this.scene.add(directionalLightHelper1);
-        // this.scene.add(directionalLightHelper2);
+        // this.scene.add(directionalLightHelper2)x;
         // this.scene.add(ambientLight);
         this.gameGroup.add(directionalLightHelper1);
         this.gameGroup.add(directionalLightHelper2);
@@ -220,6 +238,31 @@ export class Game {
 
     }
 
+    initPlayerName(playerNames) {
+        const fontLoader = new FontLoader();
+        fontLoader.load(
+            'https://threejs.org/examples/fonts/helvetiker_bold.typeface.json',
+            (font) => {
+                this.p1NameText = new Text3d(this.camera, this.scene, font, 35, 10, 0x33ccff, playerNames[0], 1.05,
+                    new THREE.Vector3(-600, 300, 300)
+                );
+                this.p2NameText = new Text3d(this.camera, this.scene, font, 35, 10, 0xff2975, playerNames[1], 1.05,
+                    new THREE.Vector3(600, 300, 300)
+                );
+                this.p1NameText.addToGroup(this.gameGroup);
+                this.p2NameText.addToGroup(this.gameGroup);
+            },
+            undefined, // onProgress callback (optional)
+            (error) => {
+                console.error('An error occurred loading the font:', error);
+            }
+        );
+    }
+    changePlayerName(playerNameOne, playerNameTwo) {
+        this.p1NameText.updateText(playerNameOne);
+        this.p2NameText.updateText(playerNameTwo);
+    }
+
     initInputHandling() {
         // if (this.socketManager.type == 'local') {
         if (!this.socketManager) {
@@ -228,14 +271,19 @@ export class Game {
         }
             document.addEventListener('keydown', event => {
                 const key = event.key.toLowerCase();
-                if (['w', 's'].includes(key)) {
-                    // console.log('keydown: w s');
-                    this.socketManager.sendMessage({ type: 'keydown', key: key, who: 0 });
-                }
-                if (['arrowup', 'arrowdown'].includes(key)) {
-                    // console.log('keydown: arrow');
-                    event.preventDefault(); // Empêche le comportement par défaut (scrolling)
-                    this.socketManager.sendMessage({ type: 'keydown', key: key, who: 1 });
+
+                if (!this.pressedKeys[key]) {
+                    this.pressedKeys[key] = true; 
+                    
+                    if (['w', 's'].includes(key)) {
+                        console.log('keydown: w s');
+                        this.socketManager.sendMessage({ type: 'keydown', key: key, who: 0 });
+                    }
+                    if (['arrowup', 'arrowdown'].includes(key)) {
+                        console.log('keydown: arrow');
+                        event.preventDefault(); // Empêche le comportement par défaut (scrolling)
+                        this.socketManager.sendMessage({ type: 'keydown', key: key, who: 1 });
+                    }
                 }
                 if (['k'].includes(key)) {
                     console.log('Close WebSocket with key K');
@@ -245,13 +293,18 @@ export class Game {
             
             document.addEventListener('keyup', event => {
                 const key = event.key.toLowerCase();
-                if (['w', 's'].includes(key)) {
-                    // console.log('keyup: w s');
-                    this.socketManager.sendMessage({ type: 'keyup', key: key, who: 0 });
-                }
-                if (['arrowup', 'arrowdown'].includes(key)) {
-                    // console.log('keyup: arrow');
-                    this.socketManager.sendMessage({ type: 'keyup', key: key, who: 1 });
+
+                if (this.pressedKeys[key]) {
+                    delete this.pressedKeys[key];
+
+                    if (['w', 's'].includes(key)) {
+                        console.log('keyup: w s');
+                        this.socketManager.sendMessage({ type: 'keyup', key: key, who: 0 });
+                    }
+                    if (['arrowup', 'arrowdown'].includes(key)) {
+                        console.log('keyup: arrow');
+                        this.socketManager.sendMessage({ type: 'keyup', key: key, who: 1 });
+                    }
                 }
             });
 
@@ -260,7 +313,43 @@ export class Game {
             this.addMobileControls();
         }
     }
-
+    initPhysics(gameData) {
+        this.velocityDelta = new THREE.Vector3(0, 0, 0); 
+        this.ballVelocity = new THREE.Vector2(gameData.ball.vel_x, -gameData.ball.vel_y);  // inverse Y car y est inversé dans THREE.js
+        this.ballSpeed = gameData.ball.speed;
+        const fixedDeltaTime = 1.0 / 60;
+        this.accumulator = 0.0;
+        this.lastPhysicsTime = performance.now();
+    
+        // Interval for physics
+        this.physics = setInterval(() => {
+            const currentTime = performance.now();
+            const deltaTime = (currentTime - this.lastPhysicsTime) / 1000;
+            this.lastPhysicsTime = currentTime;
+    
+            // Accumulate the time passed
+            this.accumulator += deltaTime;
+    
+            while (this.accumulator >= fixedDeltaTime) {
+                this.updatePhysics(fixedDeltaTime);
+                this.accumulator -= fixedDeltaTime;
+            }
+        }, 1000 / 60);
+    }
+    updatePhysics(fixedDeltaTime) {
+        if (!this.ballPosition) {
+            this.ballPosition = this.cube.position.clone();
+        }
+    
+        this.velocityDelta.set(this.ballVelocity.x, this.ballVelocity.y, 0);
+        this.velocityDelta.multiplyScalar(this.ballSpeed * fixedDeltaTime);
+    
+        this.ballPosition.add(this.velocityDelta);
+    }
+    stopPhysics() {
+        clearInterval(this.physics);
+        this.physics = null;
+    }
     handleKeyDown(e) {
         if (this.pressedKeys.includes(e.key)) return;
         this.pressedKeys.push(e.key);
@@ -322,10 +411,10 @@ export class Game {
     }
 
     updateGame(game) {
-        console.log('Update Game(Reconnection)', game);
+        console.log('Update Game(Reconnection)', game.players);
         this.ball.move(game.ball.x - this.offSet.x, -game.ball.y + this.offSet.y);
         // console.log(game.score);
-        game.paddles.forEach(element => {
+        game.players.forEach(element => {
             this.paddles[element.id].move(element.position[0] - this.offSet.x, -element.position[1] + this.offSet.y);
         });
         // this.timeText.updateText('0s');
@@ -342,11 +431,27 @@ export class Game {
             case 'scoreChange1':
                 this.p2Text.updateText(data.score[1].toString(), this.gameGroup);
                 break;
+            case 'timerUpdate':
+                this.timeText.updateText(data.timer.toString(), this.gameGroup);
+                break;
             case 'ballMove':
+                // DEPRECATED
                 // -y Car dans three js y est orienter differement
                 this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);
                 break;
-                case 'paddleMove':
+            case 'refreshBallData':
+                // console.log('Refresh ball Data: ', data);
+                // this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);
+                // this.ballPosition = this.ball.mesh.position.clone();
+                // this.ballVelocity.set(data.ball.vel_x, -data.ball.vel_y);
+                // this.ballSpeed = data.ball.speed;
+                // Synchronize the ball data from the back-end after a collision or any important update
+                this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);  // Adjust Y-axis inversion
+                this.ballPosition = this.ball.mesh.position.clone();  // Reset the front-end ball position
+                this.ballVelocity.set(data.ball.vel_x, -data.ball.vel_y);  // Sync velocity
+                this.ballSpeed = data.ball.speed;  // Sync speed
+                break;
+            case 'paddleMove':
                 // -y Car dans three js y est orienter differement
                 this.paddles[data.paddle.side].move(data.paddle.x - this.offSet.x, -data.paddle.y + this.offSet.y)
                 break;
@@ -377,13 +482,46 @@ export class Game {
     }
 
     update() {
-        
+        if (this.physics && this.ballPosition) {
+            this.ball.mesh.position.lerp(this.ballPosition, 0.5);
+        }
+        // if (this.cubePosition) {
+        //     this.cube.position.copy(this.cubePosition);
+        // }
+    }
+
+    gameIsPlayed() {
+        // TODO: Gerer le retour au menu si dans un init ou dans un udpate game.isPlayed = true
     }
 
     destroy() {
-        // Remove event listeners when the game instance is destroyed
+        if (this.gameGroup) {
+            this.gameGroup.children.forEach((child) => {
+                this.gameGroup.remove(child);
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach((material) => material.dispose());
+                    } else {
+                        child.material.dispose();
+                    }
+                }
+            });
+            this.scene.remove(this.gameGroup);
+        }
+    
         document.removeEventListener('keydown', this.handleKeyDown.bind(this));
         document.removeEventListener('keyup', this.handleKeyUp.bind(this));
+    
+        const leftControls = document.getElementById('mobile-controls-left');
+        const rightControls = document.getElementById('mobile-controls-right');
+        if (leftControls) leftControls.remove();
+        if (rightControls) rightControls.remove();
+        
+        if (this.socketManager) {
+            this.socketManager.close(); // Ferme le socket si nécessaire
+        }
+        this.stopPhysics();
     }
 
     // TODO: Mobile
