@@ -14,6 +14,7 @@ export class THREERoot {
         this.animatedObjects = []; // Liste des objets animés
         this.stats = null;
         this.renderer = null;
+        // this.queue = Promise.resolve(); // File d'attente initialisée à une Promise résolue
 
         this.initCameraControls();
     }
@@ -116,7 +117,70 @@ export class THREERoot {
         }
         this.camera.updateProjectionMatrix();
     }
-
+    tweenCamera(targetSettings, duration = 2000) {
+        const camera = this.camera;
+    
+        // Obtenir la position actuelle de la caméra et le vecteur de direction actuel au moment du démarrage du tween
+        const initialPosition = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+        console.log('initialPosition: ', initialPosition);
+        const targetPosition = targetSettings.position;
+        console.log('targetPosition: ', targetPosition);
+    
+        // Obtenir la direction actuelle vers laquelle la caméra est orientée
+        const initialLookAt = new THREE.Vector3();
+        camera.getWorldDirection(initialLookAt);
+        console.log('initialLookAt: ', initialLookAt);
+    
+        const targetLookAt = new THREE.Vector3(targetSettings.lookAt.x, targetSettings.lookAt.y, targetSettings.lookAt.z);
+        console.log('targetLookAt: ', targetLookAt);
+    
+        // Créer une promesse qui encapsule l'exécution simultanée des trois tweens
+        return new Promise((resolve) => {
+            // Définir les tweens
+            const positionTween = new TWEEN.Tween(initialPosition)
+                .to(targetPosition, duration)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .onUpdate(() => {
+                    camera.position.set(initialPosition.x, initialPosition.y, initialPosition.z);
+                });
+    
+            const lookAtTween = new TWEEN.Tween(initialLookAt)
+                .to(targetLookAt, duration)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .onUpdate(() => {
+                    camera.lookAt(initialLookAt);
+                });
+    
+            const fovTween = new TWEEN.Tween({
+                fov: camera.fov,
+                near: camera.near,
+                far: camera.far
+            })
+                .to({
+                    fov: targetSettings.fov,
+                    near: targetSettings.near,
+                    far: targetSettings.far
+                }, duration)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .onUpdate(function (settings) {
+                    camera.fov = settings.fov;
+                    camera.near = settings.near;
+                    camera.far = settings.far;
+                    camera.updateProjectionMatrix();
+                });
+    
+            // Démarrer les tweens simultanément
+            positionTween.start();
+            lookAtTween.start();
+            fovTween.start();
+    
+            // Résoudre la promesse lorsque le dernier tween est terminé
+            fovTween.onComplete(() => {
+                resolve(); // Tout est fini
+            });
+        });
+    }
+    
     initCameraControls() {
         document.getElementById('update-camera').addEventListener('click', () => {
             const posX = parseFloat(document.getElementById('camera-pos-x').value);

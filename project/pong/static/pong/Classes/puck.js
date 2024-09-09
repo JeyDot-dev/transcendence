@@ -75,6 +75,9 @@ export class Puck {
     update() {
         // this.mesh.position.add(this.puckSpeed);
     }
+    getPosition() {
+        return this.mesh.position;
+    }
     // move() {
     //     // Déplacer la balle en fonction de sa vitesse
     //     this.mesh.position.add(this.velocity.clone().multiplyScalar(this.puckSpeed));

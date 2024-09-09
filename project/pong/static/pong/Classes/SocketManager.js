@@ -4,20 +4,26 @@ export class SocketManager {
     constructor(threeRoot, onMessageCallback = null, onOpenCallback = null) {
         this.ws = null;
         this.gameId = null;
+        this.localGameId = null;
+        this.matchMakingGameId = null;
+        this.customGameId = null;
         this.type = null;  // 'local' ou 'remote'
         this.game = null;
         this.gameInitilized = false;
         this.threeRoot = threeRoot;
+        this.gameEndPromiseResolve = null;
+        this.lastMenu = null;
         // this.menu_object = null;
         this.my_id = -1;
 
-        // Utilisation des callbacks fournis ou des valeurs par défaut
         this.onMessageCallback = onMessageCallback || this.defaultOnMessageCallback.bind(this);
         this.onOpenCallback = onOpenCallback || this.defaultOnOpenCallback.bind(this);
     }
 
     getWebSocketUrl() {
         if (this.type === 'local') {
+            return `ws://${window.location.host}/ws/pong/local/${this.gameId}/`;
+        } else if (this.type === 'customGame') {
             return `ws://${window.location.host}/ws/pong/local/${this.gameId}/`;
         } else if (this.type === 'remote') {
             return `ws://${window.location.host}/ws/pong/${this.gameId}/`;
@@ -77,70 +83,86 @@ export class SocketManager {
             this.reconnect();
         }
     }
-
+    setLastMenu(menu) {
+        this.lastMenu = menu;
+    }
     reconnect() {
         if (this.ws) {
             this.close();
         }
         this.connect();
     }
-
     setGameObject(game_object) {
         this.game = game_object;
     }
 
-    // setMenuObject(menu_object) {
-    //     this.menu_object = menu_object;
-    // }
+    waitForGameEnd() {
+        return new Promise(resolve => {
+            this.gameEndPromiseResolve = resolve;
+        });
+    }
+    onGameEnd() {
+        if (this.gameEndPromiseResolve) {
+            this.gameEndPromiseResolve();
+            this.gameEndPromiseResolve = null;
+        }
+    }
+
+    connectLocalGame() {
+        this.localGameId = getCookie('localGameId');
+        console.log('Get LocalGameId cookie: ', this.localGameId);
+        if (!this.localGameId) {
+            this.localGameId = this.generateWebSocketId();
+            setCookie('localGameId', this.localGameId, 30);
+            console.log('No cookie for localGameId, new cookie: ', getCookie('localGameId'));
+        }
+        // this.gameId = this.localGameId;
+        this.setType('local');
+        this.setGameId(this.localGameId);
+        // this.connect();
+    }
+    connectCustomGame(customGameId) {
+        console.log('Connnecting to custom game id: ', customGameId);
+        this.customGameId = customGameId;
+        this.setType('customGame');
+        this.setGameId(this.customGameId);
+        // this.connect();
+    }
+
+    generateWebSocketId() {
+    const timestamp = Date.now().toString(36);
+    const randomNum = Math.random().toString(36).substring(2, 10);
+    return `${timestamp}-${randomNum}`;
+    }
 
     // Implémentation par défaut pour le onMessageCallback
     defaultOnMessageCallback(data) {
-        // console.log('defaultOnMessageCallback: ', data);
-        // let gameData = data.game ? data.game : data;
-        
-        // console.log(game);
-
-        // switch (data.type) {
-            //     case "update":
-            //         // console.log("Game State");
-            //         if (this.game_object) {
-                //             this.game_object.updateGame(game);
-                //         }
-                //         break;
-                //     case "init":
-                //         console.log("Initialisation du jeu");
-                //         // this.menu_object = new Menu(scene, camera, renderer);
-                //         this.threeRoot.updateCameraSettings({
-                    //             fov: 60,
-                    //             near: 0.5,
-                    //             far: 10000,
-                    //             position: { x: 0, y: -500, z: 1000 },
-                    //             lookAt: { x: 0, y: 0, z: 0 }
-                    //         });
-                    //         this.game_object = new Game(this.threeRoot, game.width, game.height, game.players, game.ball, this);
-                    //         // if (!local_user) return;
-                    //         this.my_id = game.id;
-                    //         // addPlayerList(local_user.username, (this.my_id % 2 == 0) ? 'l' : 'r');
-                    //         break;
-                    //     default:
-                    // }
         let gameData = data.game ? data.game : data;
         if (gameData.type == "initGame" && !this.gameInitilized) {
             console.log("Initialisation du jeu", gameData);
-            this.threeRoot.updateCameraSettings({
-                fov: 60,
-                near: 0.5,
-                far: 10000,
-                position: { x: 0, y: -500, z: 1000 },
-                lookAt: { x: 0, y: 0, z: 0 }
-            });
             this.game = new Game(this.threeRoot, gameData, this);
-            this.game.initPlayerName('Toto', 'Titi');
             this.my_id = gameData.id;
             this.gameInitilized = true;
         } else if (gameData.type == "initGame" && this.gameInitilized) {
             console.log("Update in Front End");
             this.game.updateGame(gameData);
+        } else if (gameData.type == "clearGameId" && this.gameInitilized) {
+            this.gameId = null;
+            if (gameData.gameType == 'localGame') {
+                deleteCookie('localGameId');
+                this.localGameId = null;
+            }
+            if (gameData.gameType == 'matchmakingGame') {
+                deleteCookie('matchMakingGameId');
+                this.matchMakingGameId = null;
+            }
+            this.gameInitilized = false;
+            this.onGameEnd();
+            this.game.destroy();
+            if (this.lastMenu) {
+                this.lastMenu.show();
+                this.lastMenu.tweenCameraToItem();
+            }
         } else {
             // console.log('defaultOnMessageCallback ELSE:', data);
             if (this.game) {
@@ -157,4 +179,29 @@ export class SocketManager {
     setOnMessageCallback(callbackRoutine) {
         this.onMessageCallback = callbackRoutine.bind(this);
     }
+}
+
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length); // Supprimer les espaces au début
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+function deleteCookie(name) {
+    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }

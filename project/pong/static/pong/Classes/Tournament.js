@@ -6,21 +6,24 @@ import { Arena } from './arena.js';
 // import { SkeletonHelper } from '../threejs/Three.js';
 
 export class TournamentMenu {
-    constructor(threeRoot) {
+    constructor(threeRoot, background, socketManager) {
         this.threeRoot = threeRoot;
+        this.background = background;
+        this.socketManager = socketManager;
         this.tournamentId = null;
         this.tournamentPools = [];
         this.totalWidth = 1500;
+        this.mouse = new THREE.Vector2();
+        this.raycaster = new THREE.Raycaster();
+        this.clickableGroup = new THREE.Group();
 
+        this.socketManager.setLastMenu(this);
         this.initialize();
     }
 
-    // Méthode asynchrone pour initialiser les étapes
     async initialize() {
-        // Attendre la fin de createTournament
         await this.createTournament();
-        // Ensuite appeler getNextPool
-        await this.getNextPool();
+        // await this.getNextPool();
 
         // await this.getNextPool();
     }
@@ -30,7 +33,7 @@ export class TournamentMenu {
         this.lowerPreviousPools();
         
         console.log('Lower Previous New Tournament Pool');
-        const newPool = new TournamentPool(this.threeRoot, tournamentGames, this.tournamentId, this.totalWidth);
+        const newPool = new TournamentPool(this.threeRoot, tournamentGames, this.tournamentId, this.totalWidth, this);
         this.totalWidth -= this.totalWidth / 3;
 
         console.log('Lower Previous Push Called');
@@ -54,12 +57,113 @@ export class TournamentMenu {
             // });
         });
     }
+    hide() {
+        this.tournamentPools.forEach(pool => {
+            pool.tournamentPoolGroup.visible = false;
+        });
+        if (this.background) {
+            this.background.hide();
+        }
+        this.disableClicks();
+        console.log('All tournament objects are hidden, and clicks are disabled.');
+    }
+
+    show() {
+        this.tournamentPools.forEach(pool => {
+            pool.tournamentPoolGroup.visible = true;
+        });
+        if (this.background) {
+            this.background.show();
+        }
+        this.enableClicks();
+        console.log('All tournament objects are visible, and clicks are enabled.');
+    }
+
+    disableClicks() {
+        document.removeEventListener('click', this.onMouseClick.bind(this), false);
+        console.log('Clicks are disabled.');
+    }
+
+    enableClicks() {
+        document.addEventListener('click', this.onMouseClick.bind(this), false);
+        console.log('Clicks are enabled.');
+    }
+    onMouseClick(event) {
+        const canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
+
+        this.mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1;
+
+        this.raycaster.setFromCamera(this.mouse, this.threeRoot.camera);
+        const intersects = this.raycaster.intersectObjects(this.clickableGroup.children, true);
+
+        if (intersects.length > 0) {
+            const clickedObject = intersects[0].object;
+            this.handleGameClick(clickedObject);
+        }
+    }
+
+    handleGameClick(clickedObject) {
+        const currentPool = this.tournamentPools[this.tournamentPools.length - 1];
+        const game = currentPool.getGameByClickableZone(clickedObject);
+        if (game && !game.isPlayed) {
+            this.playGame(game);
+        }
+    }
+
+    async playGame(game) {
+        console.log('Jouer le jeu avec les joueurs: ', game.playerNameOne, game.playerNameTwo, game.gameId);
+        await this.threeRoot.tweenCamera({
+            fov: 60,
+            near: 0.5,
+            far: 3000,
+            position: { x: -750, y: -300, z: 100 },
+            lookAt: { x: -750, y: 0, z: 0 }
+        }, 2000);
+
+        this.hide();
+        game.isPlayed = true;
+
+        this.clickableGroup.remove(game.clickableZone);
+        this.disableClicks();
+        this.socketManager.connectCustomGame(game.gameId);
+        this.socketManager.game.changePlayerName(game.playerNameOne, game.playerNameTwo);
+        await this.socketManager.waitForGameEnd();
+
+        console.log(`La partie avec les joueurs ${game.playerNameOne} et ${game.playerNameTwo} est terminée.`);
+        // this.show();
+
+
+        // this.clickableGroup.visible = false;
+        // this.socketManager.connectLocalGame();
+
+        this.checkPoolCompletion();
+    }
+
+    checkPoolCompletion() {
+        const currentPool = this.tournamentPools[this.tournamentPools.length - 1];
+        let allGamesPlayed = true;
+
+        // Vérifier si toutes les parties de la pool actuelle sont jouées
+        currentPool.gamesMap.forEach((game) => {
+            if (!game.isPlayed) {
+                allGamesPlayed = false;
+            }
+        });
+
+        if (allGamesPlayed) {
+            console.log('Toutes les parties de la pool actuelle sont jouées. Chargement de la prochaine pool...');
+            this.getNextPool();
+        }
+    }
+
     async createTournament() {
         try {
             const response = await fetchJSON('/database/testTournament');
             this.tournamentId = response.tournament_id;
             console.log('Tournament ID: ', this.tournamentId);
             this.initializeTournamentPool(response.games);
+            this.enableClicks();
         } catch (error) {
             console.error('Error getting tournament:', error);
         }
@@ -86,6 +190,122 @@ export class TournamentMenu {
             console.error('Error sending JSON: ', error);
         }
     }
+    tweenCameraToItem() {
+        this.threeRoot.tweenCamera({
+            fov: 60,
+            near: 0.5,
+            far: 3000,
+            position: { x: 0, y: -1000, z: 0 },
+            lookAt: { x: 0, y: 0, z: 0 }
+        }, 2000);
+    }
+}
+
+class TournamentPool {
+    constructor(threeRoot, tournamentGames, tournamentId, totalWidth, tournamentMenu) {
+        this.tournamentMenu = tournamentMenu;
+        this.threeRoot = threeRoot;
+        this.tournamentPoolGroup = new THREE.Group();
+        this.gamesMap = new Map();
+        this.tournamentId = tournamentId;
+        this.poolWidth = totalWidth;
+        // this.mouse = new THREE.Vector2();
+        // this.raycaster = new THREE.Raycaster();
+        // this.clickableGroup = new THREE.Group();
+
+        tournamentGames.forEach((game, index) => {
+            const { players, game_id } = game;
+            this.initializeGame(players, game_id, index, tournamentGames.length);
+        });
+
+        this.threeRoot.scene.add(this.tournamentPoolGroup);
+        this.threeRoot.scene.add(this.tournamentMenu.clickableGroup);
+
+        // document.addEventListener('click', this.onMouseClick.bind(this), false);
+    }
+
+    initializeGame(playerPair, gameId, index, totalGames) {
+        // const totalWidth = 1500;
+        const spacing = this.poolWidth / (totalGames - 1);
+        const startX = -(this.poolWidth / 2);
+
+        const fontLoader = new FontLoader();
+        fontLoader.load(
+            './static/assets/LEMON_MILK_Regular.json',
+            (font) => {
+                const [playerNameOne, playerNameTwo] = playerPair;
+
+                const game = new TournamentGame(this.threeRoot, playerNameOne, playerNameTwo, gameId, font);
+
+                game.tournamentGameGroup.position.x = startX + index * spacing;
+                game.clickableZone.position.x = startX + index * spacing;
+                this.tournamentPoolGroup.add(game.tournamentGameGroup);
+                
+                this.tournamentMenu.clickableGroup.add(game.clickableZone);
+
+                const key = `${playerNameOne}-${playerNameTwo}`;
+                this.gamesMap.set(key, game);
+            }
+        );
+    }
+
+    getGameByPlayerNames(playerNameOne, playerNameTwo) {
+        const key = `${playerNameOne}-${playerNameTwo}`;
+        return this.gamesMap.get(key);
+    }
+    // onMouseClick(event) {
+    //     const canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
+
+    //     // Calculer la position de la souris en fonction de la taille du canvas (pas de la fenêtre)
+    //     this.mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1;
+    //     this.mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1;
+    //     console.log('Click in tournament Menu. Mouse: ', this.mouse);
+
+    //     // Utiliser uniquement les objets dans clickableGroup
+    //     this.raycaster.setFromCamera(this.mouse, this.threeRoot.camera);
+    //     const intersects = this.raycaster.intersectObjects(this.clickableGroup.children, true);
+
+    //     if (intersects.length > 0) {
+    //         const clickedObject = intersects[0].object;
+    //         console.log('ClickedObject: ', clickedObject);
+    //         this.handleGameClick(clickedObject);
+    //     }
+    // }
+
+    // handleGameClick(clickedObject) {
+    //     const game = this.getGameByClickableZone(clickedObject);
+    //     if (game && !game.isPlayed) {
+    //         console.log('Playing game: ', game.playerNameOne, game.playerNameTwo, game.gameId);
+    //         this.playGame(game);
+    //     }
+    // }
+    // async playGame(game) {
+    //     // console.log(`Playing game: ${game.gameId}`);
+    //     console.log('Game Position: ', game.tournamentGameGroup.position);
+    //     await this.threeRoot.tweenCamera({
+    //         fov: 60,
+    //         near: 0.5,
+    //         far: 3000,
+    //         position: { x: -750, y: -300, z: 100},
+    //         lookAt: { x: -750, y: 0, z: 0 }
+    //     }, 2000);
+    //     this.tournamentMenu.hide();
+    //     game.isPlayed = true;
+
+    //     game.clickableZone.visible = false;
+    // }
+    // launchGame() {
+    //     console.log('Placeholder for launching a ws game');
+    // }
+
+    getGameByClickableZone(clickedObject) {
+        for (let [key, game] of this.gamesMap) {
+            if (game.clickableZone === clickedObject) {
+                return game;
+            }
+        }
+        return null;
+    }
 }
 
 
@@ -93,6 +313,8 @@ class TournamentGame {
     constructor(threeRoot, playerNameOne, playerNameTwo, gameId, font) {
         this.isPlayed = false;
         this.gameId = gameId;
+        this.playerNameOne = playerNameOne;
+        this.playerNameTwo = playerNameTwo;
         this.colorPalette = [
             new THREE.Color(0xff00c1),
             new THREE.Color(0x9600ff),
@@ -100,21 +322,22 @@ class TournamentGame {
             new THREE.Color(0x00b8ff),
             new THREE.Color(0x00fff9)
         ];
-        this.players = new Map();
         this.tournamentGameGroup = new THREE.Group();
         this.arena = new Arena(150, 5, 85, this.colorPalette[3], this.colorPalette[0], 5, 5, 0x4900ff);
         this.arena.group.translateY(0);
         this.arena.group.rotation.x = Math.PI / 2; // Rotation de 90° autour de l'axe Y
-        const zoneGeometry = new THREE.PlaneGeometry(150, 85);
+        const zoneGeometry = new THREE.PlaneGeometry(180, 120);
         const zoneMaterial = new THREE.MeshBasicMaterial({ 
             color: 0xdddddd, 
             side: THREE.DoubleSide, 
             transparent: true, 
-            opacity: 0 // Opacité a regler
+            opacity: 0.8 // Opacité a regler
         });
+
         this.clickableZone = new THREE.Mesh(zoneGeometry, zoneMaterial);
         this.clickableZone.position.set(0, 0, 0);
         this.clickableZone.rotation.x = Math.PI / 2;
+
         const p1TextPosition = new THREE.Vector3(0, 0, 60);
         const p2TextPosition = new THREE.Vector3(0, 0, -100);
         const p1Text = new Text3d(
@@ -139,7 +362,8 @@ class TournamentGame {
             1.02,
             p2TextPosition,
             new THREE.Vector3(Math.PI / 2, 0, 0));
-        this.players.set(playerNameOne, p1Text);
+        // this.players.set(playerNameOne, p1Text);
+        // this.players.set(playerNameTwo, p2Text);
 
 
         p1Text.addToGroup(this.tournamentGameGroup);
@@ -157,9 +381,6 @@ class TournamentGame {
         this.tournamentGameGroup.add(this.clickableZone);
         // this.gameId = this.generateUniqueId();
     }
-    updateBoundingBox() {
-        this.boundingBox.setFromObject(this.clickableZone); // Recalculer la bounding box si nécessaire
-    }
     generateUniqueId() {
         return '_' + Math.random().toString(36).slice(2, 11);
     }
@@ -176,85 +397,7 @@ class TournamentGame {
     setWinner(winner, loser) {
 
     }
-}
-
-class TournamentPool {
-    constructor(threeRoot, tournamentGames, tournamentId, totalWidth) {
-        this.threeRoot = threeRoot;
-        this.tournamentPoolGroup = new THREE.Group();
-        this.gamesMap = new Map();
-        this.tournamentId = tournamentId;
-        this.poolWidth = totalWidth;
-
-        tournamentGames.forEach((game, index) => {
-            const { players, game_id } = game;
-            this.initializeGame(players, game_id, index, tournamentGames.length);
-        });
-
-        this.threeRoot.scene.add(this.tournamentPoolGroup);
-    }
-
-    initializeGame(playerPair, gameId, index, totalGames) {
-        // const totalWidth = 1500;
-        const spacing = this.poolWidth / (totalGames - 1);
-        const startX = -(this.poolWidth / 2);
-
-        const fontLoader = new FontLoader();
-        fontLoader.load(
-            './static/assets/LEMON_MILK_Regular.json',
-            (font) => {
-                const [playerNameOne, playerNameTwo] = playerPair;
-
-                const game = new TournamentGame(this.threeRoot, playerNameOne, playerNameTwo, gameId, font);
-
-                game.tournamentGameGroup.position.x = startX + index * spacing;
-                this.tournamentPoolGroup.add(game.tournamentGameGroup);
-
-                const key = `${playerNameOne}-${playerNameTwo}`;
-                this.gamesMap.set(key, game);
-            }
-        );
-    }
-
-    getGameByPlayerNames(playerNameOne, playerNameTwo) {
-        const key = `${playerNameOne}-${playerNameTwo}`;
-        return this.gamesMap.get(key);
-    }
-    onMouseClick(event) {
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        this.raycaster.setFromCamera(this.mouse, this.threeRoot.camera);
-        const intersects = this.raycaster.intersectObjects(this.tournamentPoolGroup.children, true);
-
-        if (intersects.length > 0) {
-            const clickedObject = intersects[0].object;
-            this.handleGameClick(clickedObject);
-        }
-    }
-
-    handleGameClick(clickedObject) {
-        const game = this.getGameByClickableZone(clickedObject);
-        if (game && !game.isPlayed) {
-            this.playGame(game);
-        }
-    }
-
-    playGame(game) {
-        console.log(`Playing game: ${game.gameId}`);
-
-        game.setWinner('Player1', 'Player2');
-        game.isPlayed = true;
-
-        game.clickableZone.visible = false;
-    }
-
-    getGameByClickableZone(clickedObject) {
-        for (let [key, game] of this.gamesMap) {
-            if (game.clickableZone === clickedObject) {
-                return game;
-            }
-        }
-        return null;
+    addclickableToGroup(group) {
+        group.add(this.clickableZone);
     }
 }

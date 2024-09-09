@@ -46,6 +46,7 @@ document.addEventListener('loadView', function(event) {
     if (!isRunning) {
         const socketManager = new SocketManager(threeRoot);
         let menu = new Menu(threeRoot, socketManager);
+        socketManager.setLastMenu(menu);
         
         menu.show();
     }

@@ -15,7 +15,7 @@ class Paddle:
         self.x = x
         self.y = arenaHeight / 2
         self.color = color
-        self.speed = 15
+        self.speed = 600
         self.velocity = 0
         self.bounce = 1
         self.keys = {"up": 0, "down": 0}
@@ -23,8 +23,8 @@ class Paddle:
         self.user_id = userId
         self.updateCallBack = updateCallBack
 
-    def move(self):
-        self.y += self.speed * self.velocity
+    def move(self, delta_time):
+        self.y += self.speed * self.velocity * delta_time
         if self.updateCallBack:
             asyncio.create_task(self.updateCallBack({
                 'type': 'paddleMove',
@@ -52,7 +52,7 @@ class Ball:
     def __init__(self, color, arenaWidth, arenaHeight, updateCallBack=None):
         self.x = arenaWidth / 2
         self.y = arenaHeight / 2
-        self.speed = 5
+        self.speed = 400
         self.initialSpeed = self.speed
         self.vel_x = -1
         self.vel_y = 0
@@ -84,14 +84,14 @@ class Ball:
         self.speed = self.initialSpeed
         self.vel_x = -1 if random.choice([True, False]) else 1
         self.vel_y = 0
-        if self.updateCallBack:
-            asyncio.create_task(self.updateCallBack({
-                'type': 'ballMove',
-                'ball': {
-                    'x': self.x,
-                    'y': self.y
-                }
-            }))
+        # if self.updateCallBack:
+        #     asyncio.create_task(self.updateCallBack({
+        #         'type': 'ballMove',
+        #         'ball': {
+        #             'x': self.x,
+        #             'y': self.y
+        #         }
+        #     }))
 
     def predict_collision(self, paddle):
         future_x = self.x + self.vel_x * self.speed
@@ -136,7 +136,7 @@ class Ball:
         self.vel_y += paddle.velocity * impact_factor
 
         # Ajuster la vitesse totale de la balle en fonction de la vélocité du paddle
-        speed_influence = 1 + abs(paddle.velocity) * 0.1
+        speed_influence = 1 + abs(paddle.velocity) * 0.2
         self.vel_x *= speed_influence
         self.vel_y *= speed_influence
 
@@ -176,30 +176,57 @@ class Ball:
             return True
         return False
 
-    async def physics_update(self, paddles, score):
-        if not self.wall_collision(score):
+    async def physics_update(self, paddles, score, delta_time):
+        if self.wall_collision(score):
+            if self.updateCallBack:
+                asyncio.create_task(self.updateCallBack({
+                    'type': 'refreshBallData',
+                    'ball': {
+                        'x': self.x,
+                        'y': self.y,
+                        'vel_x': self.vel_x,
+                        'vel_y': self.vel_y,
+                        'speed': self.speed
+                    }
+                }))
+        else:
             for paddle in paddles:
                 if self.collision(paddle):
+                    if self.updateCallBack:
+                        asyncio.create_task(self.updateCallBack({
+                            'type': 'refreshBallData',
+                            'ball': {
+                                'x': self.x,
+                                'y': self.y,
+                                'vel_x': self.vel_x,
+                                'vel_y': self.vel_y,
+                                'speed': self.speed
+                            }
+                        }))
                     break
-
-        self.x += self.speed * self.vel_x
-        self.y += self.speed * self.vel_y
-        if self.updateCallBack:
-            asyncio.create_task(self.updateCallBack({
-                'type': 'ballMove',
-                'ball': {
-                    'x': self.x,
-                    'y': self.y
-                }
-            }))
+        self.x += self.speed * self.vel_x * delta_time
+        self.y += self.speed * self.vel_y * delta_time
+        # if self.updateCallBack:
+        #     asyncio.create_task(self.updateCallBack({
+        #         'type': 'ballMove',
+        #         'ball': {
+        #             'x': self.x,
+        #             'y': self.y
+        #         }
+        #     }))
 
 class Game:
-    def __init__(self, id, players, nb_max_players=100, width=1280, height=720, updateCallBack=None):
+    def __init__(self, id, players, nb_max_players=100, width=1280, height=720, updateCallBack=None, type='localGame'):
         self.id = id
+        self.type = type
         self.timer = 0
+        self.maxTimer = 180
         self.score = [0, 0]
+        self.maxScore = 5
         self.running = False
-        self.winners = []
+        self.isPlayed = False
+        self.winner = None
+        self.loser = None
         self.width = width
         self.height = height
         self.nb_max_players = nb_max_players
@@ -223,6 +250,9 @@ class Game:
         accumulator = 0.0
         last_time = time.time()
 
+        # Démarrer la boucle de mise à jour du timer en parallèle
+        asyncio.create_task(self.start_timer())
+
         while not self.running:
             await asyncio.sleep(0.1)  # Attendre que le jeu commence
 
@@ -238,22 +268,57 @@ class Game:
 
             await asyncio.sleep(0.001)
 
+    async def start_timer(self):
+        """Compteur de temps qui s'incrémente toutes les secondes."""
+        while self.running:
+            await asyncio.sleep(1)
+            self.timer += 1
+            
+            if self.updateCallBack:
+                await self.updateCallBack({
+                    'type': 'timerUpdate',
+                    'timer': self.timer
+                })
+
+            if self.timer >= self.maxTimer + 1:
+                self.running = False
+                # logger2.debug("Le temps imparti est écoulé. Fin de la partie.")
+                self.determine_winner_and_loser()
+
     async def update_physics(self, delta_time):
         for paddle in self.paddles:
             if paddle.velocity != 0:
-                paddle.move()
+                paddle.move(delta_time)
 
             if paddle.y - paddle.height / 2 < 0:
                 paddle.y = paddle.height / 2
             elif paddle.y + paddle.height / 2 > self.height:
                 paddle.y = self.height - paddle.height / 2
 
-        await self.ball.physics_update(self.paddles, self.score)
+        await self.ball.physics_update(self.paddles, self.score, delta_time)
 
-        if self.score[0] >= 50 or self.score[1] >= 50:
+        if self.score[0] >= self.maxScore or self.score[1] >= self.maxScore:
             self.running = False
+            self.determine_winner_and_loser()
+
+    def determine_winner_and_loser(self):
+        if self.score[0] > self.score[1]:
+            self.winner = self.players[0]
+            self.loser = self.players[1]
+        else:
+            self.winner = self.players[1]
+            self.loser = self.players[0]
+        if self.updateCallBack:
+            asyncio.create_task(self.updateCallBack({
+                'type': 'clearGameId',
+                'gameType': self.type
+            }))
+        self.isPlayed = True
+        # logger2.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")
+
 
 class Player:
-    def __init__(self, id, skin):
+    def __init__(self, id, skin, name):
         self.id = id
         self.skin = skin
+        self.name = name

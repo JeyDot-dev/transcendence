@@ -18,13 +18,21 @@ export class Menu {
         this.showMenuEnabled = true;
 
         // Configuration de la caméra pour le menu
-        threeRoot.updateCameraSettings({
-            fov: 60,
-            near: 0.5,
-            far: 10000,
-            position: { x: 0, y: -1000, z: 0 },
-            lookAt: { x: 0, y: 0, z: 0 }
-        });
+        // threeRoot.updateCameraSettings({
+        //     fov: 60,
+        //     near: 0.5,
+        //     far: 10000,
+        //     position: { x: 0, y: -1000, z: 0 },
+        //     lookAt: { x: 0, y: 0, z: 0 }
+        // });
+        // threeRoot.tweenCamera({
+        //         fov: 60,
+        //         near: 0.5,
+        //         far: 10000,
+        //         position: { x: 0, y: -1000, z: 0 },
+        //         lookAt: { x: 0, y: 0, z: 0 }
+        // }, 2000);
+        this.tweenCameraToItem();
         // // Charger une image en tant que fond
         // const loader = new THREE.TextureLoader();
         // loader.load('/static/assets/saturne.jpg', function(texture) {
@@ -82,6 +90,16 @@ export class Menu {
         if (this.isMobile()) {
             this.mouseControlEnabled = false;
         }
+    }
+
+    tweenCameraToItem() {
+        this.threeRoot.tweenCamera({
+            fov: 60,
+            near: 0.5,
+            far: 3000,
+            position: { x: 0, y: -1000, z: 0 },
+            lookAt: { x: 0, y: 0, z: 0 }
+        }, 2000);
     }
     // MOBILE
     isMobile() {
@@ -155,13 +173,16 @@ export class Menu {
         // Désactiver les écouteurs d'événements
         window.removeEventListener('mousemove', this.onMouseMove, false);
         window.removeEventListener('click', this.onMouseClick, false);
-
+        
         // Masquer les éléments du menu
         this.menuItems.forEach(item => {
             item.textMesh.visible = false;
             item.textGlowTextMesh.visible = false;
             item.removePaddles();
         });
+        if (this.directionalLight) {
+            this.directionalLight.visible = false;
+        }
     }
 
     onMouseMove(event) {
@@ -242,15 +263,23 @@ export class Menu {
 
     newLocalGame() {
         console.log("Clicked On: Local");
-        this.socketManager.setGameId(666);
-        this.socketManager.setType('local');
+        this.socketManager.connectLocalGame();
+        // this.socketManager.setGameId(666);
+        // this.socketManager.setType('local');
         this.hide();
     }
     
     newLocalTournament() {
         console.log("Clicked On: Tournament");
         this.hideText();
-        this.tournamentLocal = new TournamentMenu(this.threeRoot);
+        this.threeRoot.updateCameraSettings({
+            fov: 60,
+            near: 0.5,
+            far: 3000,
+            position: { x: 0, y: -1000, z: 0 },
+            lookAt: { x: 0, y: 0, z: 0 }
+        }, 2000);
+        this.tournamentLocal = new TournamentMenu(this.threeRoot, this.background, this.socketManager);
         // this.tournamentLocal.createTournament();
         // this.tournamentLocal.getNextPool();
     }

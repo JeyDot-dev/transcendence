@@ -26,8 +26,10 @@ def play(request, game_id):
         return redirect('play', game_id=game.id)
     return render(request, 'database/play.html', {'game': game})
 
-def winner(request, game_id):
+def winner(request, gameScore, game_id):
     game = get_object_or_404(Game, pk=game_id)
+    game.points1 = gameScore[0]
+    game.points2 = gameScore[1]
     game.is_played = True
     game.save()
     game.winner.is_winner = True
@@ -42,6 +44,10 @@ def winner(request, game_id):
         if game.next_game == game.id:
             return redirect('tournamentWinner', t_id = game.tournament.id)
     return response
+
+# def setWinnerPlaceholder(request, game):
+#     return response
+
 
 def tournamentWinner(request, t_id):
     tourny = get_object_or_404(Tournament, pk=t_id)
