@@ -15,6 +15,7 @@ export class Menu {
         this.menuGroup = new THREE.Group();
 
         this.mouseControlEnabled = true;
+        this.canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
         this.showMenuEnabled = true;
 
         // Configuration de la caméra pour le menu
@@ -188,8 +189,8 @@ export class Menu {
     onMouseMove(event) {
         // if (!this.mouseControlEnabled) return;  // Désactiver le mouvement de la caméra si la souris est désactivée
 
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        this.mouse.x = ((event.clientX - this.canvasBounds.left) / this.canvasBounds.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - this.canvasBounds.top) / this.canvasBounds.height) * 2 + 1;
 
         // CAMERA
         const maxRotationX = Math.PI / 4;
@@ -223,8 +224,8 @@ export class Menu {
     }
 
     onMouseClick(event) {
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        // this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        // this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
@@ -280,8 +281,6 @@ export class Menu {
             lookAt: { x: 0, y: 0, z: 0 }
         }, 2000);
         this.tournamentLocal = new TournamentMenu(this.threeRoot, this.background, this.socketManager);
-        // this.tournamentLocal.createTournament();
-        // this.tournamentLocal.getNextPool();
     }
     returnToMenu() {
         // this.socketManager

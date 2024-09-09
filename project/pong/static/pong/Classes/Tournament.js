@@ -16,6 +16,7 @@ export class TournamentMenu {
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
         this.clickableGroup = new THREE.Group();
+        this.onMouseClickBound = this.onMouseClick.bind(this); // Créer une seule référence liée ici
 
         this.socketManager.setLastMenu(this);
         this.initialize();
@@ -80,12 +81,12 @@ export class TournamentMenu {
     }
 
     disableClicks() {
-        document.removeEventListener('click', this.onMouseClick.bind(this), false);
+        document.removeEventListener('click', this.onMouseClickBound, false);
         console.log('Clicks are disabled.');
     }
 
     enableClicks() {
-        document.addEventListener('click', this.onMouseClick.bind(this), false);
+        document.addEventListener('click', this.onMouseClickBound, false);
         console.log('Clicks are enabled.');
     }
     onMouseClick(event) {
@@ -110,25 +111,28 @@ export class TournamentMenu {
             this.playGame(game);
         }
     }
-
+    
     async playGame(game) {
         console.log('Jouer le jeu avec les joueurs: ', game.playerNameOne, game.playerNameTwo, game.gameId);
+        this.clickableGroup.remove(game.clickableZone);
+        this.clickableGroup.visible = false;
+        this.disableClicks();
         await this.threeRoot.tweenCamera({
             fov: 60,
             near: 0.5,
             far: 3000,
-            position: { x: -750, y: -300, z: 100 },
-            lookAt: { x: -750, y: 0, z: 0 }
+            position: { x: game.clickableZone.position.x, y: -300, z: 100 },
+            lookAt: { x: game.clickableZone.position.x, y: 0, z: 0 }
         }, 2000);
-
+        
         this.hide();
         game.isPlayed = true;
-
-        this.clickableGroup.remove(game.clickableZone);
-        this.disableClicks();
+        
         this.socketManager.connectCustomGame(game.gameId);
-        this.socketManager.game.changePlayerName(game.playerNameOne, game.playerNameTwo);
+        // this.socketManager.game.changePlayerName(game.playerNameOne, game.playerNameTwo);
         await this.socketManager.waitForGameEnd();
+        this.clickableGroup.visible = true;
+        this.enableClicks();
 
         console.log(`La partie avec les joueurs ${game.playerNameOne} et ${game.playerNameTwo} est terminée.`);
         // this.show();
@@ -239,12 +243,15 @@ class TournamentPool {
 
                 game.tournamentGameGroup.position.x = startX + index * spacing;
                 game.clickableZone.position.x = startX + index * spacing;
+                // game.directionalLight.position.x = startX + index * spacing;
                 this.tournamentPoolGroup.add(game.tournamentGameGroup);
                 
                 this.tournamentMenu.clickableGroup.add(game.clickableZone);
 
                 const key = `${playerNameOne}-${playerNameTwo}`;
                 this.gamesMap.set(key, game);
+                console.log('Game position in scene: ', game.clickableZone.position);
+                console.log('Light position in scene: ', game.directionalLight.position);
             }
         );
     }
@@ -324,7 +331,7 @@ class TournamentGame {
         ];
         this.tournamentGameGroup = new THREE.Group();
         this.arena = new Arena(150, 5, 85, this.colorPalette[3], this.colorPalette[0], 5, 5, 0x4900ff);
-        this.arena.group.translateY(0);
+        // this.arena.group.translateY(0);
         this.arena.group.rotation.x = Math.PI / 2; // Rotation de 90° autour de l'axe Y
         const zoneGeometry = new THREE.PlaneGeometry(180, 120);
         const zoneMaterial = new THREE.MeshBasicMaterial({ 
@@ -370,16 +377,42 @@ class TournamentGame {
         p2Text.addToGroup(this.tournamentGameGroup);
         this.arena.addToGroup(this.tournamentGameGroup);
         // Ajout des sources de lumière
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.1);
-        this.directionalLight.position.set(0, -50, 50);
+        this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.15);
+        this.directionalLight.target = this.arena.group;
+        this.directionalLight.position.set(
+            this.arena.group.position.x, 
+            this.arena.group.position.y - 100,  // Adjust Y to place light above the game
+            this.arena.group.position.z + 200   // Adjust Z to move the light in front of the game
+        );
+        const DirectionalLightHelper = new THREE.DirectionalLightHelper(this.directionalLight, 100);
+        const geometry = new THREE.BoxGeometry(5, 5, 5);  // Dimensions de 5x5x5
+        const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });  // Matériau de base, rouge
+        const cube = new THREE.Mesh(geometry, material);  // Création du mesh
+        
+        cube.position.set(0, 0, 0);
+        this.tournamentGameGroup.add(cube);
         // this.scene.add(this.directionalLight);
         // this.scene.add(this.directionalLight.target);
         this.tournamentGameGroup.add(this.directionalLight);
         this.tournamentGameGroup.add(this.directionalLight.target);
+        this.tournamentGameGroup.add(DirectionalLightHelper);
         // this.tournamentGameGroup.add(this.p1Text);
         // this.tournamentGameGroup.add(this.p2Text);
         this.tournamentGameGroup.add(this.clickableZone);
         // this.gameId = this.generateUniqueId();
+        // this.spotLight = new THREE.SpotLight(0xffffff);
+        // this.spotLight.position.set(0, -200, 200);  // Position de la lumière
+        // this.spotLight.target = this.arena.group;
+        // this.spotLight.angle = Math.PI / 8;       // Angle d'éclairage (cône)
+        // this.spotLight.penumbra = 0.5;            // Douceur des bords
+        // this.spotLight.decay = 2;                 // L'atténuation de la lumière
+        // this.spotLight.distance = 500;             // Distance maximale de l'éclairage
+        // this.spotLight.intensity = 2;
+        // this.spotLightHelper = new THREE.SpotLightHelper(this.spotLight);
+        // this.tournamentGameGroup.add(this.spotLight);
+        // this.tournamentGameGroup.add(this.spotLightHelper);
+        
+        // Position du cube (optionnelle)
     }
     generateUniqueId() {
         return '_' + Math.random().toString(36).slice(2, 11);

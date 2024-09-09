@@ -41,7 +41,7 @@ def create_tournament(request):
 
 
 def index(request):
-    return render(request, "pong/pong_old.html")
+    return render(request, "pong/pong.html")
 
 def pong2d(request):
     return render(request, "pong/pong2d.html")
