@@ -11,8 +11,8 @@ class FetchOnlyMiddleware:
 		if not request_path.endswith('/'):
 			request_path += '/'
 
-		if request_path.startswith('/api/') or request_path in self.restricted_paths:
-			if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
-				return HttpResponseForbidden("403 Forbidden")
+		# if request_path.startswith('/api/') or request_path in self.restricted_paths:
+		# 	if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+		# 		return HttpResponseForbidden("403 Forbidden")
 		response = self.get_response(request)
 		return response

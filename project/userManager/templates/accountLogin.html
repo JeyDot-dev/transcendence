@@ -8,11 +8,11 @@
 	<div class="modal-body">
 		<form id="loginForm">
 			{% csrf_token %}
-			<label for="username" class="form-label">Username</label>
-			<input type="text" class="form-control" id="username" name="username" required>
+			<label for="login_username" class="form-label">Username</label>
+			<input type="text" class="form-control" id="login_username" name="login_username" required>
 
-			<label for="password" class="form-label">Password</label>
-			<input type="password" class="form-control" id="password" name="password" required>
+			<label for="login_password" class="form-label">Password</label>
+			<input type="password" class="form-control" id="login_password" name="login_password" required>
 
 			<input type="submit" class="btn btn-primary m-4" value="Login" />
 		</form>
@@ -28,6 +28,5 @@
 		var formData = new FormData(form);
 		
 		login(formData);
-		
 	});
 </script>
