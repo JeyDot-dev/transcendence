@@ -15,45 +15,68 @@ function login(formData) {
 		}
 	})
 	.then(response => response.json())
-	.then(data => {
-		console.log(data);
-		if (!data.token) {
-			alert('Invalid login');
-		} else {
-			localStorage.setItem('user', JSON.stringify(data.user));
-			location.reload();
-		}
-	})
+        .then(data => {
+            console.log(data);
+            if (!data.token) {
+                alert('Invalid login');
+                const myModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                myModal.show();
+            } else {
+                localStorage.setItem('user', JSON.stringify(data.user));
+                const myModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                navigateTo("userManager");
+            }
+        })
 }
 
 function createAccount(formData) {
-	const url = 'api/userManager/signup/';
+    const url = 'api/userManager/signup/';
 
-	if (formData.get('password') !== formData.get('password2')) {
-		alert('Passwords do not match');
-		return;
-	}
+    if (formData.get('password') !== formData.get('password2')) {
+        alert('Passwords do not match');
+        return;
+    }
 
-	fetch(url, {
-		method: 'POST',
-		body: JSON.stringify({
-			username: formData.get('username'),
-			email: formData.get('email'),
-			password: formData.get('password')
-		}),
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	})
-	.then(response => response.json())
-	.then(data => {
-		if (data.error) {
-			alert(data.error);
-		} else {
-			alert(data.message);
-			location.reload();
-		}
-	})
+    fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password')
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                const myModal = new bootstrap.Modal(document.getElementById('signupModal'));
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                myModal.show();
+            } else {
+                alert(data.message);
+                const myModal = new bootstrap.Modal(document.getElementById('signupModal'));
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                navigateTo("userManager");
+                // location.reload();
+            }
+        })
 }
 
 function testToken(token) {
@@ -140,6 +163,13 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+function submitProfilePicture() {
+    const form = document.getElementById('profilePictureForm');
+    const formData = new FormData(form);
+
+    uploadProfilePicture(formData);
 }
 
 function uploadProfilePicture(formData) {
