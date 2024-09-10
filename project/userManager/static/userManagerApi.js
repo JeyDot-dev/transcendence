@@ -1,3 +1,44 @@
+function removeBackdrop() {
+
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+}
+
+function hideModal(modal) {
+    const myModal = new bootstrap.Modal(document.getElementById(modal));
+    myModal.dispose();
+}
+
+function toggleModal(modal) {
+    const myModal = new bootstrap.Modal(document.getElementById(modal));
+    myModal.toggle();
+}
+function removeClass() {
+    var element = document.getElementById("myElement");
+    element.classList.remove("my-class");
+}
+
+function resetBody()
+{
+    document.body.classList.remove("modal-open");
+    document.body.removeAttribute("style");
+    removeBackdrop();
+}
+
+function checkInput(data, to_check) {
+    if (data.error) {
+        alert(data.error);
+    }
+    else if (data.message != to_check) {
+        alert(data.message);
+    }else {
+        alert(data.message);
+        navigateTo("userManager");
+        resetBody();
+    }
+}
 function login(formData) {
 	const url = 'api/userManager/login/';
 	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -19,20 +60,10 @@ function login(formData) {
             console.log(data);
             if (!data.token) {
                 alert('Invalid login');
-                const myModal = new bootstrap.Modal(document.getElementById('loginModal'));
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove();
-                }
-                myModal.show();
             } else {
                 localStorage.setItem('user', JSON.stringify(data.user));
-                const myModal = new bootstrap.Modal(document.getElementById('loginModal'));
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove();
-                }
                 navigateTo("userManager");
+                resetBody();
             }
         })
 }
@@ -58,24 +89,7 @@ function createAccount(formData) {
     })
         .then(response => response.json())
         .then(data => {
-            if (data.error) {
-                alert(data.error);
-                const myModal = new bootstrap.Modal(document.getElementById('signupModal'));
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove();
-                }
-                myModal.show();
-            } else {
-                alert(data.message);
-                const myModal = new bootstrap.Modal(document.getElementById('signupModal'));
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove();
-                }
-                navigateTo("userManager");
-                // location.reload();
-            }
+            checkInput(data, "User created successfully");
         })
 }
 
@@ -118,36 +132,31 @@ function logout() {
 		} else {
 			localStorage.removeItem('user');
 			document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-			location.reload();
+            navigateTo("userManager");
 		}
 	})
 }
 
 function changeUserValue(url_key, value, username) {
-	const url = `api/userManager/change_value/${url_key}/`;
-	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-	console.log(csrftoken);
+    const url = `api/userManager/change_value/${url_key}/`;
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    console.log(csrftoken);
 
-	fetch(url, {
-		method: "POST",
-		headers: {
-			"Content-Type": 'application/json',
-			"X-CSRFToken": csrftoken
-		},
-		body: JSON.stringify({
-			"username": username,
-			"new_value": value
-		})
-	})
-	.then(response => response.json())
-	.then(data => {
-		if (data.error) {
-			alert(data.error);
-		} else {
-			alert(data.message);
-			// location.reload();
-		}
-	})
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": 'application/json',
+            "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({
+            "username": username,
+            "new_value": value
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            checkInput(data, url_key + " changed successfully");
+        })
 }
 
 function getCookie(name) {
@@ -187,7 +196,7 @@ function uploadProfilePicture(formData) {
     .then(data => {
         if (data.message) {
             alert(data.message);
-            // location.reload();
+            navigateTo("userManager");
         } else {
             alert('An error occurred');
         }
