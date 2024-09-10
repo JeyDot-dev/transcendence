@@ -56,7 +56,7 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
         # if not hasattr(self, 'physics_task') or self.physics_task.done():
         #     logger.info(f"Starting the game loops for game {self.game_id}")
 
-        self.gameUpdate = asyncio.create_task(self.game_update())
+        # self.gameUpdate = asyncio.create_task(self.game_update())
 
     def log_game_state(self, context):
         """
@@ -90,7 +90,7 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
 
-        if text_data_json["key"] in ["w", "s"]:
+        if text_data_json["key"] in ["w", "s", "space"]:
             who = 0  # Joueur 1 (gauche)
         elif text_data_json["key"] in ["arrowup", "arrowdown"]:
             who = 1  # Joueur 2 (droite)
@@ -145,13 +145,16 @@ async def handle_key(game, types, key, who):
         return
 
 
-    if key == " " and types == "keydown":
-        game.isPaused = not game.isPaused
-        if game.isPaused:
-            print("Game paused")
-        else:
-            print("Game resumed")
+    if key == "space" and types == "keydown":
+        if not getattr(game, 'pause_handled', False):
+            if game.isPaused:
+                game.resume()
+            else:
+                game.pause()
+            game.pause_handled = True
         return
+    elif key == "space" and types == "keyup":
+        game.pause_handled = False 
 
     action = None
     if key in ["w", "arrowup"]:
@@ -188,7 +191,7 @@ async def build_game_state(game):
         "game_id": game.id,
         "width": game.width,
         "height": game.height,
-        "timer": game.timer,
+        "timer": game.maxTimer - game.timer,
         "playerNames": [player.name for player in game.players],
         "players": [
             {
@@ -211,7 +214,8 @@ async def build_game_state(game):
             "size": game.ball.size,
         },
         "score": game.score,
-        "isPlayed": game.isPlayed
+        "isPlayed": game.isPlayed,
+        "isPaused": game.isPaused
     }
 
 
@@ -221,7 +225,7 @@ async def update_game_state(game):
         "game_id": game.id,
         "width": game.width,
         "height": game.height,
-        "timer": game.timer,
+        "timer": game.maxTimer - game.timer,
         "players": [
             {
                 "id": paddle.user_id,
@@ -243,5 +247,6 @@ async def update_game_state(game):
             "size": game.ball.size,
         },
         "score": game.score,
-        "isPlayed": game.isPlayed
+        "isPlayed": game.isPlayed,
+        "isPaused": game.isPaused
     }

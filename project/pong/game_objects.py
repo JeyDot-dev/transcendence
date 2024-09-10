@@ -4,7 +4,7 @@ import time
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from userManager.models import UserInfos
-from local_consumers import logger
+from pong.local_consumers import logger
 
 # logger2 = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class Paddle:
         self.x = x
         self.y = arenaHeight / 2
         self.color = color
-        self.speed = 600
+        self.speed = 800
         self.velocity = 0
         self.bounce = 1
         self.keys = {"up": 0, "down": 0}
@@ -137,7 +137,7 @@ class Ball:
         self.vel_y += paddle.velocity * impact_factor
 
         # Ajuster la vitesse totale de la balle en fonction de la vélocité du paddle
-        speed_influence = 1 + abs(paddle.velocity) * 0.2
+        speed_influence = 1 + abs(paddle.velocity) * 0.17
         self.vel_x *= speed_influence
         self.vel_y *= speed_influence
 
@@ -223,10 +223,10 @@ class Game:
         self.timer = 0
         self.maxTimer = 180
         self.score = [0, 0]
-        self.maxScore = 1
+        self.maxScore = 5
         self.running = False
         self.isPlayed = False
-        self.isPaused = False
+        self.isPaused = True
         self.winner = None
         self.loser = None
         self.width = width
@@ -241,6 +241,7 @@ class Game:
     async def countdown_before_start(self):
         """Envoie un décompte de 3 secondes avant le début de la partie."""
         countdown = 3
+        await asyncio.sleep(1)
         while countdown > 0:
             if self.updateCallBack:
                 await self.updateCallBack({
@@ -263,7 +264,11 @@ class Game:
         if self.updateCallBack:
             asyncio.create_task(self.updateCallBack({
                 'type': 'gamePaused',
-                'status': True
+                'status': True,
+                'ball': {
+                    'x': self.ball.x,
+                    'y': self.ball.y
+                }
             }))
 
     def resume(self):
@@ -287,10 +292,12 @@ class Game:
     async def physics_loop(self):
         fixed_time_step = 1.0 / 60.0  # 60 Hz
         accumulator = 0.0
-        last_time = time.time()
 
+        self.pause()
         await self.countdown_before_start()
-    
+        last_time = time.time()
+        self.resume()
+
         asyncio.create_task(self.start_timer())
         if self.updateCallBack:
             asyncio.create_task(self.updateCallBack({
@@ -302,13 +309,15 @@ class Game:
             await asyncio.sleep(0.1)
 
         while self.running:
-            if self.isPaused:  # Si le jeu est en pause, attendre avant de continuer
+            if self.isPaused:
                 await asyncio.sleep(0.1)
+                last_time = time.time()
                 continue
 
             current_time = time.time()
             frame_time = current_time - last_time
             last_time = current_time
+
             accumulator += frame_time
 
             while accumulator >= fixed_time_step:
@@ -329,7 +338,7 @@ class Game:
             if self.updateCallBack:
                 await self.updateCallBack({
                     'type': 'timerUpdate',
-                    'timer': self.timer
+                    'timer': self.maxTimer - self.timer
                 })
 
             if self.timer >= self.maxTimer + 1:
@@ -337,6 +346,8 @@ class Game:
                 self.determine_winner_and_loser()
 
     async def update_physics(self, delta_time):
+        if self.isPaused:
+            return
         for paddle in self.paddles:
             if paddle.velocity != 0:
                 paddle.move(delta_time)

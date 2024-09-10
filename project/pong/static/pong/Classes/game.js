@@ -22,7 +22,7 @@ export class Game {
         this.paddles = [];
         this.offSet = new THREE.Vector2(gameData.width / 2, gameData.height / 2);
         this.gameGroup = new THREE.Group();
-        this.isPaused = true;
+        this.isPaused = gameData.isPaused;
 
         this.colorPalette = [
             new THREE.Color(0xff00c1),
@@ -41,7 +41,7 @@ export class Game {
         console.log("Init Lightning");
         this.initLighting();
         console.log("Init Text");
-        this.initText(gameData.score, gameData.tiemr);
+        this.initText(gameData.score, gameData.timer);
         console.log("Init Ball");
         this.initBall(gameData.ball);
         console.log("Init Paddles: ", gameData.players);
@@ -49,46 +49,12 @@ export class Game {
         console.log("Init Player Name: ", gameData.playerNames);
         this.initPlayerName(gameData.playerNames);
 
-        // Création de la géométrie du cube (50x50x50)
-        const geometry = new THREE.BoxGeometry(50, 50, 50);
-
-        // Création du matériau (par exemple, un matériau de base en MeshBasicMaterial)
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });  // Couleur verte
-
-        // Création du mesh (combinaison de la géométrie et du matériau)
-        this.cube = new THREE.Mesh(geometry, material);
-        this.gameGroup.add(this.cube);
         console.log('Init Physics');
         this.initPhysics(gameData);
         this.threeRoot.addAnimatedObject(this);
-        // const size = 720; // Taille de la grille
-        // const divisions = 4; // Nombre de divisions
-        // const gridHelper = new THREE.GridHelper(size, divisions);
-        // gridHelper.position.set(0, 0, 0);
-        // gridHelper.rotation.x = Math.PI / 2;
-        // this.scene.add(gridHelper);
-        
-        // const gridHelperTop = new THREE.GridHelper(1400, 8);
-        // gridHelperTop.position.set(0, 720 / 2, 0);
-        // gridHelperTop.scale.set(1, 1, 0.2);
-        // this.scene.add(gridHelperTop);
-        // const gridHelperBot = new THREE.GridHelper(1400, 8);
-        // gridHelperBot.position.set(0, -720 / 2, 0);
-        // gridHelperBot.scale.set(1, 1, 0.2);
-        // this.scene.add(gridHelperBot);
-        // const gridHelperLeft = new THREE.GridHelper(1280, 8);
-        // gridHelperLeft.position.set(-1280 / 2, 0, 0);
-        // gridHelperLeft.scale.set(1, 1, 0.2);
-        // gridHelperLeft.rotation.z = Math.PI / 2;
-        // this.scene.add(gridHelperLeft);
-        // const gridHelperRight = new THREE.GridHelper(1280, 8);
-        // gridHelperRight.position.set(1280 / 2, 0, 0);
-        // gridHelperRight.scale.set(1, 1, 0.2);
-        // gridHelperRight.rotation.z = Math.PI / 2;
-        // this.scene.add(gridHelperRight);
         
         console.log("Init Input Handling");
-        this.initInputHandling(); // Initialisation des événements clavier
+        this.initInputHandling();
         console.log("End of Game constructor")
         this.scene.add(this.gameGroup);
         this.tweenCameraToItem();
@@ -103,36 +69,12 @@ export class Game {
         }, 2000);
     }
     initArena(width, height) {
-
-        // console.log(width, height);
         this.arena = new Arena(width, 25, height, this.colorPalette[3], this.colorPalette[0], 25, 25, 0xde95d0);
         this.arena.addToGroup(this.gameGroup);
-        // this.arena.addToScene(this.scene);
-        // this.arena.group.translateX(ball_param.x);
-        // this.arena.group.translateY(ball_param.y);
-
-        // this.composer = new EffectComposer(this.renderer);
-        // this.composer.addPass(new RenderPass(this.scene, this.camera));
-
-        // const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera);
-        // this.composer.addPass(outlinePass);
-
-        // const fxaaPass = new ShaderPass(FXAAShader);
-        // fxaaPass.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
-        // this.composer.addPass(fxaaPass);
-
-        // outlinePass.selectedObjects = this.arena.getWalls();
-
-        // outlinePass.edgeStrength = 2.0;
-        // outlinePass.edgeGlow = 3.0;
-        // outlinePass.edgeThickness = 2.0;
-        // outlinePass.pulsePeriod = 2;
-        // outlinePass.visibleEdgeColor.set('#f161bf');
-        // outlinePass.hiddenEdgeColor.set('#190a05');
     }
 
     initLighting() {
-        const ambientLight = new THREE.AmbientLight(this.colorPalette, 0.3); // Couleur blanche avec une intensité de 1
+        const ambientLight = new THREE.AmbientLight(this.colorPalette, 0.1);
 
         // Light 1
         const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.6);
@@ -140,10 +82,8 @@ export class Game {
         directionalLight1.castShadow = true;
         const targetObject1 = new THREE.Object3D();
         targetObject1.position.set(400, 0, 0);
-        // this.scene.add(directionalLight1);
         directionalLight1.target = targetObject1;
         directionalLight1.target.updateMatrixWorld();     
-        // this.scene.add(targetObject1);
         this.gameGroup.add(directionalLight1);
         this.gameGroup.add(targetObject1);
 
@@ -152,21 +92,13 @@ export class Game {
         directionalLight2.position.set(400, 0, 800);
         directionalLight2.castShadow = true;
         const targetObject2 = new THREE.Object3D();
-        targetObject2.position.set(-400, 0, 0); // Positionner la cible à l'origine (0, 0, 0)
-        // this.scene.add(directionalLight2);
+        targetObject2.position.set(-400, 0, 0);
         directionalLight2.target = targetObject2;
         directionalLight2.target.updateMatrixWorld();     
-        // this.scene.add(targetObject2);
+
         this.gameGroup.add(directionalLight2);
         this.gameGroup.add(targetObject2);
 
-        const directionalLightHelper1 = new THREE.DirectionalLightHelper(directionalLight1, 1);
-        const directionalLightHelper2 = new THREE.DirectionalLightHelper(directionalLight2, 1);
-        // this.scene.add(directionalLightHelper1);
-        // this.scene.add(directionalLightHelper2)x;
-        // this.scene.add(ambientLight);
-        this.gameGroup.add(directionalLightHelper1);
-        this.gameGroup.add(directionalLightHelper2);
         this.gameGroup.add(ambientLight);
     }
 
@@ -214,8 +146,8 @@ export class Game {
             new THREE.Vector2(ball_param.speed, ball_param.speed),
             this.camera
         );
-        // this.ball.addToScene(this.scene);
         this.ball.addToGroup(this.gameGroup);
+        console.log('Ball Param init ball: ', ball_param);
 
     }
 
@@ -231,7 +163,6 @@ export class Game {
                 element.position[1] - this.offSet.y,
                 element.id
             );
-            // newPlayer.addToScene(this.scene);
             newPaddle.addToGroup(this.gameGroup);
             this.paddles.push(newPaddle);
         });
@@ -264,7 +195,6 @@ export class Game {
     }
 
     initInputHandling() {
-        // if (this.socketManager.type == 'local') {
         if (!this.socketManager) {
             console.log("Socket manager UNDIFINED");
             return ;
@@ -272,9 +202,12 @@ export class Game {
             document.addEventListener('keydown', event => {
                 const key = event.key.toLowerCase();
 
+                if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'space'].includes(event.key.toLowerCase())) {
+                    event.preventDefault(); // Empêche le comportement par défaut (scrolling)
+                }
                 if (event.code === 'Space') {
                     console.log('keydown: space');
-                    this.socketManager.sendMessage({ type: 'keydown', key: ' ', who: 0 });
+                    this.socketManager.sendMessage({ type: 'keydown', key: 'space', who: 0 });
                     return;
                 }
                 if (!this.pressedKeys[key]) {
@@ -286,7 +219,6 @@ export class Game {
                     }
                     if (['arrowup', 'arrowdown'].includes(key)) {
                         console.log('keydown: arrow');
-                        event.preventDefault(); // Empêche le comportement par défaut (scrolling)
                         this.socketManager.sendMessage({ type: 'keydown', key: key, who: 1 });
                     }
                 }
@@ -299,6 +231,14 @@ export class Game {
             document.addEventListener('keyup', event => {
                 const key = event.key.toLowerCase();
 
+                if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'space'].includes(event.key.toLowerCase())) {
+                    event.preventDefault();
+                }
+                if (event.code === 'Space') {
+                    console.log('keyup: space');
+                    this.socketManager.sendMessage({ type: 'keyup', key: 'space', who: 0 });
+                    return;
+                }
                 if (this.pressedKeys[key]) {
                     delete this.pressedKeys[key];
 
@@ -308,6 +248,7 @@ export class Game {
                     }
                     if (['arrowup', 'arrowdown'].includes(key)) {
                         console.log('keyup: arrow');
+                        event.preventDefault(); // Empêche le comportement par défaut (scrolling)
                         this.socketManager.sendMessage({ type: 'keyup', key: key, who: 1 });
                     }
                 }
@@ -319,6 +260,7 @@ export class Game {
         }
     }
     initPhysics(gameData) {
+        this.ballPosition = new THREE.Vector3(gameData.ball.x - this.offSet.x, -gameData.ball.y + this.offSet.y, 0);
         this.velocityDelta = new THREE.Vector3(0, 0, 0); 
         this.ballVelocity = new THREE.Vector2(gameData.ball.vel_x, -gameData.ball.vel_y);  // inverse Y car y est inversé dans THREE.js
         this.ballSpeed = gameData.ball.speed;
@@ -462,6 +404,10 @@ export class Game {
                 break;
             case 'gamePaused':
                 this.isPaused = data.status;
+                if (data.ball) {
+                    this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);
+                }
+                console.log('Game state Pause: ', this.isPaused);
             default:
                 break;
         }
@@ -492,9 +438,6 @@ export class Game {
         if (this.physics && this.ballPosition) {
             this.ball.mesh.position.lerp(this.ballPosition, 0.5);
         }
-        // if (this.cubePosition) {
-        //     this.cube.position.copy(this.cubePosition);
-        // }
     }
 
     gameIsPlayed() {

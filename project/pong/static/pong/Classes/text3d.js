@@ -1,6 +1,5 @@
 import { THREE } from '../three.module.js';
 import { TextGeometry } from "../TextGeometry.js";
-import { TrianglesDrawMode } from 'three';
 
 export class Text3d {
     constructor(camera, scene, font, size = 0.5, depth = 0.1, color = 0xfffff, text = "NULL", glow = 0,
