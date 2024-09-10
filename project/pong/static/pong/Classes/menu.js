@@ -87,6 +87,21 @@ export class Menu {
     isMobile() {
         return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
+
+    ModalListener = async (myModal) => {
+        document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
+            event.preventDefault();
+            try {
+                const response = await fetchJSON('/pong');
+                console.log('response is ' + response);
+    
+                this.newLocalTournament();
+            } catch (error) {
+                console.error('Error fetching JSON: ', error);
+            }
+        });
+    }
+
     // TODO: hauteur du canvas 
     createMenuItems() {
         this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
@@ -99,38 +114,8 @@ export class Menu {
             console.log("Clicked On: Local Tournament");
             const myModal = new bootstrap.Modal(document.getElementById('myModal'));
             myModal.show();
-            document.getElementById('submitTournamentForm').addEventListener('click', (event) => {
-                event.preventDefault(); // Prevent default form submission
-
-                // Use fetch API to submit the form via AJAX
-                const formElement = document.getElementById('newTournamentForm');
-                const formData = new FormData(formElement);
-
-                fetch(formElement.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'  // Ensure it's treated as an AJAX request
-                    }
-                })
-                .then(response => console.log(response))
-                .then(data => {
-                    console.log("data status = " + data.status)
-                    if (data.status === 'success') {
-                        // Close the modal
-                        myModal.hide();
-                        
-                        // Trigger your newLocalTournament() function
-                        this.newLocalTournament();
-                    } else {
-                        
-                        console.error('Form submission failed');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            });
+            this.hideText()
+            this.ModalListener(myModal);
         });
         this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
@@ -146,10 +131,6 @@ export class Menu {
             this.tournamentMenuMain,
             this.optionsMenuMain
         ];
-    }
-
-    ModalListner(){
-        
     }
 
     show() {
