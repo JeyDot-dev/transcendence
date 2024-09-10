@@ -60,12 +60,22 @@ def newTournament(request):
             tournament = Tournament(name=form.cleaned_data['tournament_title'])
             tournament.save()
             for form in formset:
+                """
+                player_name = form.cleaned_data['name']
+                player, created = Player.objects.get_or_create(name=player_name)
+                if created:
+                    player.save()
+                """
                 player = form.save()
                 tournament.players.add(player)
             tournament.save()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                response = JsonResponse({'status': 'success', 't_id': tournament.id, 'player': player.name})
+                response = JsonResponse({'status': 'success', 't_id': tournament.id})
                 return response
+    else:
+        formset = PlayerFormSet(queryset=Player.objects.none())
+        form = newTournamentForm()
+    return render(request, "pong/pong.html", {'form': form, 'formset': formset})
 
 
 def pong2d(request):

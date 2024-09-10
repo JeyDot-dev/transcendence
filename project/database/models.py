@@ -46,31 +46,9 @@ class Tournament(models.Model):
         return pairs
 
 
-"""
-    def play_set(self):
-        for game in self.games.filter(is_played=False):
-            gamedata = {
-                "p1": game.player1,
-                "p2": game.player2,
-            }
-            response = requests.post(???, json=gamedata)
-            answer = ??? #wait for JSON info on player who won
-            game.is_played = True
-            winner = self.players.filter(name=answer.winner).first()
-            winner.is_winner = 1
-            loser = self.players.object(id = answer.loser)
-            loser.is_winner = 0
-
-    def play_tournament(self):
-        set_total = math.ceil(math.log(self.players.count()))
-        for i in range(set_total):
-            self.make_games()
-            self.play_set()
-"""
-
 class Game(models.Model):
-    player1 = models.ForeignKey(Player, related_name='games_as_player1', on_delete=models.CASCADE)
-    player2 = models.ForeignKey(Player, related_name='games_as_player2', on_delete=models.CASCADE)
+    player1 = models.ForeignKey(Player, related_name='player1', on_delete=models.CASCADE)
+    player2 = models.ForeignKey(Player, related_name='player2', on_delete=models.CASCADE)
     #players = models.ManyToManyField(Player)
     points1 = models.IntegerField(default=0)
     points2 = models.IntegerField(default=0)

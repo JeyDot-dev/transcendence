@@ -24,9 +24,7 @@ export class TournamentMenu {
 
     async initialize() {
         await this.createTournament();
-        // await this.getNextPool();
-
-        // await this.getNextPool();
+        await this.getNextPool();
     }
 
     initializeTournamentPool(tournamentGames) {
@@ -163,8 +161,7 @@ export class TournamentMenu {
 
     async createTournament(t_id) {
         try {
-            const url = '/database/startTournament/' + this.tournamentId;
-            console.log('URL ', url);
+            const url = '/database/NextPool/' + this.tournamentId;
             const response = await fetchJSON(url);
             console.log('Tournament ID: ', this.tournamentId);
             console.log("Tournament: " + response);
@@ -186,7 +183,7 @@ export class TournamentMenu {
                 const data = {
                     tournamentId: this.tournamentId
                 }
-                const response = await sendJSON(`/database/testNextPool`, data);
+                const response = await sendJSON("/database/NextPool/" + this.tournamentId, data);
                 const parsedResponse = JSON.parse(response);
                 console.log('getNextPool Response: ', typeof(parsedResponse),parsedResponse);
                 console.log('getNextPool Response: tournament_id: ', parsedResponse.tournament_id);

@@ -98,7 +98,7 @@ def addPlayers(request, t_id):
     tournament = get_object_or_404(Tournament, pk=t_id)
     return render(request, 'database/addplayers.html', {'form': form, 'tournament': tournament})
 
-def startTournament(request, t_id):
+def NextPool(request, t_id):
     tournament = get_object_or_404(Tournament, pk=t_id)
     tournament.make_games()
     games = tournament.JSONgames()
@@ -107,37 +107,7 @@ def startTournament(request, t_id):
         'games': games
     })
 
-
-
-"""
-def newTournament(request):
-    form = newTournamentForm(request.POST)
-    if form.is_valid():
-        tournament = Tournament(name=form.cleaned_data['tournament_title'])
-        tournament.save()
-        return redirect("addPlayers", t_id=tournament.id)
-    return render(request, 'database/newtournament.html', {'form': form})
-
-
-def newTournament(request, t_id):
-    tournament = get_object_or_404(Tournament, t_id)
-            formset = PlayerFormSet(request.POST, queryset=Player.objects.none())
-            if formset.is_valid():
-                for form in formset:
-                    player = form.save()
-                    tournament.players.add(player)
-                tournament.make_games()
-                games = tournament.JSONgames()
-                return JsonResponse({
-                    'tournament_id': tournament.id,
-                    'games': games
-                })
-    else:
-        formset = PlayerFormSet(queryset=Player.objects.none())
-        form = newTournamentForm()
-    return render(request, 'database/newtournament.html', {'form': form, 'formset': formset})
-"""
-    
+  
 def generate_unique_id():
     """Génère un identifiant unique pour les jeux et le tournoi."""
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
