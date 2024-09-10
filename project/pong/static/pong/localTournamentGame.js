@@ -23,7 +23,7 @@ if (!isRunning) {
     isRunning = true;
 }
 
-console.log('Fetch JSON: ', await fetchJSON('database/testTournament/'));
+console.log('Fetch JSON: ', await fetchJSON('database/startTournament/'));
 // // document.addEventListener('DOMContentLoaded', function () {
 // const gameDataScript = document.getElementById('game-data');
 // const data = JSON.parse(gameDataScript.textContent);

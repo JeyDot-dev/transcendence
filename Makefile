@@ -47,7 +47,7 @@ help:
 	note: clean only removes images created by the project | not images that have been downloaded from official repos"
 
 cp-dev:
-	-cp	$(MAKEFILE_DIR)/django-settings/dev-settings.py $(MAKEFILE_DIR)/project/transcendence/settings.py
+	-cp	$(MAKEFILE_DIR)django-settings/dev-settings.py $(MAKEFILE_DIR)project/transcendence/settings.py
 cp-prod:
 	-cp	$(MAKEFILE_DIR)/django-settings/prod-settings.py $(MAKEFILE_DIR)/project/transcendence/settings.py
 

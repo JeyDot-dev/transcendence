@@ -23,12 +23,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Listener for form submissions management
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("___BEGIN DAY___")
     document.body.addEventListener("submit", e => {
         if (e.target.matches("form")) { // Check if the submitted element is a form
+            console.log("___HAPPY DAY___")
             e.preventDefault();
             const url = e.target.action;
             const data = new FormData(e.target);
-            navigateTo(url, data);
+            //navigateTo(url, data);
+            sendJSON(url, data);
         }
     });
 });
@@ -131,7 +134,7 @@ async function fetchHTML(url, data = null) {
             options.headers['X-CSRFToken'] = getCookie('csrftoken');
             options.body = data;
         }
-
+        console.log(destination, options);
         // Fetch the destination
         const response = await fetch(destination, options);
 

@@ -106,6 +106,30 @@ export class Menu {
     isMobile() {
         return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
+
+    ModalListener = async (myModal) => {
+        document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
+            event.preventDefault();
+            try {
+                let form = document.getElementById('newTournamentForm');
+                let formData = new FormData(form);
+
+                let jsonObject = {};
+                for (const [key, value] of formData.entries()) {
+                    jsonObject[key] = value;
+                }
+                const response = await sendJSON('/pong/newTournament', jsonObject);
+                console.log('response is ' + response);
+                const obj = JSON.parse(response);
+                console.log('t_id is ' + obj.t_id);
+                myModal.hide();
+                this.newLocalTournament(obj.t_id);
+            } catch (error) {
+                console.error('Error fetching JSON: ', error);
+            }
+        });
+    }
+
     // TODO: hauteur du canvas 
     createMenuItems() {
         this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
@@ -115,7 +139,11 @@ export class Menu {
             console.log("Clicked On: Matchmaking");
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
-            this.newLocalTournament();
+            console.log("Clicked On: Local Tournament");
+            const myModal = new bootstrap.Modal(document.getElementById('myModal'));
+            myModal.show();
+            this.hideText()
+            this.ModalListener(myModal);
         });
         this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
@@ -174,7 +202,7 @@ export class Menu {
         // Désactiver les écouteurs d'événements
         window.removeEventListener('mousemove', this.onMouseMove, false);
         window.removeEventListener('click', this.onMouseClick, false);
-        
+
         // Masquer les éléments du menu
         this.menuItems.forEach(item => {
             item.textMesh.visible = false;
@@ -269,9 +297,8 @@ export class Menu {
         // this.socketManager.setType('local');
         this.hide();
     }
-    
-    newLocalTournament() {
-        console.log("Clicked On: Tournament");
+
+    newLocalTournament(t_id) {
         this.hideText();
         this.threeRoot.updateCameraSettings({
             fov: 60,
@@ -280,7 +307,7 @@ export class Menu {
             position: { x: 0, y: -1000, z: 0 },
             lookAt: { x: 0, y: 0, z: 0 }
         }, 2000);
-        this.tournamentLocal = new TournamentMenu(this.threeRoot, this.background, this.socketManager);
+        this.tournamentLocal = new TournamentMenu(this.threeRoot, this.background, this.socketManager, t_id);
     }
     returnToMenu() {
         // this.socketManager
@@ -331,7 +358,7 @@ class MenuItem {
             uniforms: {
                 "c": { type: "f", value: 1.0 },
                 "p": { type: "f", value: 1.4 },
-                glowColor: { type: "c", value: new THREE.Color( { color: 0xffffff } ) },
+                glowColor: { type: "c", value: new THREE.Color({ color: 0xffffff }) },
                 viewVector: { type: "v3", value: this.camera.position }
             },
             vertexShader: `
@@ -358,7 +385,7 @@ class MenuItem {
             blending: THREE.AdditiveBlending,
             transparent: true
         });
-        
+
         // Créer le paddle gauche
         const leftPaddle = new THREE.Mesh(paddleGeometry, shaderMaterial);
         leftPaddle.position.set(this.boundingBox.min.x - 50, this.position.y - 80, this.position.z + paddleSize.z / 2);

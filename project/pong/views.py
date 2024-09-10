@@ -1,7 +1,14 @@
 from django.shortcuts import render
 import json
+import json
+from database.forms import *
+from database.models import *
+from django.http import JsonResponse
+import logging
 
+logger = logging.getLogger(__name__)
 # Create your views here.
+
 
 def index(request):
 	return render(request, 'index.html')
@@ -41,7 +48,35 @@ def create_tournament(request):
 
 
 def index(request):
-    return render(request, "pong/pong.html")
+    formset = PlayerFormSet(queryset=Player.objects.none())
+    form = newTournamentForm()
+    return render(request, "pong/pong.html", {'form': form, 'formset': formset})
+
+def newTournament(request):
+    if request.method == 'POST':
+        form = newTournamentForm(request.POST)
+        formset = PlayerFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            tournament = Tournament(name=form.cleaned_data['tournament_title'])
+            tournament.save()
+            for form in formset:
+                """
+                player_name = form.cleaned_data['name']
+                player, created = Player.objects.get_or_create(name=player_name)
+                if created:
+                    player.save()
+                """
+                player = form.save()
+                tournament.players.add(player)
+            tournament.save()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                response = JsonResponse({'status': 'success', 't_id': tournament.id})
+                return response
+    else:
+        formset = PlayerFormSet(queryset=Player.objects.none())
+        form = newTournamentForm()
+    return render(request, "pong/pong.html", {'form': form, 'formset': formset})
+
 
 def pong2d(request):
     return render(request, "pong/pong2d.html")
@@ -50,5 +85,5 @@ def launchTournamentLocalGame(request):
     data = {
           "p1": json.dumps({"name":"PlayerUno"}),
           "p2": json.dumps({"name":"PlayerDos"}),
-}
+	}
     return render(request, "pong/localTournamentGame.html", data)
