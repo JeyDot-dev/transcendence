@@ -106,6 +106,21 @@ export class Menu {
     isMobile() {
         return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
+
+    ModalListener = async (myModal) => {
+        document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
+            event.preventDefault();
+            try {
+                const response = await fetchJSON('/pong');
+                console.log('response is ' + response);
+    
+                this.newLocalTournament();
+            } catch (error) {
+                console.error('Error fetching JSON: ', error);
+            }
+        });
+    }
+
     // TODO: hauteur du canvas 
     createMenuItems() {
         this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
@@ -118,7 +133,8 @@ export class Menu {
             console.log("Clicked On: Local Tournament");
             const myModal = new bootstrap.Modal(document.getElementById('myModal'));
             myModal.show();
-            this.ModalListner(myModal);
+            this.hideText()
+            this.ModalListener(myModal);
         });
         this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
@@ -134,13 +150,6 @@ export class Menu {
             this.tournamentMenuMain,
             this.optionsMenuMain
         ];
-    }
-
-    async ModalListner(myModal){
-        const response = await fetchJSON('/pong/index');
-        myModal.hide();
-        console.log('reponse is' + response);
-        this.newLocalTournament();
     }
 
     show() {

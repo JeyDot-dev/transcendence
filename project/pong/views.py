@@ -4,8 +4,11 @@ import json
 from database.forms import *
 from database.models import *
 from django.http import JsonResponse
+import logging
 
+logger = logging.getLogger(__name__)
 # Create your views here.
+
 
 def index(request):
 	return render(request, 'index.html')
@@ -46,6 +49,9 @@ def create_tournament(request):
 
 def index(request):
     if request.method == 'POST':
+        logger.info(
+            f"___Enterd post request____"
+        )
         form = newTournamentForm(request.POST or None)
         formset = PlayerFormSet(request.POST or None, queryset=Player.objects.none())
         if form.is_valid() and formset.is_valid():
@@ -57,9 +63,13 @@ def index(request):
             tournament.save()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'status': 'success', 't_id': tournament.id})
+                #return render(request, "pong/pong.html", {'form': form, 'formset': formset, 't_id': tournament.id})
     else:
         formset = PlayerFormSet(queryset=Player.objects.none())
         form = newTournamentForm()
+        logger.info(
+            f"___Did not enter post request____"
+        )
     return render(request, "pong/pong.html", {'form': form, 'formset': formset})
 
 def pong2d(request):

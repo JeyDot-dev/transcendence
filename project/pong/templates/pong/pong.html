@@ -9,7 +9,6 @@
         </div>
     </div>
 </div>
-
 <div id="camera-control-panel">
     <h3>Camera Control</h3>
     <label for="camera-pos-x">Pos X:</label>
@@ -26,7 +25,9 @@
     <input id="camera-lookat-z" type="number" step="1" value="0"><br>
     <button id="update-camera">Update Camera</button>
 </div>
-  
+<script type="module" src="{% static 'pong3d.js' %}"></script>
+
+
 <script type="module" src="{% static 'generatePlayers.js' %}"></script>
 
 <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="loginModalPage" aria-hidden="true" style="color: #000">
@@ -60,3 +61,8 @@
         </div>
     </div>
 </div>
+
+
+
+
+

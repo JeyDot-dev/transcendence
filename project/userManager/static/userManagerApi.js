@@ -1,3 +1,30 @@
+function removeBackdrop() {
+
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+}
+
+function resetBody()
+{
+    document.body.classList.remove("modal-open");
+    document.body.removeAttribute("style");
+    removeBackdrop();
+}
+
+function checkInput(data, to_check) {
+    if (data.error) {
+        alert(data.error);
+    }
+    else if (data.message != to_check) {
+        alert(data.message);
+    }else {
+        alert(data.message);
+        navigateTo("userManager");
+        resetBody();
+    }
+}
 function login(formData) {
 	const url = 'api/userManager/login/';
 	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -15,45 +42,41 @@ function login(formData) {
 		}
 	})
 	.then(response => response.json())
-	.then(data => {
-		console.log(data);
-		if (!data.token) {
-			alert('Invalid login');
-		} else {
-			localStorage.setItem('user', JSON.stringify(data.user));
-			location.reload();
-		}
-	})
+        .then(data => {
+            console.log(data);
+            if (!data.token) {
+                alert('Invalid login');
+            } else {
+                localStorage.setItem('user', JSON.stringify(data.user));
+                navigateTo("userManager");
+                resetBody();
+            }
+        })
 }
 
 function createAccount(formData) {
-	const url = 'api/userManager/signup/';
+    const url = 'api/userManager/signup/';
 
-	if (formData.get('password') !== formData.get('password2')) {
-		alert('Passwords do not match');
-		return;
-	}
+    if (formData.get('password') !== formData.get('password2')) {
+        alert('Passwords do not match');
+        return;
+    }
 
-	fetch(url, {
-		method: 'POST',
-		body: JSON.stringify({
-			username: formData.get('username'),
-			email: formData.get('email'),
-			password: formData.get('password')
-		}),
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	})
-	.then(response => response.json())
-	.then(data => {
-		if (data.error) {
-			alert(data.error);
-		} else {
-			alert(data.message);
-			location.reload();
-		}
-	})
+    fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password')
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            checkInput(data, "User created successfully");
+        })
 }
 
 function testToken(token) {
@@ -95,36 +118,31 @@ function logout() {
 		} else {
 			localStorage.removeItem('user');
 			document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-			location.reload();
+            navigateTo("userManager");
 		}
 	})
 }
 
 function changeUserValue(url_key, value, username) {
-	const url = `api/userManager/change_value/${url_key}/`;
-	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-	console.log(csrftoken);
+    const url = `api/userManager/change_value/${url_key}/`;
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    console.log(csrftoken);
 
-	fetch(url, {
-		method: "POST",
-		headers: {
-			"Content-Type": 'application/json',
-			"X-CSRFToken": csrftoken
-		},
-		body: JSON.stringify({
-			"username": username,
-			"new_value": value
-		})
-	})
-	.then(response => response.json())
-	.then(data => {
-		if (data.error) {
-			alert(data.error);
-		} else {
-			alert(data.message);
-			// location.reload();
-		}
-	})
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": 'application/json',
+            "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({
+            "username": username,
+            "new_value": value
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            checkInput(data, url_key + " changed successfully");
+        })
 }
 
 function getCookie(name) {
@@ -142,6 +160,13 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function submitProfilePicture() {
+    const form = document.getElementById('profilePictureForm');
+    const formData = new FormData(form);
+
+    uploadProfilePicture(formData);
+}
+
 function uploadProfilePicture(formData) {
     const url = '/api/userManager/change_profile_pic/';
     const csrftoken = getCookie('csrftoken');
@@ -157,7 +182,7 @@ function uploadProfilePicture(formData) {
     .then(data => {
         if (data.message) {
             alert(data.message);
-            // location.reload();
+            navigateTo("userManager");
         } else {
             alert('An error occurred');
         }
