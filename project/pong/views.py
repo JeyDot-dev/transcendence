@@ -1,7 +1,14 @@
 from django.shortcuts import render
 import json
+import json
+from database.forms import *
+from database.models import *
+from django.http import JsonResponse
+import logging
 
+logger = logging.getLogger(__name__)
 # Create your views here.
+
 
 def index(request):
 	return render(request, 'index.html')
@@ -41,7 +48,9 @@ def create_tournament(request):
 
 
 def index(request):
-    return render(request, "pong/pong.html")
+    formset = PlayerFormSet(queryset=Player.objects.none())
+    form = newTournamentForm()
+    return render(request, "pong/pong.html", {'form': form, 'formset': formset})
 
 def pong2d(request):
     return render(request, "pong/pong2d.html")
@@ -50,5 +59,5 @@ def launchTournamentLocalGame(request):
     data = {
           "p1": json.dumps({"name":"PlayerUno"}),
           "p2": json.dumps({"name":"PlayerDos"}),
-}
+	}
     return render(request, "pong/localTournamentGame.html", data)

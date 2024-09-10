@@ -1,11 +1,15 @@
+import json
 import asyncio
 import random
 import time
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
+from asgiref.sync import sync_to_async  # Pour utiliser Django ORM dans un environnement asynchrone
+from database.models import Game as GameDB  # Importer le modèle de la base de données
 from userManager.models import UserInfos
+from pong.logger import logger
 
-logger2 = logging.getLogger(__name__)
+# logger2 = logging.getLogger(__name__)
 
 class Paddle:
     def __init__(self, x, color, userId, arenaWidth, arenaHeight, updateCallBack=None):
@@ -15,7 +19,7 @@ class Paddle:
         self.x = x
         self.y = arenaHeight / 2
         self.color = color
-        self.speed = 600
+        self.speed = 800
         self.velocity = 0
         self.bounce = 1
         self.keys = {"up": 0, "down": 0}
@@ -136,7 +140,7 @@ class Ball:
         self.vel_y += paddle.velocity * impact_factor
 
         # Ajuster la vitesse totale de la balle en fonction de la vélocité du paddle
-        speed_influence = 1 + abs(paddle.velocity) * 0.2
+        speed_influence = 1 + abs(paddle.velocity) * 0.17
         self.vel_x *= speed_influence
         self.vel_y *= speed_influence
 
@@ -225,6 +229,7 @@ class Game:
         self.maxScore = 1
         self.running = False
         self.isPlayed = False
+        self.isPaused = True
         self.winner = None
         self.loser = None
         self.width = width
@@ -234,7 +239,49 @@ class Game:
         self.players = players
         self.paddles = []
         self.ball = Ball((255, 255, 255), width, height, updateCallBack)
-        logger2.debug("Backend Game Constructor")
+        logger.info("Backend Game Constructor")
+
+    async def countdown_before_start(self):
+        """Envoie un décompte de 3 secondes avant le début de la partie."""
+        countdown = 3
+        await asyncio.sleep(1)
+        while countdown > 0:
+            if self.updateCallBack:
+                await self.updateCallBack({
+                    'type': 'countdown',
+                    'value': countdown
+                })
+            countdown -= 1
+            await asyncio.sleep(1)
+        
+        if self.updateCallBack:
+            await self.updateCallBack({
+                'type': 'countdown',
+                'value': "GO!"
+            })
+        await asyncio.sleep(1)
+
+    def pause(self):
+        self.isPaused = True
+        logger.info("Le jeu est en pause.")
+        if self.updateCallBack:
+            asyncio.create_task(self.updateCallBack({
+                'type': 'gamePaused',
+                'status': True,
+                'ball': {
+                    'x': self.ball.x,
+                    'y': self.ball.y
+                }
+            }))
+
+    def resume(self):
+        self.isPaused = False
+        logger.info("Le jeu reprend.")
+        if self.updateCallBack:
+            asyncio.create_task(self.updateCallBack({
+                'type': 'gamePaused',
+                'status': False
+            }))
 
     def addPlayer(self, player: UserInfos, side: int):
         if len(self.players) < self.nb_max_players:
@@ -248,18 +295,32 @@ class Game:
     async def physics_loop(self):
         fixed_time_step = 1.0 / 60.0  # 60 Hz
         accumulator = 0.0
-        last_time = time.time()
 
-        # Démarrer la boucle de mise à jour du timer en parallèle
+        self.pause()
+        await self.countdown_before_start()
+        last_time = time.time()
+        self.resume()
+
         asyncio.create_task(self.start_timer())
+        if self.updateCallBack:
+            asyncio.create_task(self.updateCallBack({
+                'type': 'gamePaused',
+                'status': False
+            }))
 
         while not self.running:
-            await asyncio.sleep(0.1)  # Attendre que le jeu commence
+            await asyncio.sleep(0.1)
 
         while self.running:
+            if self.isPaused:
+                await asyncio.sleep(0.1)
+                last_time = time.time()
+                continue
+
             current_time = time.time()
             frame_time = current_time - last_time
             last_time = current_time
+
             accumulator += frame_time
 
             while accumulator >= fixed_time_step:
@@ -269,23 +330,27 @@ class Game:
             await asyncio.sleep(0.001)
 
     async def start_timer(self):
-        """Compteur de temps qui s'incrémente toutes les secondes."""
         while self.running:
+            if self.isPaused:  # Si en pause, attendre
+                await asyncio.sleep(0.1)
+                continue
+
             await asyncio.sleep(1)
             self.timer += 1
-            
+
             if self.updateCallBack:
                 await self.updateCallBack({
                     'type': 'timerUpdate',
-                    'timer': self.timer
+                    'timer': self.maxTimer - self.timer
                 })
 
             if self.timer >= self.maxTimer + 1:
                 self.running = False
-                # logger2.debug("Le temps imparti est écoulé. Fin de la partie.")
                 self.determine_winner_and_loser()
 
     async def update_physics(self, delta_time):
+        if self.isPaused:
+            return
         for paddle in self.paddles:
             if paddle.velocity != 0:
                 paddle.move(delta_time)
@@ -313,9 +378,27 @@ class Game:
                 'type': 'clearGameId',
                 'gameType': self.type
             }))
-        self.isPlayed = True
-        # logger2.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")
+        if self.type == 'dbGame':
+            asyncio.create_task(self.save_scores_to_db())
 
+        self.isPlayed = True
+        logger.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")
+
+    async def save_scores_to_db(self):
+        """Met à jour les scores dans la base de données pour les parties de type dbGame."""
+        try:
+            # Récupérer l'instance Game dans la base de données
+            game_db = await sync_to_async(GameDB.objects.get)(game_ws_id=self.id)
+            game_db.points1 = self.score[0]
+            game_db.points2 = self.score[1]
+            game_db.is_played = True
+            game_db.loser.is_winner = False
+
+            # Sauvegarder dans la base de données
+            await sync_to_async(game_db.save)()
+            logger.info(f"Scores saved to database for game {self.id}: {self.score[0]} - {self.score[1]}")
+        except GameDB.DoesNotExist:
+            logger.error(f"Game with ID {self.id} not found in the database.")
 
 class Player:
     def __init__(self, id, skin, name):

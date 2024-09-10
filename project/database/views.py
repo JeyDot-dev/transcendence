@@ -45,10 +45,6 @@ def winner(request, gameScore, game_id):
             return redirect('tournamentWinner', t_id = game.tournament.id)
     return response
 
-# def setWinnerPlaceholder(request, game):
-#     return response
-
-
 def tournamentWinner(request, t_id):
     tourny = get_object_or_404(Tournament, pk=t_id)
     tourny.winner = tourny.players.get(is_winner=True)
@@ -56,7 +52,12 @@ def tournamentWinner(request, t_id):
 
 
 def newGame(request):
-    form = newGameForm(request.POST)
+    """serializer = GameSerializer(data=request.POST)
+    if serializer.is_valid():
+        game = serializer.save()
+        return redirect("play", game_id = game.id)
+    return render(request, 'database/newgame.html')"""
+    """form = newGameForm(request.POST)
     if form.is_valid():
         player1_name = form.cleaned_data['player1_name']
         player2_name = form.cleaned_data['player2_name']
@@ -68,16 +69,20 @@ def newGame(request):
         player2.save()
         game = Game.objects.create(player1=player1, player2=player2)
         return redirect("play", game_id = game.id)
-    return render(request, 'database/newgame.html', {'form': form})
+    return render(request, 'database/newgame.html', {'form': form})"""
+    if request.method == 'POST':
+        formset = PlayerFormSet(request.POST, queryset=Player.objects.none())
+        if formset.is_valid():
+            game = Game.objects.create()
+            for form in formset:
+                player = form.save()
+                game.players.add(player)
+            return redirect("play", game_id=game.id)
+    else:
+        formset = PlayerFormSet(queryset=Player.objects.none())
+    
+    return render(request, 'database/newgame.html', {'formset': formset})
 
-
-def newTournament(request):
-    form = newTournamentForm(request.POST)
-    if form.is_valid():
-        tournament = Tournament(name=form.cleaned_data['tournament_title'])
-        tournament.save()
-        return redirect("addPlayers", t_id=tournament.id)
-    return render(request, 'database/newtournament.html', {'form': form})
 
 def addPlayers(request, t_id):
     form = addPlayer(request.POST)
@@ -93,64 +98,36 @@ def addPlayers(request, t_id):
     tournament = get_object_or_404(Tournament, pk=t_id)
     return render(request, 'database/addplayers.html', {'form': form, 'tournament': tournament})
 
-def startTournament(request, t_id):
+def newTournament(request):
+    if request.method == 'POST':
+        form = newTournamentForm(request.POST)
+        formset = PlayerFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            tournament = Tournament(name=form.cleaned_data['tournament_title'])
+            tournament.save()
+            for form in formset:
+                """
+                player_name = form.cleaned_data['name']
+                player, created = Player.objects.get_or_create(name=player_name)
+                if created:
+                    player.save()
+                """
+                player = form.save()
+                tournament.players.add(player)
+            tournament.save()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                response = JsonResponse({'status': 'success', 't_id': tournament.id})
+                return response
+    else:
+        formset = PlayerFormSet(queryset=Player.objects.none())
+        form = newTournamentForm()
+    return render(request, "pong/pong.html", {'form': form, 'formset': formset})
+
+def NextPool(request, t_id):
     tournament = get_object_or_404(Tournament, pk=t_id)
     tournament.make_games()
-    for game in tournament.games.all():
-        return redirect("play", game_id = game.id)
-
-def generate_unique_id():
-    """Génère un identifiant unique pour les jeux et le tournoi."""
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
-
-def testTournament(request):
-    tournament_id = generate_unique_id()
-
-    player_pairs = [
-        ['To\'to', 'Titi'],
-        ['Dodo', 'Didi'],
-        ['Bobo', 'Bibi'],
-        ['Foo', 'Bar'],
-        ['BONJOUR', 'Bob'],
-        ['kkk', 'jjj'],
-        ['EEE', 'OOO'],
-        ['AAA', 'BBB']
-    ]
-    games = []
-    for index, pair in enumerate(player_pairs):
-        game_id = generate_unique_id()
-        games.append({
-            'game_id': game_id,
-            'players': pair
-        })
+    games = tournament.JSONgames()
     return JsonResponse({
-        'tournament_id': tournament_id,
-        'games': games
-    })
-
-def testNextPool(request):
-    tournament_id = 0
-    if request.method == 'POST':
-        form = tournamentIdForm(request.POST)
-        if form.is_valid():
-            tournament_id = form.cleaned_data['tournamentId']
-        else:
-            raise Http404('Page not found ou caca')
-            
-    player_pairs = [
-        ['Toto', 'Titi'],
-        ['Dodo', 'Didi'],
-        ['Bobo', 'Bibi'],
-        ['Foo', 'Bar']
-    ]
-    games = []
-    for index, pair in enumerate(player_pairs):
-        game_id = generate_unique_id()
-        games.append({
-            'game_id': game_id,
-            'players': pair
-        })
-    return JsonResponse({
-        'tournament_id': tournament_id,
+        'tournament_id': tournament.id,
         'games': games
     })

@@ -1,9 +1,4 @@
-// import * as THREE from "../threejs/Three.js";
-// import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
 import { THREE } from '../three.module.js';
-// import { EffectComposer } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/EffectComposer.js';
-// import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/RenderPass.js';
-// import { UnrealBloomPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 export class Arena {
     constructor(width, height, depth, color, wallColor, wallThickness, borderRadius, innerWallColor) {
@@ -36,7 +31,7 @@ export class Arena {
 
     createArena() {
         const geometry = new THREE.PlaneGeometry(this.width - this.wallThickness, this.depth - this.wallThickness);
-        const material = new THREE.MeshLambertMaterial({ color: this.color, side: THREE.DoubleSide });
+        const material = new THREE.MeshStandardMaterial({ color: this.color, side: THREE.DoubleSide });
         const arenaMesh = new THREE.Mesh(geometry, material);
         return arenaMesh;
     }
@@ -78,8 +73,8 @@ export class Arena {
     
         let geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     
-        const wallMaterial = new THREE.MeshLambertMaterial({ color: this.wallColor });
-        const innerWallMaterial = new THREE.MeshLambertMaterial({ color: this.innerWallColor });
+        const wallMaterial = new THREE.MeshStandardMaterial({ color: this.wallColor });
+        const innerWallMaterial = new THREE.MeshStandardMaterial({ color: this.innerWallColor });
     
         const materials = [wallMaterial, innerWallMaterial];
     
