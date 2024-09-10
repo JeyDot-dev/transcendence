@@ -4,8 +4,9 @@ import time
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from userManager.models import UserInfos
+from local_consumers import logger
 
-logger2 = logging.getLogger(__name__)
+# logger2 = logging.getLogger(__name__)
 
 class Paddle:
     def __init__(self, x, color, userId, arenaWidth, arenaHeight, updateCallBack=None):
@@ -225,6 +226,7 @@ class Game:
         self.maxScore = 1
         self.running = False
         self.isPlayed = False
+        self.isPaused = False
         self.winner = None
         self.loser = None
         self.width = width
@@ -234,7 +236,44 @@ class Game:
         self.players = players
         self.paddles = []
         self.ball = Ball((255, 255, 255), width, height, updateCallBack)
-        logger2.debug("Backend Game Constructor")
+        logger.info("Backend Game Constructor")
+
+    async def countdown_before_start(self):
+        """Envoie un décompte de 3 secondes avant le début de la partie."""
+        countdown = 3
+        while countdown > 0:
+            if self.updateCallBack:
+                await self.updateCallBack({
+                    'type': 'countdown',
+                    'value': countdown
+                })
+            countdown -= 1
+            await asyncio.sleep(1)
+        
+        if self.updateCallBack:
+            await self.updateCallBack({
+                'type': 'countdown',
+                'value': "GO!"
+            })
+        await asyncio.sleep(1)
+
+    def pause(self):
+        self.isPaused = True
+        logger.info("Le jeu est en pause.")
+        if self.updateCallBack:
+            asyncio.create_task(self.updateCallBack({
+                'type': 'gamePaused',
+                'status': True
+            }))
+
+    def resume(self):
+        self.isPaused = False
+        logger.info("Le jeu reprend.")
+        if self.updateCallBack:
+            asyncio.create_task(self.updateCallBack({
+                'type': 'gamePaused',
+                'status': False
+            }))
 
     def addPlayer(self, player: UserInfos, side: int):
         if len(self.players) < self.nb_max_players:
@@ -250,13 +289,23 @@ class Game:
         accumulator = 0.0
         last_time = time.time()
 
-        # Démarrer la boucle de mise à jour du timer en parallèle
+        await self.countdown_before_start()
+    
         asyncio.create_task(self.start_timer())
+        if self.updateCallBack:
+            asyncio.create_task(self.updateCallBack({
+                'type': 'gamePaused',
+                'status': False
+            }))
 
         while not self.running:
-            await asyncio.sleep(0.1)  # Attendre que le jeu commence
+            await asyncio.sleep(0.1)
 
         while self.running:
+            if self.isPaused:  # Si le jeu est en pause, attendre avant de continuer
+                await asyncio.sleep(0.1)
+                continue
+
             current_time = time.time()
             frame_time = current_time - last_time
             last_time = current_time
@@ -269,11 +318,14 @@ class Game:
             await asyncio.sleep(0.001)
 
     async def start_timer(self):
-        """Compteur de temps qui s'incrémente toutes les secondes."""
         while self.running:
+            if self.isPaused:  # Si en pause, attendre
+                await asyncio.sleep(0.1)
+                continue
+
             await asyncio.sleep(1)
             self.timer += 1
-            
+
             if self.updateCallBack:
                 await self.updateCallBack({
                     'type': 'timerUpdate',
@@ -282,7 +334,6 @@ class Game:
 
             if self.timer >= self.maxTimer + 1:
                 self.running = False
-                # logger2.debug("Le temps imparti est écoulé. Fin de la partie.")
                 self.determine_winner_and_loser()
 
     async def update_physics(self, delta_time):
@@ -314,7 +365,7 @@ class Game:
                 'gameType': self.type
             }))
         self.isPlayed = True
-        # logger2.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")
+        logger.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")
 
 
 class Player:

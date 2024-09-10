@@ -1,5 +1,6 @@
 import { THREE } from '../three.module.js';
 import { TextGeometry } from "../TextGeometry.js";
+import { TrianglesDrawMode } from 'three';
 
 export class Text3d {
     constructor(camera, scene, font, size = 0.5, depth = 0.1, color = 0xfffff, text = "NULL", glow = 0,
@@ -13,8 +14,8 @@ export class Text3d {
         this.color = color;
         this.scene = scene;
         this.rotation = rotation;
-        this.material = new THREE.MeshLambertMaterial({ color: color });
-        this.geometry = new TextGeometry(text, {
+        this.material = new THREE.MeshStandardMaterial({ color: color });
+        this.geometry = new TextGeometry(this.text, {
             font: font,
             size: size,
             depth: depth,
@@ -87,6 +88,35 @@ export class Text3d {
             this.glowTextMesh.position.set(position.x - offsetX, position.y - offsetY, position.z);
         }
     }
+    setColor(newColor) {
+        if (this.color == newColor) return;
+        this.color = newColor;
+        this.material.color.set(newColor);
+        if (this.glowTextMesh) {
+            this.glowTextMesh.material.uniforms.glowColor.value.set(newColor);
+        }
+    }
+    // setSize(newSize, group) {
+    //     this.size = newSize;
+    //     this.removeFromGroup(group);
+
+    //     this.geometry = new TextGeometry(this.text, {
+    //         font: this.font,
+    //         size: newSize,
+    //         depth: this.depth,
+    //         curveSegments: 12
+    //     });
+
+    //     this.mesh.geometry = this.geometry;
+
+    //     if (this.glowTextMesh) {
+    //         this.createGlowMesh(this.camera, this.scene, this.color, this.glowTextMesh.scale.x);
+    //     }
+
+    //     this.addToGroup(group);
+
+    //     this.setPosition(this.position);
+    // }
 
     addToGroup(group) {
         group.add(this.mesh);
@@ -105,7 +135,8 @@ export class Text3d {
         // this.scene.remove(this.mesh);
         // this.scene.remove(this.glowTextMesh);
         this.removeFromGroup(group);
-        this.geometry = new TextGeometry(text, {
+        this.text = text;
+        this.geometry = new TextGeometry(this.text, {
             font: this.font,
             size: this.size,
             depth: this.depth,

@@ -22,6 +22,7 @@ export class Game {
         this.paddles = [];
         this.offSet = new THREE.Vector2(gameData.width / 2, gameData.height / 2);
         this.gameGroup = new THREE.Group();
+        this.isPaused = true;
 
         this.colorPalette = [
             new THREE.Color(0xff00c1),
@@ -40,7 +41,7 @@ export class Game {
         console.log("Init Lightning");
         this.initLighting();
         console.log("Init Text");
-        this.initText(gameData.score);
+        this.initText(gameData.score, gameData.tiemr);
         console.log("Init Ball");
         this.initBall(gameData.ball);
         console.log("Init Paddles: ", gameData.players);
@@ -169,7 +170,7 @@ export class Game {
         this.gameGroup.add(ambientLight);
     }
 
-    initText(score) {
+    initText(score, timer) {
         const fontLoader = new FontLoader();
         fontLoader.load(
             'https://threejs.org/examples/fonts/helvetiker_bold.typeface.json',
@@ -181,7 +182,7 @@ export class Game {
                     105,
                     10,
                     0xffffff,
-                    '0s',
+                    timer.toString(),
                     1.05,
                     new THREE.Vector3(0, 125 / 2, 300)
                 );
@@ -191,7 +192,6 @@ export class Game {
                 this.p2Text = new Text3d(this.camera, this.scene, font, 100, 10, 0xff2975, score[1].toString(), 1.05,
                     new THREE.Vector3(200, 100 / 2, 300)
                 );
-                // TODO: Text3d au group ?
                 this.timeText.addToGroup(this.gameGroup);
                 this.p1Text.addToGroup(this.gameGroup);
                 this.p2Text.addToGroup(this.gameGroup);
@@ -272,6 +272,11 @@ export class Game {
             document.addEventListener('keydown', event => {
                 const key = event.key.toLowerCase();
 
+                if (event.code === 'Space') {
+                    console.log('keydown: space');
+                    this.socketManager.sendMessage({ type: 'keydown', key: ' ', who: 0 });
+                    return;
+                }
                 if (!this.pressedKeys[key]) {
                     this.pressedKeys[key] = true; 
                     
@@ -337,6 +342,7 @@ export class Game {
         }, 1000 / 60);
     }
     updatePhysics(fixedDeltaTime) {
+        if (this.isPaused) return ;
         if (!this.ballPosition) {
             this.ballPosition = this.cube.position.clone();
         }
@@ -432,6 +438,7 @@ export class Game {
                 this.p2Text.updateText(data.score[1].toString(), this.gameGroup);
                 break;
             case 'timerUpdate':
+                this.timeText.setColor(0xffffff);
                 this.timeText.updateText(data.timer.toString(), this.gameGroup);
                 break;
             case 'ballMove':
@@ -440,21 +447,21 @@ export class Game {
                 this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);
                 break;
             case 'refreshBallData':
-                // console.log('Refresh ball Data: ', data);
-                // this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);
-                // this.ballPosition = this.ball.mesh.position.clone();
-                // this.ballVelocity.set(data.ball.vel_x, -data.ball.vel_y);
-                // this.ballSpeed = data.ball.speed;
-                // Synchronize the ball data from the back-end after a collision or any important update
-                this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);  // Adjust Y-axis inversion
-                this.ballPosition = this.ball.mesh.position.clone();  // Reset the front-end ball position
-                this.ballVelocity.set(data.ball.vel_x, -data.ball.vel_y);  // Sync velocity
-                this.ballSpeed = data.ball.speed;  // Sync speed
+                this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);
+                this.ballPosition = this.ball.mesh.position.clone();
+                this.ballVelocity.set(data.ball.vel_x, -data.ball.vel_y);
+                this.ballSpeed = data.ball.speed;
                 break;
             case 'paddleMove':
                 // -y Car dans three js y est orienter differement
                 this.paddles[data.paddle.side].move(data.paddle.x - this.offSet.x, -data.paddle.y + this.offSet.y)
                 break;
+            case 'countdown':
+                this.timeText.setColor(0xfd2892);
+                this.timeText.updateText(data.value.toString(), this.gameGroup);
+                break;
+            case 'gamePaused':
+                this.isPaused = data.status;
             default:
                 break;
         }

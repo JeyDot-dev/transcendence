@@ -20,6 +20,23 @@ export class TournamentMenu {
 
         this.socketManager.setLastMenu(this);
         this.initialize();
+
+        this.directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.7);
+        this.directionalLight1.position.set(-750, -800, 200);
+        this.directionalLight1.target.position.set(300, 0, 0);
+        this.directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.7);
+        this.directionalLight1.target.position.set(-300, 0, 0);
+        this.directionalLight2.position.set(750, -500, 200);
+
+        // const directionalLightHelper1 = new THREE.DirectionalLightHelper(this.directionalLight1);
+        // const directionalLightHelper2 = new THREE.DirectionalLightHelper(this.directionalLight2);
+        // this.directionalLight.castShadow = true;
+        this.threeRoot.scene.add(this.directionalLight1);
+        this.threeRoot.scene.add(this.directionalLight2);
+        // this.threeRoot.scene.add(directionalLightHelper1);
+        // this.threeRoot.scene.add(directionalLightHelper2);
+
+        // this.threeRoot
     }
 
     async initialize() {
@@ -65,6 +82,8 @@ export class TournamentMenu {
         if (this.background) {
             this.background.hide();
         }
+        this.directionalLight1.visible = false;
+        this.directionalLight2.visible = false;
         this.disableClicks();
         console.log('All tournament objects are hidden, and clicks are disabled.');
     }
@@ -76,6 +95,8 @@ export class TournamentMenu {
         if (this.background) {
             this.background.show();
         }
+        this.directionalLight1.visible = true;
+        this.directionalLight2.visible = true;
         this.enableClicks();
         console.log('All tournament objects are visible, and clicks are enabled.');
     }
@@ -243,7 +264,41 @@ class TournamentPool {
 
                 game.tournamentGameGroup.position.x = startX + index * spacing;
                 game.clickableZone.position.x = startX + index * spacing;
-                // game.directionalLight.position.x = startX + index * spacing;
+
+                // const targetObject = new THREE.Object3D();
+                // targetObject.position.set(startX + index * spacing, 0, 0);
+
+                // const spotLight = new THREE.SpotLight(0xffffff);
+                // spotLight.position.set(
+                //     game.tournamentGameGroup.position.x, 
+                //     game.tournamentGameGroup.position.y - 500,
+                //     game.tournamentGameGroup.position.z + 100
+                // );
+                // spotLight.target = targetObject;
+                // spotLight.target.updateMatrixWorld();
+                // spotLight.angle = Math.PI / 64;       // Angle d'éclairage (cône)
+                // spotLight.penumbra = 0.0;            // Douceur des bords
+                // spotLight.decay = 1;                 // L'atténuation de la lumière
+                // spotLight.distance = 600;             // Distance maximale de l'éclairage
+                // // spotLight.intensity = 10;
+                // const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+                // this.tournamentPoolGroup.add(spotLight);
+                // this.tournamentPoolGroup.add(spotLight.target);
+                // this.tournamentPoolGroup.add(spotLightHelper);
+                // spotLight.updateMatrixWorld();
+                // // const directionalLight = new THREE.DirectionalLight(0xffffff, 0.15);
+                // // directionalLight.position.set(
+                // //     game.tournamentGameGroup.position.x, 
+                // //     game.tournamentGameGroup.position.y - 100,  // Adjust Y to place light above the game
+                // //     game.tournamentGameGroup.position.z + 200  // Adjust Z to move the light in front of the game
+                // //     );
+                // // directionalLight.target = targetObject;
+                // // directionalLight.target.updateMatrixWorld();
+                // // const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 100);
+                // // this.tournamentPoolGroup.add(directionalLight);
+                // // this.tournamentPoolGroup.add(directionalLight.target);
+                // // this.tournamentPoolGroup.add(directionalLightHelper);
+                // // game.directionalLight.position.x = startX + index * spacing;
                 this.tournamentPoolGroup.add(game.tournamentGameGroup);
                 
                 this.tournamentMenu.clickableGroup.add(game.clickableZone);
@@ -251,7 +306,8 @@ class TournamentPool {
                 const key = `${playerNameOne}-${playerNameTwo}`;
                 this.gamesMap.set(key, game);
                 console.log('Game position in scene: ', game.clickableZone.position);
-                console.log('Light position in scene: ', game.directionalLight.position);
+                // console.log('Light position in scene: ', spotLight.position);
+                // console.log('Target Object position: ', targetObject.position);
             }
         );
     }
@@ -260,51 +316,6 @@ class TournamentPool {
         const key = `${playerNameOne}-${playerNameTwo}`;
         return this.gamesMap.get(key);
     }
-    // onMouseClick(event) {
-    //     const canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
-
-    //     // Calculer la position de la souris en fonction de la taille du canvas (pas de la fenêtre)
-    //     this.mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1;
-    //     this.mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1;
-    //     console.log('Click in tournament Menu. Mouse: ', this.mouse);
-
-    //     // Utiliser uniquement les objets dans clickableGroup
-    //     this.raycaster.setFromCamera(this.mouse, this.threeRoot.camera);
-    //     const intersects = this.raycaster.intersectObjects(this.clickableGroup.children, true);
-
-    //     if (intersects.length > 0) {
-    //         const clickedObject = intersects[0].object;
-    //         console.log('ClickedObject: ', clickedObject);
-    //         this.handleGameClick(clickedObject);
-    //     }
-    // }
-
-    // handleGameClick(clickedObject) {
-    //     const game = this.getGameByClickableZone(clickedObject);
-    //     if (game && !game.isPlayed) {
-    //         console.log('Playing game: ', game.playerNameOne, game.playerNameTwo, game.gameId);
-    //         this.playGame(game);
-    //     }
-    // }
-    // async playGame(game) {
-    //     // console.log(`Playing game: ${game.gameId}`);
-    //     console.log('Game Position: ', game.tournamentGameGroup.position);
-    //     await this.threeRoot.tweenCamera({
-    //         fov: 60,
-    //         near: 0.5,
-    //         far: 3000,
-    //         position: { x: -750, y: -300, z: 100},
-    //         lookAt: { x: -750, y: 0, z: 0 }
-    //     }, 2000);
-    //     this.tournamentMenu.hide();
-    //     game.isPlayed = true;
-
-    //     game.clickableZone.visible = false;
-    // }
-    // launchGame() {
-    //     console.log('Placeholder for launching a ws game');
-    // }
-
     getGameByClickableZone(clickedObject) {
         for (let [key, game] of this.gamesMap) {
             if (game.clickableZone === clickedObject) {
@@ -338,7 +349,7 @@ class TournamentGame {
             color: 0xdddddd, 
             side: THREE.DoubleSide, 
             transparent: true, 
-            opacity: 0.8 // Opacité a regler
+            opacity: 0.0 // Opacité a regler
         });
 
         this.clickableZone = new THREE.Mesh(zoneGeometry, zoneMaterial);
@@ -377,25 +388,19 @@ class TournamentGame {
         p2Text.addToGroup(this.tournamentGameGroup);
         this.arena.addToGroup(this.tournamentGameGroup);
         // Ajout des sources de lumière
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.15);
-        this.directionalLight.target = this.arena.group;
-        this.directionalLight.position.set(
-            this.arena.group.position.x, 
-            this.arena.group.position.y - 100,  // Adjust Y to place light above the game
-            this.arena.group.position.z + 200   // Adjust Z to move the light in front of the game
-        );
-        const DirectionalLightHelper = new THREE.DirectionalLightHelper(this.directionalLight, 100);
-        const geometry = new THREE.BoxGeometry(5, 5, 5);  // Dimensions de 5x5x5
-        const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });  // Matériau de base, rouge
-        const cube = new THREE.Mesh(geometry, material);  // Création du mesh
+        // this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.15);
+        // this.directionalLight.target = this.arena.group;
+        // this.directionalLight.position.set(
+        //     this.arena.group.position.x, 
+        //     this.arena.group.position.y - 100,  // Adjust Y to place light above the game
+        //     this.arena.group.position.z + 200  // Adjust Z to move the light in front of the game
+        // );
+        // const DirectionalLightHelper = new THREE.DirectionalLightHelper(this.directionalLight, 100);
         
-        cube.position.set(0, 0, 0);
-        this.tournamentGameGroup.add(cube);
-        // this.scene.add(this.directionalLight);
-        // this.scene.add(this.directionalLight.target);
-        this.tournamentGameGroup.add(this.directionalLight);
-        this.tournamentGameGroup.add(this.directionalLight.target);
-        this.tournamentGameGroup.add(DirectionalLightHelper);
+
+        // this.tournamentGameGroup.add(this.directionalLight);
+        // this.tournamentGameGroup.add(this.directionalLight.target);
+        // this.tournamentGameGroup.add(DirectionalLightHelper);
         // this.tournamentGameGroup.add(this.p1Text);
         // this.tournamentGameGroup.add(this.p2Text);
         this.tournamentGameGroup.add(this.clickableZone);

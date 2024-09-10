@@ -144,6 +144,15 @@ async def handle_key(game, types, key, who):
     if types not in ["keydown", "keyup"]:
         return
 
+
+    if key == " " and types == "keydown":
+        game.isPaused = not game.isPaused
+        if game.isPaused:
+            print("Game paused")
+        else:
+            print("Game resumed")
+        return
+
     action = None
     if key in ["w", "arrowup"]:
         action = "up"
@@ -179,6 +188,7 @@ async def build_game_state(game):
         "game_id": game.id,
         "width": game.width,
         "height": game.height,
+        "timer": game.timer,
         "playerNames": [player.name for player in game.players],
         "players": [
             {
@@ -211,6 +221,7 @@ async def update_game_state(game):
         "game_id": game.id,
         "width": game.width,
         "height": game.height,
+        "timer": game.timer,
         "players": [
             {
                 "id": paddle.user_id,

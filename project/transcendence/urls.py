@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin', admin.site.urls),
     path("api/home/", views.home_content, name="home_content"),
     # path("api/pong/", include("database.urls")),
+    path("api/database/", include("database.urls")),
     path("api/pong/", include("pong.urls")),
     path("api/userManager/", include("userManager.urls")),
     path("api/about/", views.about_content, name="about_content"),
