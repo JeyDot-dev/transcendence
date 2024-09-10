@@ -50,9 +50,6 @@ def create_tournament(request):
 def index(request):
     formset = PlayerFormSet(queryset=Player.objects.none())
     form = newTournamentForm()
-    logger.info(
-        f"___Did not enter post request____"
-    )
     return render(request, "pong/pong.html", {'form': form, 'formset': formset})
 
 def newTournament(request):
@@ -67,7 +64,8 @@ def newTournament(request):
                 tournament.players.add(player)
             tournament.save()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'status': 'success', 't_id': tournament.id, 'player': player.name})
+                response = JsonResponse({'status': 'success', 't_id': tournament.id, 'player': player.name})
+                return response
 
 
 def pong2d(request):

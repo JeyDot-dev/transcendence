@@ -6,11 +6,11 @@ import { Arena } from './arena.js';
 // import { SkeletonHelper } from '../threejs/Three.js';
 
 export class TournamentMenu {
-    constructor(threeRoot, background, socketManager) {
+    constructor(threeRoot, background, socketManager, t_id) {
         this.threeRoot = threeRoot;
         this.background = background;
         this.socketManager = socketManager;
-        this.tournamentId = null;
+        this.tournamentId = t_id;
         this.tournamentPools = [];
         this.totalWidth = 1500;
         this.mouse = new THREE.Vector2();
@@ -161,11 +161,13 @@ export class TournamentMenu {
         }
     }
 
-    async createTournament() {
+    async createTournament(t_id) {
         try {
-            const response = await fetchJSON('/database/testTournament');
-            this.tournamentId = response.tournament_id;
+            const url = '/database/startTournament/' + this.tournamentId;
+            console.log('URL ', url);
+            const response = await fetchJSON(url);
             console.log('Tournament ID: ', this.tournamentId);
+            console.log("Tournament: " + response);
             this.initializeTournamentPool(response.games);
             this.enableClicks();
         } catch (error) {

@@ -45,10 +45,6 @@ def winner(request, gameScore, game_id):
             return redirect('tournamentWinner', t_id = game.tournament.id)
     return response
 
-# def setWinnerPlaceholder(request, game):
-#     return response
-
-
 def tournamentWinner(request, t_id):
     tourny = get_object_or_404(Tournament, pk=t_id)
     tourny.winner = tourny.players.get(is_winner=True)
@@ -105,12 +101,13 @@ def addPlayers(request, t_id):
 def startTournament(request, t_id):
     tournament = get_object_or_404(Tournament, pk=t_id)
     tournament.make_games()
-    for game in tournament.games.all():
-        return redirect("play", game_id = game.id)
+    games = tournament.JSONgames()
+    return JsonResponse({
+        'tournament_id': tournament.id,
+        'games': games
+    })
 
-def generate_unique_id():
-    """Génère un identifiant unique pour les jeux et le tournoi."""
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+
 
 """
 def newTournament(request):
@@ -120,13 +117,10 @@ def newTournament(request):
         tournament.save()
         return redirect("addPlayers", t_id=tournament.id)
     return render(request, 'database/newtournament.html', {'form': form})
-"""
 
-def newTournament(request):
-    if request.method == 'POST':
-        form = newTournamentForm(request.POST)
-        if form.is_valid():
-            tournament = Tournament(name=form.cleaned_data['tournament_title'])
+
+def newTournament(request, t_id):
+    tournament = get_object_or_404(Tournament, t_id)
             formset = PlayerFormSet(request.POST, queryset=Player.objects.none())
             if formset.is_valid():
                 for form in formset:
@@ -142,6 +136,11 @@ def newTournament(request):
         formset = PlayerFormSet(queryset=Player.objects.none())
         form = newTournamentForm()
     return render(request, 'database/newtournament.html', {'form': form, 'formset': formset})
+"""
+    
+def generate_unique_id():
+    """Génère un identifiant unique pour les jeux et le tournoi."""
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
 def testTournament(request):
     tournament_id = generate_unique_id()

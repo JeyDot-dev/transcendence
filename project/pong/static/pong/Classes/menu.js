@@ -118,11 +118,12 @@ export class Menu {
                 for (const [key, value] of formData.entries()) {
                     jsonObject[key] = value;
                 }
-
                 const response = await sendJSON('/pong/newTournament', jsonObject);
                 console.log('response is ' + response);
-
-                this.newLocalTournament();
+                const obj = JSON.parse(response);
+                console.log('t_id is ' + obj.t_id);
+                myModal.hide();
+                this.newLocalTournament(obj.t_id);
             } catch (error) {
                 console.error('Error fetching JSON: ', error);
             }
@@ -297,8 +298,7 @@ export class Menu {
         this.hide();
     }
 
-    newLocalTournament() {
-        console.log("Clicked On: Tournament");
+    newLocalTournament(t_id) {
         this.hideText();
         this.threeRoot.updateCameraSettings({
             fov: 60,
@@ -307,7 +307,7 @@ export class Menu {
             position: { x: 0, y: -1000, z: 0 },
             lookAt: { x: 0, y: 0, z: 0 }
         }, 2000);
-        this.tournamentLocal = new TournamentMenu(this.threeRoot, this.background, this.socketManager);
+        this.tournamentLocal = new TournamentMenu(this.threeRoot, this.background, this.socketManager, t_id);
     }
     returnToMenu() {
         // this.socketManager
