@@ -13,18 +13,37 @@ function resetBody()
     removeBackdrop();
 }
 
-function checkInput(data, to_check) {
+function errorInModal(data, modal, custom_error = null) {
+    let modalSpan = document.getElementById(modal);
+    if (data.error) {
+        modalSpan.innerHTML = data.error;
+        modalSpan.style.color = "red";
+    }
+    else if (custom_error) {
+        modalSpan.innerHTML = custom_error;
+        modalSpan.style.color = "red";
+    }
+    else {
+        modalSpan.innerHTML = data.message;
+        modalSpan.style.color = "red";
+    }
+}
+
+function checkInput(data, to_check, to_alert = null) {
     if (data.error) {
         alert(data.error);
     }
     else if (data.message != to_check) {
         alert(data.message);
     }else {
+        if (to_alert) {
         alert(data.message);
+        }
         navigateTo("userManager");
         resetBody();
     }
 }
+
 function login(formData) {
 	const url = 'api/userManager/login/';
 	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -45,7 +64,7 @@ function login(formData) {
         .then(data => {
             console.log(data);
             if (!data.token) {
-                alert('Invalid login');
+                errorInModal(data, "loginSpan", "Invalid login credentials");
             } else {
                 localStorage.setItem('user', JSON.stringify(data.user));
                 navigateTo("userManager");
@@ -75,7 +94,12 @@ function createAccount(formData) {
     })
         .then(response => response.json())
         .then(data => {
+            if (!data.token) {
+                errorInModal(data, "signupSpan");
+            }
+            else {
             checkInput(data, "User created successfully");
+            }
         })
 }
 
@@ -113,13 +137,11 @@ function logout() {
 	})
 	.then(response => response.json())
 	.then(data => {
-		if (data.error) {
-			alert(data.error);
-		} else {
-			localStorage.removeItem('user');
-			document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            navigateTo("userManager");
-		}
+        checkInput(data, "Logout successful", false);
+        localStorage.removeItem('user');
+        document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        navigateTo("/");
+        updateNav();
 	})
 }
 
@@ -141,7 +163,7 @@ function changeUserValue(url_key, value, username) {
     })
         .then(response => response.json())
         .then(data => {
-            checkInput(data, url_key + " changed successfully");
+            checkInput(data, url_key + " changed successfully", true);
         })
 }
 
@@ -193,11 +215,11 @@ function uploadProfilePicture(formData) {
     });
 }
 
-document.getElementById('profilePictureForm').addEventListener('submit', function(e) {
-	e.preventDefault();
-	console.log('submitting');
-	var form = document.getElementById('profilePictureForm');
-	var formData = new FormData(form);
-
-	uploadProfilePicture(formData);
-});
+// document.getElementById('profilePictureForm').addEventListener('submit', function(e) {
+// 	e.preventDefault();
+// 	console.log('submitting');
+// 	var form = document.getElementById('profilePictureForm');
+// 	var formData = new FormData(form);
+//
+// 	uploadProfilePicture(formData);
+// });
