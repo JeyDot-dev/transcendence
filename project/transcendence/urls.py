@@ -17,6 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.http import HttpResponse
 from . import views
 
 urlpatterns = [
@@ -28,6 +29,6 @@ urlpatterns = [
     path("api/database/", include("database.urls")),
     path("api/about/", views.about_content, name="about_content"),
     path("api/test/", views.test_content, name="test_content"),
-    re_path(r"^api/.*$", views.home_content),
+    re_path(r"^api/.*$", views.default_content, name="default_content"),
     re_path(r"^.*$", views.index, name="index"),
 ]

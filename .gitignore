@@ -8,6 +8,7 @@ locallibrary/
 *.pot
 *.pyc
 __pycache__/
+profile_pics/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
