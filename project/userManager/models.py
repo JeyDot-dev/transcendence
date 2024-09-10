@@ -42,6 +42,19 @@ class UserInfos(AbstractUser):
             "friends_requests": [friend.id for friend in self.friends_requests.all()],
         }
 
+    def to_dict_public(self):
+            return {
+                "username": self.username,
+				"profile_pic": self.profile_pic.url,
+				"status": self.status,
+                "is_online": self.is_online,
+                "is_playing": self.is_playing,
+				"grade": self.grade,
+				"total_games": self.total_games,
+				"total_victories": self.total_victories,
+				"skin": self.skin
+			}
+    
     def get_last_tournament_id(self):
         return self.last_tournament_id
 
@@ -96,6 +109,8 @@ class UserInfos(AbstractUser):
 
     def add_friend(self, friend_username: str):
         friend = UserInfos.objects.get(username=friend_username)
+        if friend is self:
+            raise ValueError("Vous ne pouvez pas vous ajouter en tant qu'ami.")
         if not friend:
             raise ValueError("L'utilisateur n'existe pas.")
         if friend in self.friends.all():
