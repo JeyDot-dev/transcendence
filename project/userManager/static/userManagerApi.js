@@ -6,20 +6,6 @@ function removeBackdrop() {
     }
 }
 
-function hideModal(modal) {
-    const myModal = new bootstrap.Modal(document.getElementById(modal));
-    myModal.dispose();
-}
-
-function toggleModal(modal) {
-    const myModal = new bootstrap.Modal(document.getElementById(modal));
-    myModal.toggle();
-}
-function removeClass() {
-    var element = document.getElementById("myElement");
-    element.classList.remove("my-class");
-}
-
 function resetBody()
 {
     document.body.classList.remove("modal-open");
