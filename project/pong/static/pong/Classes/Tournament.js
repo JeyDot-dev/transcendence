@@ -41,7 +41,7 @@ export class TournamentMenu {
 
     async initialize() {
         await this.createTournament();
-        await this.getNextPool();
+        // await this.getNextPool();
     }
 
     initializeTournamentPool(tournamentGames) {
@@ -186,6 +186,8 @@ export class TournamentMenu {
             const response = await fetchJSON(url);
             console.log('Tournament ID: ', this.tournamentId);
             console.log("Tournament: " + response);
+            this.totalWidth = response.games.length * 200;
+            console.log('Tournament sze: ', response.games.length);
             this.initializeTournamentPool(response.games);
             this.enableClicks();
         } catch (error) {
@@ -238,8 +240,9 @@ class TournamentPool {
         // this.clickableGroup = new THREE.Group();
 
         tournamentGames.forEach((game, index) => {
-            const { players, game_id } = game;
-            this.initializeGame(players, game_id, index, tournamentGames.length);
+            const { players, game_ws_id } = game;
+            this.initializeGame(players, game_ws_id, index, tournamentGames.length);
+            console.log('initialize: ', players, game_ws_id);
         });
 
         this.threeRoot.scene.add(this.tournamentPoolGroup);

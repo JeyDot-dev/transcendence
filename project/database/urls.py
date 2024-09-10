@@ -7,6 +7,7 @@ urlpatterns = [
     path('addPlayers/<int:t_id>/', views.addPlayers, name = 'addPlayers'),
     path('tournamentWinner/<int:t_id>/', views.tournamentWinner, name = 'tournamentWinner'),
     path('NextPool/<int:t_id>/', views.NextPool, name = 'NextPool'),
+    path('newTournament/', views.newTournament, name='newTournament'),
 
     #NOTE: Ancine route play/
     path('', views.newGame, name='newGame'),

@@ -118,7 +118,7 @@ export class Menu {
                 for (const [key, value] of formData.entries()) {
                     jsonObject[key] = value;
                 }
-                const response = await sendJSON('/pong/newTournament', jsonObject);
+                const response = await sendJSON('/database/newTournament', jsonObject);
                 console.log('response is ' + response);
                 const obj = JSON.parse(response);
                 console.log('t_id is ' + obj.t_id);

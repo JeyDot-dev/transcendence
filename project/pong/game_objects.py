@@ -1,10 +1,13 @@
+import json
 import asyncio
 import random
 import time
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
+from asgiref.sync import sync_to_async  # Pour utiliser Django ORM dans un environnement asynchrone
+from database.models import Game as GameDB  # Importer le modèle de la base de données
 from userManager.models import UserInfos
-from pong.local_consumers import logger
+from pong.logger import logger
 
 # logger2 = logging.getLogger(__name__)
 
@@ -223,7 +226,7 @@ class Game:
         self.timer = 0
         self.maxTimer = 180
         self.score = [0, 0]
-        self.maxScore = 5
+        self.maxScore = 1
         self.running = False
         self.isPlayed = False
         self.isPaused = True
@@ -375,9 +378,27 @@ class Game:
                 'type': 'clearGameId',
                 'gameType': self.type
             }))
+        if self.type == 'dbGame':
+            asyncio.create_task(self.save_scores_to_db())
+
         self.isPlayed = True
         logger.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")
 
+    async def save_scores_to_db(self):
+        """Met à jour les scores dans la base de données pour les parties de type dbGame."""
+        try:
+            # Récupérer l'instance Game dans la base de données
+            game_db = await sync_to_async(GameDB.objects.get)(game_ws_id=self.id)
+            game_db.points1 = self.score[0]
+            game_db.points2 = self.score[1]
+            game_db.is_played = True
+            game_db.loser.is_winner = False
+
+            # Sauvegarder dans la base de données
+            await sync_to_async(game_db.save)()
+            logger.info(f"Scores saved to database for game {self.id}: {self.score[0]} - {self.score[1]}")
+        except GameDB.DoesNotExist:
+            logger.error(f"Game with ID {self.id} not found in the database.")
 
 class Player:
     def __init__(self, id, skin, name):
