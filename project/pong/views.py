@@ -60,7 +60,7 @@ def index(request):
     else:
         formset = PlayerFormSet(queryset=Player.objects.none())
         form = newTournamentForm()
-    return render(request, "pong/pong_old.html", {'form': form, 'formset': formset})
+    return render(request, "pong/pong.html", {'form': form, 'formset': formset})
 
 def pong2d(request):
     return render(request, "pong/pong2d.html")
