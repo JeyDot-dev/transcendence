@@ -56,7 +56,7 @@ def index(request):
                 tournament.players.add(player)
             tournament.save()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'status': 'success', 'message': 'Tournament started!'})
+                return JsonResponse({'status': 'success', 't_id': tournament.id})
     else:
         formset = PlayerFormSet(queryset=Player.objects.none())
         form = newTournamentForm()

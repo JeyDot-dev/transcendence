@@ -20,7 +20,7 @@ export class TournamentMenu {
         // Attendre la fin de createTournament
         await this.createTournament();
         // Ensuite appeler getNextPool
-        await this.getNextPool();
+        //await this.getNextPool();
 
         // await this.getNextPool();
     }
