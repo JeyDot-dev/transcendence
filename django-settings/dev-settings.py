@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "channels",
     "pong",
 
-    #"userManager",
+    "userManager",
 ]
 
 MIDDLEWARE = [

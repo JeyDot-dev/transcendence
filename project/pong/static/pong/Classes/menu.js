@@ -111,9 +111,17 @@ export class Menu {
         document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
             event.preventDefault();
             try {
-                const response = await fetchJSON('/pong');
+                let form = document.getElementById('newTournamentForm');
+                let formData = new FormData(form);
+
+                let jsonObject = {};
+                for (const [key, value] of formData.entries()) {
+                    jsonObject[key] = value;
+                }
+
+                const response = await sendJSON('/pong/newTournament', jsonObject);
                 console.log('response is ' + response);
-    
+
                 this.newLocalTournament();
             } catch (error) {
                 console.error('Error fetching JSON: ', error);
@@ -193,7 +201,7 @@ export class Menu {
         // Désactiver les écouteurs d'événements
         window.removeEventListener('mousemove', this.onMouseMove, false);
         window.removeEventListener('click', this.onMouseClick, false);
-        
+
         // Masquer les éléments du menu
         this.menuItems.forEach(item => {
             item.textMesh.visible = false;
@@ -288,7 +296,7 @@ export class Menu {
         // this.socketManager.setType('local');
         this.hide();
     }
-    
+
     newLocalTournament() {
         console.log("Clicked On: Tournament");
         this.hideText();
@@ -350,7 +358,7 @@ class MenuItem {
             uniforms: {
                 "c": { type: "f", value: 1.0 },
                 "p": { type: "f", value: 1.4 },
-                glowColor: { type: "c", value: new THREE.Color( { color: 0xffffff } ) },
+                glowColor: { type: "c", value: new THREE.Color({ color: 0xffffff }) },
                 viewVector: { type: "v3", value: this.camera.position }
             },
             vertexShader: `
@@ -377,7 +385,7 @@ class MenuItem {
             blending: THREE.AdditiveBlending,
             transparent: true
         });
-        
+
         // Créer le paddle gauche
         const leftPaddle = new THREE.Mesh(paddleGeometry, shaderMaterial);
         leftPaddle.position.set(this.boundingBox.min.x - 50, this.position.y - 80, this.position.z + paddleSize.z / 2);
