@@ -1,9 +1,11 @@
 {% load static %}
+
 <link rel="stylesheet" href="{% static 'pong/css/style.css' %}"><title>Pong 3D</title>
 <div class="d-sm-none inline">Please somehow make your screen bigger (or turn your phone to landscape mode)</div>
-<div id="container_game" class="container d-none d-sm-block ratio mx-auto shadow bg-body-primary mx-auto mw-auto px-0 mb-100" style="min-width: 95%; min-height: 90%; max-width: 92%; max-height: 95%; --bs-aspect-ratio: 50%;">
-    <div class="d-flex justify-content-center align-items-center" >
-        <div class="spinner-grow" style="width: 30rem; height: 30rem; color: #4900ff" role="status" id="fidget-spinner">
+<!-- <div id="container_game" class="container d-none d-sm-block ratio mx-auto shadow bg-body-primary mx-auto mw-auto px-0 mb-100" style="min-width: 95%; min-height: 90%; max-width: 92%; max-height: 95%; --bs-aspect-ratio: 50%;"> -->
+<div id="container_game" class="container-fluid d-none d-sm-block mx-0 px-0 px-0 mx-0" style="width: 99vw; max-height: 100vh; height: 78vw">
+    <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%" id="fidget-spinner">
+        <div class="spinner-grow" style="width: 35vh; height: 35vh; color: #444444" role="status">
 
             <span class="visually-hidden">Loading...</span>
         </div>
@@ -26,17 +28,3 @@
     <button id="update-camera">Update Camera</button>
 </div>
 <script type="module" src="{% static 'localTournamentGame.js' %}"></script>
-<script id="game-data" type="application/json">
-        const data = {
-            p1: "playerOneFoo",
-            p2: "playerTwoBar"
-          };
-</script>
-
-<div id="myModal" style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-    <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px;">
-        <span id="closeModalButton" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-        <p>Hello</p>
-        <button id="okButton">OK</button>
-    </div>
-</div>

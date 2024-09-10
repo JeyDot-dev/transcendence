@@ -229,7 +229,14 @@ function unloadTitle() {
 // Function to navigate to a new URL
 function navigateTo(url, data = null) {
     try {
-        history.pushState(data, "", url);
+        let jsonData = null;
+        if (data) {
+            jsonData = {};
+            for (let pair of data.entries()) {
+                jsonData[pair[0]] = pair[1];
+            }
+        }
+        history.pushState(jsonData, "", url);
         spa(url, data);
     } catch (err) {
         console.error("Unable to load external resources from SPA:", err);
@@ -281,5 +288,20 @@ async function sendJSON(view, data) {
         return result
     } catch (err) {
         console.error("Error while sending JSON:  ", err);
+    }
+}
+
+async function checkView(urlRaw) {
+    try {
+        const url = makeURL(urlRaw);
+        const response = await fetch(url, { method: 'HEAD' });
+        const isDefaultView = response.headers.get('X-Default-View');
+        if (isDefaultView === 'True') {
+            return false;
+        } else {
+            return true;
+        }
+    } catch (err) {
+        console.error("Error while checking view: ", err);
     }
 }

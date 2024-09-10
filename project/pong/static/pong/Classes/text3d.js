@@ -13,7 +13,7 @@ export class Text3d {
         this.color = color;
         this.scene = scene;
         this.rotation = rotation;
-        this.material = new THREE.MeshStandardMaterial({ color: color });
+        this.material = new THREE.MeshLambertMaterial({ color: color });
         this.geometry = new TextGeometry(text, {
             font: font,
             size: size,
