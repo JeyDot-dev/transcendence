@@ -5,6 +5,7 @@
 				<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
+                <span id="signupSpan"></span>
 				<form id="signupForm">
 					{% csrf_token %}
 					<label for="username">Username</label>
@@ -29,6 +30,7 @@
 <script>
 	document.getElementById('signupForm').addEventListener('submit', function(e) {
 		e.preventDefault();
+        e.stopPropagation();
 		var form = document.getElementById('signupForm');
 		var formData = new FormData(form);
 		

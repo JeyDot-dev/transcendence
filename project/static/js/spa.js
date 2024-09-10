@@ -241,6 +241,7 @@ function navigateTo(url, data = null) {
         }
         history.pushState(jsonData, "", url);
         spa(url, data);
+        updateNav();
     } catch (err) {
         console.error("Unable to load external resources from SPA:", err);
     }
@@ -262,6 +263,17 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+
+async function updateNav() {
+    try {
+        let data = await fetchJSON("navbar");
+        document.getElementById('theNavBar').innerHTML = data.content;
+    }
+    catch (err) {
+        console.error("Error while updating the navbar: ", err);
+    }
 }
 
 // Function to fetch JSON from a source
