@@ -128,12 +128,11 @@ def change_value(request, field):
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 def get_user_list(request):
-	logger.info(f"Getting user list")
 	if searchTerm := request.GET.get('searchTerm', ''):
 		users = UserInfos.objects.filter(username__icontains=searchTerm)
 	else:
 		users = UserInfos.objects.all()
-	users_list = [user.to_dict_public for user in users]
+	users_list = [user.to_dict_public() for user in users]
 	return Response({'users': users_list}, status=status.HTTP_200_OK)
 
 # ==========================

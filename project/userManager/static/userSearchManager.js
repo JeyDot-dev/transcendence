@@ -1,5 +1,9 @@
 function searchUser(searchTerm) {
-	const endpoint = `/api/get_user_list?searchTerm=${encodeURIComponent(searchTerm)}`;
+	if (searchTerm === '' || searchTerm === null) {
+		displayUserList([]);
+		return;
+	}
+	const endpoint = `/api/userManager/get_user_list?searchTerm=${encodeURIComponent(searchTerm)}`;
 	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 	fetch(endpoint, {
@@ -16,12 +20,23 @@ function searchUser(searchTerm) {
 				alert(data.error);
 			} else {
 				console.log(data.users);
+				displayUserList(data.users);
 			}
 		})
 }
 
-let searchTimeout;
+function displayUserList(users) {
+	const userList = document.getElementById('searchResultList');
+	userList.innerHTML = '';
+	users.forEach(user => {
+		const userDiv = document.createElement('li');
+		userDiv.innerText = user.username;
+		userList.appendChild(userDiv);
+	});
+}
 
+
+let searchTimeout;
 function searchUserInput() {
 	clearTimeout(searchTimeout);
 	searchTimeout = setTimeout(() => {

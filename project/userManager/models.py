@@ -122,6 +122,7 @@ class UserInfos(AbstractUser):
             friend.friends_requests.remove(self)
         else:
             friend.friends_requests.add(self)
+            self.friends_requests.add(friend)
 
         self.save()
 
