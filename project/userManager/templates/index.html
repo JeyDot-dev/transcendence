@@ -19,6 +19,7 @@
 <button type="button" onclick="logout()">
 	Logout
 </button>
+{% include "searchBar.html" %}
 	<p>User connected</p>
 	<img src="{% static user.profile_pic.url %}" alt="Profile Picture" style="width: 100px; height: 100px;" id="pp">
 	<p>Username: {{ user.username }}</p>
