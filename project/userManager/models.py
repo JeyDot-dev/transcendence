@@ -21,6 +21,7 @@ class UserInfos(AbstractUser):
     is_3d = models.BooleanField(default=False)
     friends = models.ManyToManyField("self", blank=True)
     friends_requests = models.ManyToManyField("self", blank=True)
+    match_history = models.ManyToManyField("MatchResults", blank=True)
 
     REQUIRED_FIELDS = ["email", "password"]
 
@@ -126,3 +127,32 @@ class UserInfos(AbstractUser):
 
         self.save()
 
+class MatchResults(models.Model):
+	winner = models.ForeignKey(UserInfos, on_delete=models.CASCADE, related_name='winner')
+	loser = models.ForeignKey(UserInfos, on_delete=models.CASCADE, related_name='loser')
+	score_left = models.IntegerField(default=0)
+	score_right = models.IntegerField(default=0)
+	date = models.DateTimeField(auto_now_add=True)
+	tournament_id = models.CharField(max_length=200, default="")
+
+	def __str__(self):
+		return f"{self.winner.username} vs {self.loser.username} ({self.date})"
+
+	def to_dict(self):
+		return {
+			"winner": self.winner.username,
+			"loser": self.loser.username,
+			"date": self.date,
+			"score_left": self.score_left,
+			"score_right": self.score_right,
+			"tournament_id": self.tournament_id
+		}
+
+	def set_tournament_id(self, tournament_id: str):
+		self.tournament_id = tournament_id
+		self.save()
+    
+	def set_score(self, score_left: int, score_right: int):
+		self.score_left = score_left
+		self.score_right = score_right
+		self.save()
