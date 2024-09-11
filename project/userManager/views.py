@@ -124,6 +124,17 @@ def change_value(request, field):
 	
 	return Response({'message': field + ' changed successfully'}, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+def get_user_list(request):
+	if searchTerm := request.GET.get('searchTerm', ''):
+		users = UserInfos.objects.filter(username__icontains=searchTerm)
+	else:
+		users = UserInfos.objects.all()
+	users_list = [user.to_dict_public() for user in users]
+	return Response({'users': users_list}, status=status.HTTP_200_OK)
+
 # ==========================
 #         HTML VIEWS
 # ==========================
