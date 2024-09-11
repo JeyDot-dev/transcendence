@@ -1,0 +1,67 @@
+#pp {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+main textarea, label, {
+    color: white;
+}
+.img-overlay {
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgb(129,18,134);
+    background: linear-gradient(17deg, rgba(129,18,134,1) 0%, rgba(29,3,68,1) 52%, rgba(29,3,68,1) 59%, rgba(225,42,255,1) 76%, rgba(38,0,74,1) 90%);
+    mix-blend-mode: hue;
+}
+#pp-div {
+    position: relative;
+    width: 10vw;
+    height: 10vw;
+    border-radius: 50%;
+}
+.vertical-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.btn{
+    height: 100%;
+    width: 100%;
+}
+#submit_status{
+    height: 100%;
+    width: 10vw;
+}
+.modifyProfileContainer{
+}
+.list-group-horizontal .list-group-item {
+    width: 100%;
+}
+#new_status {
+    color: white;
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    font-family: 'Roboto Condensed';
+    justify-content: center;
+    text-align: center;
+    resize: none;
+    width: 100%;
+    font-size: 1.2em;
+    --bs-focus-ring-color: rgba(0, 0, 0, 0);
+    overflow: hidden;
+}
+/* #new_status:focus { */
+/*     border: none; */
+/*     highlight: none; */
+/* } */
+main ul, main input, .list-group, .list-group-item, .form-control, textarea {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.form-control:focus {
+    background-color: rgba(232, 32, 180, 0.2);
+}

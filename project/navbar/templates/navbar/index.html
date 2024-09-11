@@ -31,8 +31,9 @@
             </ul>
             <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
+                {% csrf_token %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/logout" data-link>Logout</a>
+                    <a class="nav-link" title="Logout" href="#" onclick="logout();return false;">Logout</a>
                 </li>
                 <li class="nav-ite ">
                     <span class="navbar-text ms-auto">Hello, {{ user.username }}</span>
