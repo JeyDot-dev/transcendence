@@ -9,9 +9,9 @@ height: 100vh;
 /*     display: none; */
 /* } */
 
-.navbar {
-    background: rgb(0,0,0);
-background: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(255,0,193,1) 30%, rgba(150,0,255,1) 40%, rgba(145,0,255,1) 50%, rgba(73,0,255,1) 60%, rgba(0,255,249,1) 70%, rgba(0,0,0,1) 100%);
+#theNavBar {
+    background: rgb(0,0,0) !important;
+    background: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(255,0,193,1) 30%, rgba(150,0,255,1) 40%, rgba(145,0,255,1) 50%, rgba(73,0,255,1) 60%, rgba(0,255,249,1) 70%, rgba(0,0,0,1) 100%) !important;
 }
 
 #camera-control-panel {
