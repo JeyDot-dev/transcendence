@@ -1,13 +1,14 @@
 project/transcendence/settings.py
 project/static_production
-containers/scripts/django_setup.sh
 .DS_Store
 locallibrary/
+
 ### Django ###
 *.log
 *.pot
 *.pyc
 __pycache__/
+.vscode/
 profile_pics/
 local_settings.py
 db.sqlite3
