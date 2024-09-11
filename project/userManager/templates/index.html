@@ -4,20 +4,15 @@
 {% if not user.is_authenticated  %}
 <div>
 	<h2>Log in to play</h2>
-	<button type="button" class="btn btn-primary m-4" data-bs-toggle="modal" data-bs-target="#loginModal">
+	<button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#loginModal">
 		Login
 	</button>
-	<br />
 	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signupModal">
 		Create account
 	</button>
 </div>
-{% endif %}
 
-{% if user.is_authenticated %}
-<button type="button" onclick="logout()">
-	Logout
-</button>
+{% elif user.is_authenticated %}
 {% include "searchBar.html" %}
     <div class="vertical-container pt-5" id="profile_container">
         <div id="pp-div">
@@ -124,12 +119,10 @@
             <textarea id="add_friend" placeholder="Username of someone" required></textarea>
             <button onclick="changeUserValue('add_friend', document.getElementById('add_friend').value, '{{ user.username }}')">send friend request</button>
         </div>
+        {% else %}
+        <h1>Something went wrong</h1>
+        {% endif %}
 
-
-
-{% else %}
-	<p>User not connected</p>
-{% endif %}
 
 {% include "accountCreation.html" %}
 {% include "accountLogin.html" %}

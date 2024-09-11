@@ -33,3 +33,6 @@
     font-family: 'Lemon/Milk light';
     color: #FFFFFF;
 }
+#userLink:link, #userLink:visited {
+    color: orange;
+}
