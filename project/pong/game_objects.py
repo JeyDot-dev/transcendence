@@ -385,18 +385,32 @@ class Game:
         logger.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")
 
     async def save_scores_to_db(self):
-        """Met à jour les scores dans la base de données pour les parties de type dbGame."""
+        """Update the scores in the database for dbGame games and manage tournament progression."""
         try:
-            # Récupérer l'instance Game dans la base de données
             game_db = await sync_to_async(GameDB.objects.get)(game_ws_id=self.id)
+
             game_db.points1 = self.score[0]
             game_db.points2 = self.score[1]
-            game_db.is_played = True
-            game_db.loser.is_winner = False
 
-            # Sauvegarder dans la base de données
+            # MAYBE: increment looses ?
+            winner = self.winner
+            loser = self.loser
+
+            await sync_to_async(game_db.finalize_game)()
+
             await sync_to_async(game_db.save)()
             logger.info(f"Scores saved to database for game {self.id}: {self.score[0]} - {self.score[1]}")
+
+            # tournament = game_db.tournament
+            # if tournament:
+            #     unplayed_games = await sync_to_async(tournament.get_unplayed_games)()
+            #     if not unplayed_games.exists():
+            #         # If no unplayed games exist, create the next pool of games or finalize the tournament
+            #         if len(tournament.players.all()) > 1:
+            #             await sync_to_async(tournament.make_games)()  # Create new pool of games
+            #         else:
+            #             await sync_to_async(tournament.finalize_tournament)()  # Finalize the tournament
+
         except GameDB.DoesNotExist:
             logger.error(f"Game with ID {self.id} not found in the database.")
 

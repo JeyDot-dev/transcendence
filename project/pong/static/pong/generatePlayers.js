@@ -1,30 +1,38 @@
-function generatePlayerForms() {
-    var formCount = document.querySelectorAll('#player-formset .form-group').length;
-    var numForms = parseInt(document.getElementById('num-players').value);
-    var playerFormset = document.getElementById('player-formset');
-         
-    // Clear existing forms
-    playerFormset.innerHTML = '';
+// console.log('***************************** generatePlayer.js LOADING!!!!!!!!!!!')
+console.log('***************************** generatePlayer.js LOADED')
+const playerCountSelect = document.getElementById('player-count');
+const playerFieldsContainer = document.getElementById('player-fields');
 
-    // Append the management form
-    var managementForm = document.createElement('div');
-    managementForm.innerHTML = '{{ formset.management_form|safe }}';
-    playerFormset.appendChild(managementForm.firstChild);
+function updatePlayerFields(playerCount) {
+    // Clear existing fields
+    playerFieldsContainer.innerHTML = '';
 
-    // Add the specified number of forms
-    for (var i = 0; i < numForms; i++) {
-        var newForm = document.createElement('div');
-        newForm.className = 'form-group';
-        var emptyFormHtml = `{{ formset.empty_form.as_p|escapejs }}`;
-        newForm.innerHTML = emptyFormHtml.replace(/__prefix__/g, i);
-        playerFormset.appendChild(newForm);
+    // Insert management form (if dynamically generating fields via JS)
+    const managementForm = `
+        <input type="hidden" name="form-TOTAL_FORMS" value="${playerCount}">
+        <input type="hidden" name="form-INITIAL_FORMS" value="0">
+        <input type="hidden" name="form-MIN_NUM_FORMS" value="0">
+        <input type="hidden" name="form-MAX_NUM_FORMS" value="1000">
+    `;
+    playerFieldsContainer.insertAdjacentHTML('beforeend', managementForm);
+
+    // Generate player name input fields
+    for (let i = 0; i < playerCount; i++) {
+        const playerField = `
+            <div class="form-group">
+                <label for="form-${i}-name">Player ${i + 1}</label>
+                <input type="text" name="form-${i}-name" id="form-${i}-name" class="form-control" required>
+            </div>
+        `;
+        playerFieldsContainer.insertAdjacentHTML('beforeend', playerField);
     }
-
-    // Update the TOTAL_FORMS count
-    document.querySelector('#id_form-TOTAL_FORMS').value = numForms;
-
-    // Show the form container
-    document.getElementById('player-form-container').style.display = 'block';
-
-    return 0;
 }
+
+// Initial player field generation (default to 4 players)
+updatePlayerFields(playerCountSelect.value);
+
+// Update player fields when the number of players changes
+playerCountSelect.addEventListener('change', function () {
+    updatePlayerFields(parseInt(this.value));
+});
+// });

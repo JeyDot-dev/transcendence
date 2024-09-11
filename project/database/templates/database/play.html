@@ -1,8 +1,0 @@
-<h1>{{ game.player1.name }} vs {{ game.player2.name }}</h1>
-<p>{{ game.player1.name }}: {{ game.points1 }} points</p>
-<p>{{ game.player2.name }}: {{ game.points2 }} points</p>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit" name="player" value="{{ game.player1.id }}">{{ game.player1.name }}</button>
-    <button type="submit" name="player" value="{{ game.player2.id }}">{{ game.player2.name }}</button>
-</form>

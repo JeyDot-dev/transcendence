@@ -182,10 +182,10 @@ export class TournamentMenu {
 
     async createTournament(t_id) {
         try {
-            const url = '/database/NextPool/' + this.tournamentId;
+            const url = '/database/nextPool/' + this.tournamentId;
             const response = await fetchJSON(url);
             console.log('Tournament ID: ', this.tournamentId);
-            console.log("Tournament: " + response);
+            console.log("Tournament: ", response);
             this.totalWidth = response.games.length * 200;
             console.log('Tournament sze: ', response.games.length);
             this.initializeTournamentPool(response.games);
@@ -206,12 +206,13 @@ export class TournamentMenu {
                 const data = {
                     tournamentId: this.tournamentId
                 }
-                const response = await sendJSON("/database/NextPool/" + this.tournamentId, data);
-                const parsedResponse = JSON.parse(response);
-                console.log('getNextPool Response: ', typeof(parsedResponse),parsedResponse);
-                console.log('getNextPool Response: tournament_id: ', parsedResponse.tournament_id);
-                console.log('getNextPool Response: games: ', parsedResponse.games);
-                this.initializeTournamentPool(parsedResponse.games);
+                const response = await fetchJSON("/database/nextPool/" + this.tournamentId);
+                // // const parsedResponse = JSON.parse(response);
+                // console.log('getNextPool Response: ', typeof(parsedResponse),parsedResponse);
+                // console.log('getNextPool Response: tournament_id: ', parsedResponse.tournament_id);
+                // console.log('getNextPool Response: games: ', parsedResponse.games);
+                console.log('getNextPool: ', response);
+                this.initializeTournamentPool(response.games);
         } catch (error) {
             console.error('Error sending JSON: ', error);
         }
@@ -252,9 +253,16 @@ class TournamentPool {
     }
 
     initializeGame(playerPair, gameId, index, totalGames) {
-        // const totalWidth = 1500;
-        const spacing = this.poolWidth / (totalGames - 1);
-        const startX = -(this.poolWidth / 2);
+        let spacing, startX;
+        if (totalGames === 1) {
+            // Center the game if there's only one game left
+            spacing = 0;
+            startX = 0; // Centered at 0
+        } else {
+            // Normal case with multiple games
+            spacing = this.poolWidth / (totalGames - 1);
+            startX = -(this.poolWidth / 2); // Start at the leftmost position
+        }
 
         const fontLoader = new FontLoader();
         fontLoader.load(

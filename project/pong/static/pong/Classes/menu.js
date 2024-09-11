@@ -108,27 +108,44 @@ export class Menu {
     }
 
     ModalListener = async (myModal) => {
-        document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
-            event.preventDefault();
-            try {
-                let form = document.getElementById('newTournamentForm');
-                let formData = new FormData(form);
-
-                let jsonObject = {};
-                for (const [key, value] of formData.entries()) {
-                    jsonObject[key] = value;
-                }
-                const response = await sendJSON('/database/newTournament', jsonObject);
-                console.log('response is ' + response);
-                const obj = JSON.parse(response);
-                console.log('t_id is ' + obj.t_id);
-                myModal.hide();
-                this.newLocalTournament(obj.t_id);
-            } catch (error) {
-                console.error('Error fetching JSON: ', error);
+        // Wait until the modal is fully shown
+        myModal._element.addEventListener('shown.bs.modal', () => {
+            // Add the event listener after the modal is shown
+            const submitButton = document.getElementById('submitTournamentForm');
+            if (!submitButton) {
+                console.error('submitTournamentForm button not found');
+                return;
             }
+    
+            submitButton.addEventListener('click', async (event) => {
+                event.preventDefault();
+                try {
+                    let form = document.getElementById('newTournamentForm');
+                    if (!form) {
+                        console.error('newTournamentForm not found');
+                        return;
+                    }
+    
+                    let formData = new FormData(form);
+    
+                    let jsonObject = {};
+                    for (const [key, value] of formData.entries()) {
+                        jsonObject[key] = value;
+                    }
+    
+                    const response = await sendJSON('/database/new_tournament', jsonObject);
+                    console.log('response is ' + response);
+                    const obj = JSON.parse(response);
+                    console.log('JSON obj is ', obj);
+                    console.log('tournament_id is ' + obj.tournament_id);
+                    myModal.hide();
+                    this.newLocalTournament(obj.tournament_id);
+                } catch (error) {
+                    console.error('Error fetching JSON: ', error);
+                }
+            });
         });
-    }
+    };
 
     // TODO: hauteur du canvas 
     createMenuItems() {
