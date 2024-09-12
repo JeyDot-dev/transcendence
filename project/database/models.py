@@ -28,6 +28,7 @@ class Tournament(models.Model):
     name = models.CharField(max_length=100, default = "Tournament")
     players = models.ManyToManyField(Player, blank=True)
     winner = models.IntegerField(default=1)
+    round_number = models.IntegerField(default=1)
 
     def __str__(self):
         return self.name
@@ -40,14 +41,16 @@ class Tournament(models.Model):
         winners = [player for player in list(self.players.all()) if player.is_winner]
         random.shuffle(winners)
         if len(winners) == 3:
-            self.games.create(player1=winners[0], player2=winners[1], game_ws_id=generate_unique_id())
-            self.games.create(player1=winners[0], player2=winners[2], game_ws_id=generate_unique_id())
-            self.games.create(player1=winners[2], player2=winners[1], game_ws_id=generate_unique_id())
+            self.games.create(player1=winners[0], player2=winners[1], game_ws_id=generate_unique_id(), pool=self.round_number)
+            self.games.create(player1=winners[0], player2=winners[2], game_ws_id=generate_unique_id(), pool=self.round_number)
+            self.games.create(player1=winners[2], player2=winners[1], game_ws_id=generate_unique_id(), pool=self.round_number)
         else: 
             #since is_winner doesn't change if you don't play, the player left out will automaticly rise
             while len(winners) >= 2:
-                self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id())
-
+                self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number)
+        self.round_number = models.F('round_number') + 1
+        self.save()
+            
     def JSONgames(self):
         pairs = []
         for game in self.games.filter(is_played=False):
@@ -55,6 +58,17 @@ class Tournament(models.Model):
             'game_id': game.id,
             'game_ws_id': game.game_ws_id,
             'players': [game.player1.name, game.player2.name]
+            })
+        return pairs
+    
+    def oldPoolInfo(self, rn):
+        pairs = []
+        for game in self.games.filter(pool=rn):
+            pairs.append({
+            'game_id': game.id,
+            'game_ws_id': game.game_ws_id,
+            'players': [game.player1.name, game.player2.name],
+            'winner' : game.winner
             })
         return pairs
 
@@ -66,6 +80,7 @@ class Game(models.Model):
     points2 = models.IntegerField(default=0)
     game_ws_id = models.CharField(default=0)
     tournament = models.ForeignKey(Tournament, related_name='games', on_delete=models.CASCADE, blank=True, null=True)
+    pool = models.IntegerField(default=1)
     is_played = models.BooleanField(default=False)
 
     def __str__(self):
@@ -103,7 +118,6 @@ class Game(models.Model):
         self.looser.is_winner = False
         self.save()
         self.looser.save()
-
 
 def generate_unique_id():
     """Génère un identifiant unique pour les jeux et le tournoi."""
