@@ -444,7 +444,6 @@ export class BackToMainMenu {
         this.handleEscapeBound = this.handleEscape.bind(this);
 
         this.createBackToMenuText();
-        // this.createClickablePlane();
 
         this.setVisibility(false);  // Initially hidden
     }
