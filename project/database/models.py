@@ -37,15 +37,16 @@ class Tournament(models.Model):
         self.players.add(player)
 
     def make_games(self):
-        #make sure all losers are not winners
-        for game in self.games.filter(is_played = True):
-            game.looser.is_winner = False
-            game.looser.save()
         winners = [player for player in list(self.players.all()) if player.is_winner]
         random.shuffle(winners)
-        #since is_winner doesn't change if you don't play, the player left out will automaticly rise
-        while len(winners) >= 2:
-            self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id())
+        if len(winners) == 3:
+            self.games.create(player1=winners[0], player2=winners[1], game_ws_id=generate_unique_id())
+            self.games.create(player1=winners[0], player2=winners[2], game_ws_id=generate_unique_id())
+            self.games.create(player1=winners[2], player2=winners[1], game_ws_id=generate_unique_id())
+        else: 
+            #since is_winner doesn't change if you don't play, the player left out will automaticly rise
+            while len(winners) >= 2:
+                self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id())
 
     def JSONgames(self):
         pairs = []

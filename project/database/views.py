@@ -79,12 +79,13 @@ def newTournament(request):
             for form in formset:
                 player_name = form.cleaned_data['name']
                 player, created = Player.objects.get_or_create(name=player_name)
-                if created:
-                    player.save()
+                player.is_winner = True
+                player.save()
                 tournament.players.add(player)
             tournament.save()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                response = JsonResponse({'status': 'success', 't_id': tournament.id})
+                players = [player.name for player in list(tournament.players.all())]
+                response = JsonResponse({'status': 'success', 't_id': tournament.id, "players": players})
                 return response
         else:
             logger.info(f"Form errors: {Tform.errors}")
