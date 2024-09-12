@@ -87,6 +87,12 @@ export class Text3d {
             this.glowTextMesh.position.set(position.x - offsetX, position.y - offsetY, position.z);
         }
     }
+    setVisible(isVisible) {
+        this.mesh.visible = isVisible;
+        if (this.glowTextMesh) {
+            this.glowTextMesh.visible = isVisible;
+        }
+    }
     setColor(newColor) {
         if (this.color == newColor) return;
         this.color = newColor;

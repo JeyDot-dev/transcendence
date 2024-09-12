@@ -105,4 +105,7 @@ class Tournament(models.Model):
 
 def generate_unique_id():
     """Generate a unique WebSocket ID for games."""
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+    while True:
+        unique_id = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        if not Game.objects.filter(game_ws_id=unique_id).exists():
+            return unique_id

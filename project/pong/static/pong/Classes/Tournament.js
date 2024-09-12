@@ -130,7 +130,21 @@ export class TournamentMenu {
             this.playGame(game);
         }
     }
+    async handleGameWinner(game) {
+        try {
+            const response = await fetchJSON(`/database/game_winner/${game.gameId}/`);
     
+            if (response.winner) {
+                game.setWinner(response.winner);
+                console.log(`Winner of game ${game.gameId}: ${response.winner}`);
+            } else {
+                console.error(`Erreur de récupération du gagnant pour le jeu ${game.gameId}: ${response.message}`);
+            }
+        } catch (error) {
+            console.error(`Erreur lors de la requête pour le gagnant du jeu ${game.gameId}:`, error);
+        }
+    }
+
     async playGame(game) {
         console.log('Jouer le jeu avec les joueurs: ', game.playerNameOne, game.playerNameTwo, game.gameId);
         this.clickableGroup.remove(game.clickableZone);
@@ -148,8 +162,8 @@ export class TournamentMenu {
         game.isPlayed = true;
         
         this.socketManager.connectCustomGame(game.gameId);
-        // this.socketManager.game.changePlayerName(game.playerNameOne, game.playerNameTwo);
         await this.socketManager.waitForGameEnd();
+        await this.handleGameWinner(game);
         this.clickableGroup.visible = true;
         this.enableClicks();
 
@@ -167,12 +181,17 @@ export class TournamentMenu {
         const currentPool = this.tournamentPools[this.tournamentPools.length - 1];
         let allGamesPlayed = true;
 
-        // Vérifier si toutes les parties de la pool actuelle sont jouées
         currentPool.gamesMap.forEach((game) => {
             if (!game.isPlayed) {
                 allGamesPlayed = false;
             }
         });
+
+        if (currentPool.gamesMap.size === 1 && allGamesPlayed) {
+            console.log('La dernière partie est jouée. Fin du tournoi.');
+            this.endTournament();
+            return;
+        }
 
         if (allGamesPlayed) {
             console.log('Toutes les parties de la pool actuelle sont jouées. Chargement de la prochaine pool...');
@@ -366,84 +385,69 @@ class TournamentGame {
         this.clickableZone.position.set(0, 0, 0);
         this.clickableZone.rotation.x = Math.PI / 2;
 
-        const p1TextPosition = new THREE.Vector3(0, 0, 60);
-        const p2TextPosition = new THREE.Vector3(0, 0, -100);
-        const p1Text = new Text3d(
+        this.p1TextPosition = new THREE.Vector3(0, 0, 60);
+        this.p2TextPosition = new THREE.Vector3(0, 0, -100);
+        this.p1Text = new Text3d(
             threeRoot.camera,
             this.scene,
             font,
-            35,
+            35 * this.calculateScale(playerNameOne),
             10,
-            this.colorPalette[0],
+            this.colorPalette[4],
             playerNameOne,
             1.02,
-            p1TextPosition,
+            this.p1TextPosition,
             new THREE.Vector3(Math.PI / 2, 0, 0));
-        const p2Text = new Text3d(
+        this.p2Text = new Text3d(
             threeRoot.camera,
             this.scene,
             font,
-            35,
+            35 * this.calculateScale(playerNameTwo),
             10,
-            this.colorPalette[3],
+            this.colorPalette[1],
             playerNameTwo,
             1.02,
-            p2TextPosition,
+            this.p2TextPosition,
             new THREE.Vector3(Math.PI / 2, 0, 0));
-        // this.players.set(playerNameOne, p1Text);
-        // this.players.set(playerNameTwo, p2Text);
 
 
-        p1Text.addToGroup(this.tournamentGameGroup);
-        p2Text.addToGroup(this.tournamentGameGroup);
+        this.p1Text.addToGroup(this.tournamentGameGroup);
+        this.p2Text.addToGroup(this.tournamentGameGroup);
         this.arena.addToGroup(this.tournamentGameGroup);
-        // Ajout des sources de lumière
-        // this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.15);
-        // this.directionalLight.target = this.arena.group;
-        // this.directionalLight.position.set(
-        //     this.arena.group.position.x, 
-        //     this.arena.group.position.y - 100,  // Adjust Y to place light above the game
-        //     this.arena.group.position.z + 200  // Adjust Z to move the light in front of the game
-        // );
-        // const DirectionalLightHelper = new THREE.DirectionalLightHelper(this.directionalLight, 100);
-        
 
-        // this.tournamentGameGroup.add(this.directionalLight);
-        // this.tournamentGameGroup.add(this.directionalLight.target);
-        // this.tournamentGameGroup.add(DirectionalLightHelper);
-        // this.tournamentGameGroup.add(this.p1Text);
-        // this.tournamentGameGroup.add(this.p2Text);
         this.tournamentGameGroup.add(this.clickableZone);
-        // this.gameId = this.generateUniqueId();
-        // this.spotLight = new THREE.SpotLight(0xffffff);
-        // this.spotLight.position.set(0, -200, 200);  // Position de la lumière
-        // this.spotLight.target = this.arena.group;
-        // this.spotLight.angle = Math.PI / 8;       // Angle d'éclairage (cône)
-        // this.spotLight.penumbra = 0.5;            // Douceur des bords
-        // this.spotLight.decay = 2;                 // L'atténuation de la lumière
-        // this.spotLight.distance = 500;             // Distance maximale de l'éclairage
-        // this.spotLight.intensity = 2;
-        // this.spotLightHelper = new THREE.SpotLightHelper(this.spotLight);
-        // this.tournamentGameGroup.add(this.spotLight);
-        // this.tournamentGameGroup.add(this.spotLightHelper);
-        
-        // Position du cube (optionnelle)
     }
     generateUniqueId() {
         return '_' + Math.random().toString(36).slice(2, 11);
     }
     setGroupOpacity(opacity) {
         this.tournamentGameGroup.traverse((child) => {
-            if (child.isMesh) { // Vérifier si l'objet est un Mesh avec un matériau
+            if (child.isMesh) {
                 if (child.material) {
-                    child.material.transparent = true; // Activer la transparence si nécessaire
-                    child.material.opacity = opacity;  // Appliquer l'opacité
+                    child.material.transparent = true;
+                    child.material.opacity = opacity;
                 }
             }
         });
     }
-    setWinner(winner, loser) {
+    setWinner(winner) {
+        if (winner === this.playerNameOne) {
+            this.p2Text.setVisible(false);
+            this.p1TextPosition.set(0, 0, 0);
+        } else if (winner === this.playerNameTwo) {
+            this.p1Text.setVisible(false);
+            this.p2TextPosition.set(0, 0, 0);
+        }
 
+        this.p1Text.setPosition(this.p1TextPosition);
+        this.p2Text.setPosition(this.p2TextPosition);
+    }
+    calculateScale(playerName) {
+        const maxLength = 5; // Largeur max des pseudo
+        if (playerName.length > maxLength) {
+            return maxLength / playerName.length;
+        }
+        return 1;
     }
     addclickableToGroup(group) {
         group.add(this.clickableZone);

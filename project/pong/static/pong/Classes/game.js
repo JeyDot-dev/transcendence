@@ -118,10 +118,10 @@ export class Game {
                     1.05,
                     new THREE.Vector3(0, 125 / 2, 300)
                 );
-                this.p1Text = new Text3d(this.camera, this.scene, font, 100, 10, 0x33ccff, score[0].toString(), 1.05,
+                this.p1Text = new Text3d(this.camera, this.scene, font, 100, 10, this.colorPalette[4], score[0].toString(), 1.05,
                     new THREE.Vector3(-200, 100 / 2, 300)
                 );
-                this.p2Text = new Text3d(this.camera, this.scene, font, 100, 10, 0xff2975, score[1].toString(), 1.05,
+                this.p2Text = new Text3d(this.camera, this.scene, font, 100, 10, this.colorPalette[1], score[1].toString(), 1.05,
                     new THREE.Vector3(200, 100 / 2, 300)
                 );
                 this.timeText.addToGroup(this.gameGroup);
@@ -174,10 +174,10 @@ export class Game {
         fontLoader.load(
             'https://threejs.org/examples/fonts/helvetiker_bold.typeface.json',
             (font) => {
-                this.p1NameText = new Text3d(this.camera, this.scene, font, 35, 10, 0x33ccff, playerNames[0], 1.05,
+                this.p1NameText = new Text3d(this.camera, this.scene, font, 35, 10, this.colorPalette[4], playerNames[0], 1.05,
                     new THREE.Vector3(-600, 300, 300)
                 );
-                this.p2NameText = new Text3d(this.camera, this.scene, font, 35, 10, 0xff2975, playerNames[1], 1.05,
+                this.p2NameText = new Text3d(this.camera, this.scene, font, 35, 10, this.colorPalette[1], playerNames[1], 1.05,
                     new THREE.Vector3(600, 300, 300)
                 );
                 this.p1NameText.addToGroup(this.gameGroup);

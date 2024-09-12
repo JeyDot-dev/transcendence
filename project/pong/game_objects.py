@@ -226,7 +226,7 @@ class Game:
         self.timer = 0
         self.maxTimer = 180
         self.score = [0, 0]
-        self.maxScore = 1
+        self.maxScore = 3
         self.running = False
         self.isPlayed = False
         self.isPaused = True

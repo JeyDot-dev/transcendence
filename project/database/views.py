@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
-from .models import Player, Tournament
+from .models import Player, Tournament, Game
 from .forms import get_player_formset, newTournamentForm
 from database.logger import logger
 import json
@@ -106,3 +106,18 @@ def next_pool(request, t_id):
 
     # Return the new pool of games
     return get_pool_games(request, t_id)
+
+def get_game_winner(request, game_ws_id):
+    game = get_object_or_404(Game, game_ws_id=game_ws_id)
+
+    if not game.is_played:
+        logger.warning(f"Game {game_ws_id} is not yet played.")
+        return JsonResponse({'error': 'Game has not been played yet.'}, status=400)
+
+    winner = game.winner
+    if winner:
+        logger.info(f"The winner for game {game_ws_id} is {winner.name}")
+        return JsonResponse({'winner': winner.name})
+    else:
+        logger.warning(f"No winner found for game {game_ws_id}.")
+        return JsonResponse({'error': 'No winner found for this game.'}, status=404)
