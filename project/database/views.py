@@ -13,25 +13,6 @@ from .models import Game, Player, Tournament
 from .forms import *
 # Create your views here.
 
-def winner(request, gameScore, game_id):
-    game = get_object_or_404(Game, pk=game_id)
-    game.points1 = gameScore[0]
-    game.points2 = gameScore[1]
-    game.is_played = True
-    game.save()
-    game.winner.is_winner = True
-    game.looser.is_winner = False
-    game.winner.save()
-    game.looser.save()
-    game.winner.matchesWon = F("matchesWon") + 1
-    response = render(request, 'database/winner.html', {'game': game})
-    game.winner.save()
-    game.looser.save()
-    if game.tournament:
-        if game.next_game == game.id:
-            return redirect('tournamentWinner', t_id = game.tournament.id)
-    return response
-
 def tournamentWinner(request, t_id):
     tourny = get_object_or_404(Tournament, pk=t_id)
     tourny.winner = tourny.players.get(is_winner=True)
@@ -53,21 +34,6 @@ def newGame(request):
         return redirect("play", game_id = game.id)
     return render(request, 'database/newgame.html', {'form': form})
 
-
-def addPlayers(request, t_id):
-    form = addPlayer(request.POST)
-    if form.is_valid():
-        tournament = get_object_or_404(Tournament, pk=t_id)
-        player_name = form.cleaned_data['player_name']
-        player, new = Player.objects.get_or_create(name=player_name)
-        player.is_winner = True
-        player.save()
-        tournament.add_player(player)
-        tournament.save()
-        return redirect("addPlayers", t_id = tournament.id)
-    tournament = get_object_or_404(Tournament, pk=t_id)
-    return render(request, 'database/addplayers.html', {'form': form, 'tournament': tournament})
-
 def newTournament(request):
     if request.method == 'POST':
         Tform = newTournamentForm(request.POST)
@@ -77,11 +43,12 @@ def newTournament(request):
             tournament = Tournament(name=Tform.cleaned_data['tournament_title'])
             tournament.save()
             for form in formset:
-                player_name = form.cleaned_data['name']
-                player, created = Player.objects.get_or_create(name=player_name)
-                player.is_winner = True
-                player.save()
-                tournament.players.add(player)
+                player_name = form.cleaned_data.get('name')
+                if player_name:
+                    player, created = Player.objects.get_or_create(name=player_name)
+                    player.is_winner = True
+                    player.save()
+                    tournament.players.add(player)
             tournament.save()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 players = [player.name for player in list(tournament.players.all())]
@@ -109,9 +76,7 @@ def nextPool(request, t_id):
     })
 
 def game_winner(request, game_ws_id):
-    logger.warning(f"Looking for Game {game_ws_id}")
     game = get_object_or_404(Game, game_ws_id=game_ws_id)
-    logger.warning(f"Found Game {game_ws_id}")
     if not game.is_played:
         logger.warning(f"Game {game_ws_id} is not yet played.")
         return JsonResponse({'error': 'Game has not been played yet.'}, status=400)

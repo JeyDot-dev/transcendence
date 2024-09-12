@@ -11,8 +11,9 @@ class addPlayer(forms.ModelForm):
         fields = ['name']
 
     def clean_name(self):
-        name = self.cleaned_data.get('name')
-        # No need to check uniqueness here; we'll do that in the formset
+        name = self.cleaned_data.get('name').strip()
+        if not name:
+            return None
         return name
 
 class UniquePlayerFormSet(forms.BaseModelFormSet):
@@ -29,16 +30,14 @@ class UniquePlayerFormSet(forms.BaseModelFormSet):
                         form.add_error('name', 'Name must be unique within the formset.')
                     names.append(name)
 
-PlayerFormSet = forms.modelformset_factory(Player, form=addPlayer, formset=UniquePlayerFormSet, fields=['name'], extra=3)
+PlayerFormSet = forms.modelformset_factory(Player, form=addPlayer, formset=UniquePlayerFormSet, fields=['name'], extra=1)
                     
-
 class newTournamentForm(forms.Form):
     tournament_title = forms.CharField(label='Tournament Title', max_length=100)
 
 class GameResultForm(forms.Form):
     winner = forms.CharField(label='game winner', max_length=100)
     game = forms.IntegerField(label='gameId')
-
 
 class tournamentIdForm(forms.Form):
     tournamentId = forms.CharField(label='Tournament Id', max_length=100)
