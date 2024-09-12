@@ -18,27 +18,8 @@ export class Menu {
         this.canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
         this.showMenuEnabled = true;
 
-        // Configuration de la caméra pour le menu
-        // threeRoot.updateCameraSettings({
-        //     fov: 60,
-        //     near: 0.5,
-        //     far: 10000,
-        //     position: { x: 0, y: -1000, z: 0 },
-        //     lookAt: { x: 0, y: 0, z: 0 }
-        // });
-        // threeRoot.tweenCamera({
-        //         fov: 60,
-        //         near: 0.5,
-        //         far: 10000,
-        //         position: { x: 0, y: -1000, z: 0 },
-        //         lookAt: { x: 0, y: 0, z: 0 }
-        // }, 2000);
         this.tweenCameraToItem();
-        // // Charger une image en tant que fond
-        // const loader = new THREE.TextureLoader();
-        // loader.load('/static/assets/saturne.jpg', function(texture) {
-        //     threeRoot.scene.background = texture;
-        // });
+
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
         this.fontLoader = new FontLoader();
@@ -110,6 +91,7 @@ export class Menu {
     ModalListener = async (myModal) => {
         // Wait until the modal is fully shown
         myModal._element.addEventListener('shown.bs.modal', () => {
+            let isFormSubmitted = false;
             // Add the event listener after the modal is shown
             const submitButton = document.getElementById('submitTournamentForm');
             if (!submitButton) {
