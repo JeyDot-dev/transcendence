@@ -41,7 +41,7 @@ export class TournamentMenu {
 
     async initialize() {
         await this.createTournament();
-        // await this.getNextPool();
+        // await this.getnextPool();
     }
 
     initializeTournamentPool(tournamentGames) {
@@ -195,7 +195,7 @@ export class TournamentMenu {
 
         if (allGamesPlayed) {
             console.log('Toutes les parties de la pool actuelle sont jouées. Chargement de la prochaine pool...');
-            this.getNextPool();
+            this.getnextPool();
         }
     }
 
@@ -219,18 +219,15 @@ export class TournamentMenu {
         });
         return response;
     }
-    async getNextPool() {
+    async getnextPool() {
         try {
-                console.log('Tournament Id to testNextPool front: ', this.tournamentId);
+                console.log('Tournament Id to testnextPool front: ', this.tournamentId);
                 const data = {
                     tournamentId: this.tournamentId
                 }
                 const response = await fetchJSON("/database/nextPool/" + this.tournamentId);
                 // // const parsedResponse = JSON.parse(response);
-                // console.log('getNextPool Response: ', typeof(parsedResponse),parsedResponse);
-                // console.log('getNextPool Response: tournament_id: ', parsedResponse.tournament_id);
-                // console.log('getNextPool Response: games: ', parsedResponse.games);
-                console.log('getNextPool: ', response);
+                console.log('getnextPool: ', response);
                 this.initializeTournamentPool(response.games);
         } catch (error) {
             console.error('Error sending JSON: ', error);

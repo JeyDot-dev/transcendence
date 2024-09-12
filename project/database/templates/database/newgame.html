@@ -1,0 +1,18 @@
+{% load static %}
+<div class="container">
+    <h1>Start a New Game</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div id="player-formset">
+            {{ formset.management_form }}
+            {% for form in formset %}
+                <div class="form-group">
+                    {{ form.as_p }}
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-secondary" id="addPlayerBtn">Add Players</button>
+        <input type="submit" class="btn btn-primary" value="Save">
+    </form>
+    <script src="{% static 'js/addPlayerForm.js' %}"></script>
+</div>

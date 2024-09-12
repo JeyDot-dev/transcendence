@@ -2,8 +2,16 @@ from django.urls import include, path
 from . import views
 
 urlpatterns = [
-    path('new_tournament/', views.new_tournament, name='new_tournament'),
-    path('getPoolGames/<int:t_id>/', views.get_pool_games, name='get_pool_games'),
-    path('nextPool/<int:t_id>/', views.next_pool, name='next_pool'),
-    path('game_winner/<str:game_ws_id>/', views.get_game_winner, name='get_game_winner'),
+    path('winner/<int:game_id>/', views.winner, name='winner'),
+    path('addPlayers/<int:t_id>/', views.addPlayers, name = 'addPlayers'),
+    path('tournamentWinner/<int:t_id>/', views.tournamentWinner, name = 'tournamentWinner'),
+    path('nextPool/<int:t_id>/', views.nextPool, name = 'nextPool'),
+    path('newTournament/', views.newTournament, name='newTournament'),
+    path('game_winner/<str:game_ws_id>/', views.game_winner, name='game_winner'),
+
+    #NOTE: Ancine route play/
+    path('', views.newGame, name='newGame'),
+
+    #NOTE: Ancine route play
+    path('', views.newGame, name='newGame'),
 ]
