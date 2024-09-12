@@ -1,63 +1,31 @@
 <!doctype html>
 <html lang="en">
-<head>
-	{% load static %}
-    <meta charset="utf-8">
-    <title>Bootstrap demo</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- <link href="https://fonts.cdnfonts.com/css/lemonmilk" rel="stylesheet"> -->
-    <link href="https://fonts.cdnfonts.com/css/lemonmilk?styles=18118,18121,18122,18119,18120,18123" rel="stylesheet">
-    <link href="https://fonts.cdnfonts.com/css/romela" rel="stylesheet">
-    <link href="https://fonts.cdnfonts.com/css/br-cobane" rel="stylesheet">
-    <link href="https://fonts.cdnfonts.com/css/roboto-condensed-3" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-	<script src="{% static 'js/spa.js' %}"></script>
-	<link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <nav class="navbar navbar-expand-md" style="height: 60px;">
-        <div class="container-fluid h-100 my-auto">
-            <a class="navbar-brand pb-0 pt-0 ms-10 pt-md-1" href="/" data-link>Transcendance</a>
-            <button class="navbar-toggler pt-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav z-3 ms-auto ms-md-1 me-md-auto" style="max-width: 95px">
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/" data-link>Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/pong" data-link>Pong</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Dropdown
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/userManager" data-link>User</a></li>
-                            <li><a class="dropdown-item" href="/about" data-link>About</a></li>
-                            <li><a class="dropdown-item" href="/admin">Admin</a></li>
-                            <li><a class="dropdown-item" href="https://localhost:447">Graphs</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="https://transcendence.jjorge.ch:447">Graphs(for VPS)</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <div id="nav-border"></div>
-	<main>
-
-	</main>
-    <footer>
-        <div class="container-fluid"
+    <head>
+        {% load static %}
+        <meta charset="utf-8">
+        <title>Transcendance</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.cdnfonts.com/css/lemonmilk?styles=18118,18121,18122,18119,18120,18123" rel="stylesheet">
+        <link href="https://fonts.cdnfonts.com/css/roboto-condensed-3" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script src="{% static 'js/spa.js' %}"></script>
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    </head>
+    <body>
+        <header id="theNavBar">
+            {% include 'navbar/index.html' %}
+        </header>
+        <div id="nav-border"></div>
+        <main>
+        </main>
+        <footer>
+            <div class="container-fluid">
                 <p>Un transcendance de qualité <inline>professionnelle et élégant</inline>, tout en gardant une expérience utilisateur agréable</p>
-    </footer>
-	<script src="{% static 'userManagerLocal.js' %}"></script>
-	<script src="{% static 'userManagerApi.js' %}"></script>
-	<script src="{% static 'userSearchManager.js' %}"></script>
-</body>
+                </div>
+        </footer>
+        <script src="{% static 'userManagerLocal.js' %}"></script>
+        <script src="{% static 'userManagerApi.js' %}"></script>
+        <script src="{% static 'userSearchManager.js' %}"></script>
+    </body>
 </html>

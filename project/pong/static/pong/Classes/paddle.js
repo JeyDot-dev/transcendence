@@ -1,5 +1,3 @@
-// import * as THREE from "../threejs/Three.js";
-// import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
 import { THREE } from '../three.module.js';
 
 export class Paddle {
@@ -15,8 +13,8 @@ export class Paddle {
         this.user_id = id;
         this.mesh.position.set(x, y, width / 2);
 
-        this.axesHelper = new THREE.AxesHelper(50); // La taille des axes peut être ajustée
-        this.mesh.add(this.axesHelper);
+        // this.axesHelper = new THREE.AxesHelper(50); // La taille des axes peut être ajustée
+        // this.mesh.add(this.axesHelper);
     }
 
     logMeshData() {

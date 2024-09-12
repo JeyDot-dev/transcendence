@@ -140,7 +140,8 @@ function logout() {
         checkInput(data, "Logout successful", false);
         localStorage.removeItem('user');
         document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        navigateTo("/");
+        // navigateTo("/");
+        updateNav();
 	})
 }
 

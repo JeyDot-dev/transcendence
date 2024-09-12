@@ -1,0 +1,103 @@
+#pp {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+main textarea, label, {
+    color: white;
+}
+#friendList{
+    max-height: 100%;
+    overflow-y: auto;
+}
+#separator {
+    height: 2px;
+    width: 50%;
+    background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(255,0,193,0.7) 30%, rgba(150,0,255,1) 40%, rgba(145,0,255,1) 50%, rgba(73,0,255,1) 60%, rgba(0,255,249,0.7) 70%, rgba(0,0,0,0) 100%);
+}
+
+.list-group-item{
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    text-align: center;
+}
+.list-group{
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+.img-overlay {
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgb(129,18,134);
+    background: linear-gradient(17deg, rgba(129,18,134,0.1) 0%, rgba(29,3,68,1) 52%, rgba(29,3,68,1) 59%, rgba(225,42,255,1) 76%, rgba(38,0,74,1) 90%);
+    mix-blend-mode: hue;
+}
+.img-overlay:hover{
+    transition: background 0.5s, mix-blend-mode 0.5s;
+    background: linear-gradient(17deg, rgba(129,18,134,0.5) 0%, rgba(29,3,68,0.5) 52%, rgba(29,3,68,0.5) 59%, rgba(225,42,255,0.5) 76%, rgba(38,0,74,0.5) 90%);
+    mix-blend-mode: normal;
+}
+#pp-div {
+    position: relative;
+    min-width: 200px;
+    min-height: 200px;
+    width: 10vw;
+    height: 10vw;
+    border-radius: 50%;
+}
+.vertical-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.btn{
+    color: darkorchid;
+    height: 100%;
+    width: 100%;
+}
+#submit_status{
+    height: 100%;
+    width: 10vw;
+}
+.modifyProfileContainer{
+}
+.list-group-horizontal .list-group-item {
+    width: 100%;
+}
+#new_status {
+    color: white;
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    font-family: 'Roboto Condensed';
+    justify-content: center;
+    text-align: center;
+    resize: none;
+    width: 100%;
+    font-size: 1.2em;
+    overflow: hidden;
+}
+.focus-ring .form-control{
+    --bs-focus-ring-color: darkorchid;
+}
+#profilePictureForm input {
+    display: none;
+}
+#new_status:hover {
+    border: dotted;
+    border-color: darkorchid;
+/* #new_status:focus { */
+/*     border: none; */
+/*     highlight: none; */
+/* } */
+main ul, main input, .list-group, .list-group-item, .form-control, textarea {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.form-control:focus {
+    background-color: rgba(232, 32, 180, 0.2);
+}

@@ -1,5 +1,7 @@
 from django.db import models
-import random
+import random, string
+#import request
+import math
 
 # Create your models here.
 
@@ -23,23 +25,35 @@ class Tournament(models.Model):
         return self.name
     
     def add_player(self, player):
+        player.is_winner = True
         self.players.add(player)
 
     def make_games(self):
         #after start, make pairs, cannot add more players
         winners = [player for player in list(self.players.all()) if player.is_winner]
-        print("Winners:", winners)
         random.shuffle(winners)
         #since is_winner doesn't change if you don't play, the player left out will automaticly rise
         while len(winners) >= 2:
-            self.games.create(player1=winners.pop(), player2=winners.pop())
+            self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id())
+
+    def JSONgames(self):
+        pairs = []
+        for game in self.games.filter(is_played=False):
+            pairs.append({
+            'game_id': game.id,
+            'game_ws_id': game.game_ws_id,
+            'players': [game.player1.name, game.player2.name]
+            })
+        return pairs
 
 
 class Game(models.Model):
-    player1 = models.ForeignKey(Player, related_name='games_as_player1', on_delete=models.CASCADE)
-    player2 = models.ForeignKey(Player, related_name='games_as_player2', on_delete=models.CASCADE)
+    player1 = models.ForeignKey(Player, related_name='player1', on_delete=models.CASCADE)
+    player2 = models.ForeignKey(Player, related_name='player2', on_delete=models.CASCADE)
+    #players = models.ManyToManyField(Player)
     points1 = models.IntegerField(default=0)
     points2 = models.IntegerField(default=0)
+    game_ws_id = models.CharField(default=0)
     tournament = models.ForeignKey(Tournament, related_name='games', on_delete=models.CASCADE, blank=True, null=True)
     is_played = models.BooleanField(default=False)
 
@@ -73,7 +87,6 @@ class Game(models.Model):
         return self.id
 
 
-    
-
-
-        
+def generate_unique_id():
+    """Génère un identifiant unique pour les jeux et le tournoi."""
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))

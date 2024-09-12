@@ -1,0 +1,38 @@
+.navbar {
+    padding-left: 6vw;
+    padding-right: 6vw;
+    background: rgb(36,8,82);
+    background: linear-gradient(180deg, rgba(36,8,82,1) 0%, rgba(3,22,68,1) 82%);
+    /* background-color: #031644; */
+}
+
+.navbar-brand:focus {
+    color: #FFFFFF;
+}
+.navbar-brand:hover {
+    color: #FFFFFF;
+}
+.navbar-brand {
+    font-size: 2rem;
+    font-family: 'Lemon/Milk', sans-serif;
+    /* text-shadow: */
+    /*    0.05rem 0.05rem 0 rgba(255, 0, 0, 0.9), */
+    /*    -0.05rem -0.05rem 0 rgba(0, 255, 0, 0.9), */
+    /*    0.05rem -0.05rem 0 rgba(0, 0, 255, 0.9), */
+    /*    0.1rem 0.1rem 0.2rem rgba(222, 1, 173, 1); */
+    color: #FFFFFF;
+    /* animation: blinker 30s linear infinite !important; */
+}
+.navbar-toggler-icon{
+    opacity: 100;
+    color: #FFFFFF;
+    filter: invert(90%) sepia(99%) saturate(2%) hue-rotate(49deg) brightness(108%) contrast(101%) drop-shadow(0.1rem 0.1rem 0.1rem rgba(222, 1, 173, 1));
+}
+.navbar .nav-link {
+    font-size: 1.5rem;
+    font-family: 'Lemon/Milk light';
+    color: #FFFFFF;
+}
+#userLink:link, #userLink:visited {
+    color: orange;
+}

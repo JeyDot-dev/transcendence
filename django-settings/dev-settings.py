@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     "database.apps.DatabaseConfig",
     "channels",
     "pong",
+
     "userManager",
+    "navbar",
 ]
 
 MIDDLEWARE = [
@@ -155,6 +157,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "pong/static/pong",
     BASE_DIR / "userManager/static",
     BASE_DIR / "database/static/database",
+    BASE_DIR / "navbar/static/navbar",
 ]
 
 
@@ -188,4 +191,3 @@ LOGGING = {
         },
     },
 }
-

@@ -41,10 +41,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
     "database.apps.DatabaseConfig",
     "channels",
     "pong",
     "userManager",
+    "navbar",
 ]
 
 MIDDLEWARE = [
@@ -156,6 +158,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "pong/static/pong",
     BASE_DIR / "userManager/static/userManager",
     BASE_DIR / "database/static/database",
+    BASE_DIR / "navbar/static/navbar",
 ]
 
 
