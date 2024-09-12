@@ -60,7 +60,7 @@
 		</ul>
 		<h2>Friends requests</h2>
 		<ul>
-			{% for friend in user.friends_request.all %}
+			{% for friend in user.friends_requests.all %}
 				<li>{{ friend.username }}</li>
 			{% endfor %}
 		</ul>
