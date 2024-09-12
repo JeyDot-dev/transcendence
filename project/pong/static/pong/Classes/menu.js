@@ -93,45 +93,35 @@ export class Menu {
     }
 
     ModalListener = async (myModal) => {
-        // Wait until the modal is fully shown
-        myModal._element.addEventListener('shown.bs.modal', () => {
-            let isFormSubmitted = false;
-            // Add the event listener after the modal is shown
-            const submitButton = document.getElementById('submitTournamentForm');
-            if (!submitButton) {
-                console.error('submitTournamentForm button not found');
-                return;
-            }
-    
-            submitButton.addEventListener('click', async (event) => {
-                event.preventDefault();
-                try {
-                    let form = document.getElementById('newTournamentForm');
-                    if (!form) {
-                        console.error('newTournamentForm not found');
-                        return;
-                    }
-    
-                    let formData = new FormData(form);
-    
-                    let jsonObject = {};
-                    for (const [key, value] of formData.entries()) {
-                        jsonObject[key] = value;
-                    }
-    
-                    const response = await sendJSON('/database/new_tournament', jsonObject);
-                    console.log('response is ' + response);
-                    const obj = JSON.parse(response);
-                    console.log('JSON obj is ', obj);
-                    console.log('tournament_id is ' + obj.tournament_id);
-                    myModal.hide();
-                    this.newLocalTournament(obj.tournament_id);
-                } catch (error) {
-                    console.error('Error fetching JSON: ', error);
+        document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
+            event.preventDefault();
+            try {
+                let form = document.getElementById('newTournamentForm');
+                let formData = new FormData(form);
+
+                let jsonObject = {};
+                for (const [key, value] of formData.entries()) {
+                    jsonObject[key] = value;
                 }
-            });
+                const response = await sendJSON('/database/newTournament', jsonObject);
+                console.log('response is ' + response);
+                const obj = JSON.parse(response);
+                if (obj.status.localeCompare('success') == 0) {
+                    myModal.hide();
+                    this.newLocalTournament(obj.t_id);
+                }
+                else if (obj.status.localeCompare('failure') == 0) {
+                    const newDiv = document.createElement('div');
+                    newDiv.textContent = 'All usernames must be different';
+                    newDiv.style.color = "red";
+                    const label = document.querySelector('#top');
+                    label.insertAdjacentElement('afterend', newDiv);
+                }    
+            } catch (error) {
+                console.error('Error fetching JSON: ', error);
+            }
         });
-    };
+    }
 
     // TODO: hauteur du canvas 
     createMenuItems() {

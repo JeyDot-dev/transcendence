@@ -1,28 +1,20 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const playerCountSelect = document.getElementById('player-count');
-    const playerFieldsContainer = document.getElementById('player-fields');
+document.getElementById('add_players').addEventListener('click', function() {
+    console.log('added players');
+    let formCount = document.querySelectorAll('#formsetContainer .form-group').length;
 
-    function updatePlayerFields(playerCount) {
-        // Clear existing fields
-        playerFieldsContainer.innerHTML = '';
+    const formsetContainer = document.getElementById('formsetContainer');
+    const numPlayersToAdd = parseInt(document.getElementById('num-players').value);  // Get the number of forms from input
 
-        // Generate player name input fields
-        for (let i = 0; i < playerCount; i++) {
-            const playerField = `
-                <div class="form-group">
-                    <label for="player-${i + 1}">Player ${i + 1}</label>
-                    <input type="text" name="player-${i + 1}-name" id="player-${i + 1}" class="form-control" required>
-                </div>
-            `;
-            playerFieldsContainer.insertAdjacentHTML('beforeend', playerField);
-        }
+    for (let i = 0; i < numPlayersToAdd; i++) {
+        const newFormHtml = `
+            <div class="form-group">
+                <label for="id_form-${formCount}-name">Player Name:</label>
+                <input type="text" name="form-${formCount}-name" class="form-control" id="id_form-${formCount}-name">
+                <div class="error-message" id="error-${formCount}-name" style="color: red;"></div>
+            </div>`;
+        formsetContainer.insertAdjacentHTML('beforeend', newFormHtml);
+        formCount++;
     }
 
-    // Initial player field generation (default to 4 players)
-    updatePlayerFields(playerCountSelect.value);
-
-    // Update player fields when the number of players changes
-    playerCountSelect.addEventListener('change', function () {
-        updatePlayerFields(parseInt(this.value));
-    });
+    document.querySelector('input[name="form-TOTAL_FORMS"]').value = formCount;
 });

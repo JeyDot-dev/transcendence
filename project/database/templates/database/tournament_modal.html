@@ -1,37 +1,33 @@
-<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="loginModalPage" aria-hidden="true">
+{% load static %}
+
+<script type="module" src="{% static 'generatePlayers.js' %}"></script>
+
+<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="loginModalPage" aria-hidden="true" style="color: #000">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="loginModalPage">Tournament Registration</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="loginModalPage">Tournament Registeration</h5>
+                <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="newTournamentForm" method="post">
-                    {% csrf_token %}
-                    
-                    <div class="form-group">
-                        <label for="id_tournament_title">Tournament Name</label>
-                        <input type="text" name="name" id="id_tournament_title" class="form-control" placeholder="Enter tournament name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="player-count">Number of Players</label>
-                        <select id="player-count" class="form-select">
-                            <option value="4">4</option>
-                            <option value="8">8</option>
-                            <option value="16">16</option>
-                            <option value="32">32</option>
-                        </select>
-                    </div>
-
-                    <div id="player-fields">
-                        <!-- Player input fields will be dynamically added here by JavaScript -->
-                        {{ formset.management_form }}
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" id="submitTournamentForm" class="btn btn-primary">Start Tournament</button>
-                </form>
+                <div class="container">
+                    <form id="newTournamentForm" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label id ="top" for="id_tournament_title">Tournament Title</label>
+                            {{ form.tournament_title }}
+                        </div>
+                        <div id="formsetContainer">
+                            {{ formset.management_form }}  
+                        </div>
+                        <label for="num-players">Number of Players:</label>
+                        <input type="number" id="num-players" min="4" value="4">
+                        <button type="button" id='add_players'>Add Players</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" id="submitTournamentForm" class="btn btn-primary" form="newTournamentForm">Start Tournament</button>
             </div>
         </div>
     </div>
