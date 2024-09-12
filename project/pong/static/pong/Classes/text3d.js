@@ -13,6 +13,7 @@ export class Text3d {
         this.color = color;
         this.scene = scene;
         this.rotation = rotation;
+        this.quaternion = null;
         this.material = new THREE.MeshStandardMaterial({ color: color });
         this.geometry = new TextGeometry(this.text, {
             font: font,
@@ -101,6 +102,16 @@ export class Text3d {
             this.glowTextMesh.material.uniforms.glowColor.value.set(newColor);
         }
     }
+    alignTextWithCamera() {
+        this.mesh.quaternion.copy(this.camera.quaternion);
+        // this.mesh.rotation.x = Math.PI / 3;
+        // this.rotation.x = Math.PI / 3;
+        this.quaternion = this.camera.quaternion.clone();
+        if (this.glowTextMesh) {
+            this.glowTextMesh.quaternion.copy(this.camera.quaternion);
+            // this.glowTextMesh.rotation.x = Math.PI / 3;
+        }
+    }
     // setSize(newSize, group) {
     //     this.size = newSize;
     //     this.removeFromGroup(group);
@@ -148,10 +159,17 @@ export class Text3d {
             curveSegments: 12
         });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.mesh.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
+        if (this.quaternion) {
+            this.mesh.quaternion.copy(this.quaternion);
+        } else {
+            this.mesh.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
+        }
         // this.scene.add(this.mesh);
         if (this.glowTextMesh) {
             this.createGlowMesh(this.camera, this.scene, this.color, this.glowTextMesh.scale.x);
+            if (this.quaternion) {
+                this.glowTextMesh.quaternion.copy(this.quaternion);
+            }
         }
         this.addToGroup(group);
 

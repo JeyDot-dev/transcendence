@@ -213,12 +213,12 @@ export class TournamentMenu {
             console.error('Error getting tournament:', error);
         }
     }
-    async sendGameResult(winner, loser, gameId) {
-        const response = await sendJSON(`/game_result/${gameId}/`, {
-            body: JSON.stringify({ winner, loser })
-        });
-        return response;
-    }
+    // async sendGameResult(winner, loser, gameId) {
+    //     const response = await sendJSON(`/game_result/${gameId}/`, {
+    //         body: JSON.stringify({ winner, loser })
+    //     });
+    //     return response;
+    // }
     async getNextPool() {
         try {
                 console.log('Tournament Id to testNextPool front: ', this.tournamentId);

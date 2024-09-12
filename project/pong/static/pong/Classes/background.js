@@ -16,12 +16,12 @@ export class BouncingBallInCube {
         this.createCubeWithGrid();
         this.createBall();
 
-        // Ajouter un écouteur d'événements pour la touche espace
-        window.addEventListener('keydown', (event) => {
-            if (event.code === 'Space') {
-                this.togglePause();
-            }
-        });
+        // // Ajouter un écouteur d'événements pour la touche espace
+        // window.addEventListener('keydown', (event) => {
+        //     if (event.code === 'Space') {
+        //         this.togglePause();
+        //     }
+        // });
         
         this.addToGroup(group);
     }
