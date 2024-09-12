@@ -195,7 +195,7 @@ export class TournamentMenu {
 
         if (allGamesPlayed) {
             console.log('Toutes les parties de la pool actuelle sont jouées. Chargement de la prochaine pool...');
-            this.getnextPool();
+            this.getNextPool();
         }
     }
 
