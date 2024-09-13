@@ -16,7 +16,7 @@ export class THREERoot {
         this.renderer = null;
         // this.queue = Promise.resolve(); // File d'attente initialisée à une Promise résolue
 
-        this.initCameraControls();
+        // this.initCameraControls();
     }
     
     initCanvas() {
