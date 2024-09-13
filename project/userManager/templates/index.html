@@ -1,101 +1,145 @@
 {% load static %}
-
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 
 {% if not user.is_authenticated  %}
 <div>
 	<h2>Log in to play</h2>
-	<button type="button" class="btn btn-primary m-4" data-bs-toggle="modal" data-bs-target="#loginModal">
+	<button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#loginModal">
 		Login
 	</button>
-	<br />
 	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signupModal">
 		Create account
 	</button>
 </div>
-{% endif %}
 
-{% if user.is_authenticated %}
-<button type="button" onclick="logout()">
-	Logout
-</button>
-	<p>User connected</p>
-	<img src="{% static user.profile_pic.url %}" alt="Profile Picture" style="width: 100px; height: 100px;" id="pp">
-	<p>Username: {{ user.username }}</p>
-	<p>Email: {{ user.email }}</p>
-	<p>Status: {{ user.status }}</p>
-	<p>Total games: {{ user.total_games }}</p>
-	<p>Wins: {{ user.total_victories }}</p>
-	<p>skin: {{ user.skin }}</p>
-	<p>Grade: {{ user.grade }}</p>
-	<p>Is online: {{ user.is_online }}</p>
-	<p>Is playing: {{ user.is_playing }}</p>
+{% elif user.is_authenticated %}
+<!-- {% include "searchBar.html" %} -->
+<div class="vertical-container pt-5" id="profile_container">
 
+    <label for="profile_pic" id="profile_pic_label">
+        <div id="pp-div">
+            <img src="{% static user.profile_pic.url %}" alt="Profile Picture" id="pp">
+            <div class="img-overlay"></div>
+        </div>
+    </label>
     <form id="profilePictureForm" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="hidden" name="username" value="{{ user.username }}">
         <input type="file" name="profile_pic" id="profile_pic" accept="image/*" required>
-        <button type="button" onclick="submitProfilePicture()">Upload Profile Picture</button>
+        <button class="btn" type="button" onclick="submitProfilePicture()">Update Profile Picture</button>
     </form>
-	<!-- <form id="profilePictureForm" enctype="multipart/form-data"> -->
-	<!-- 	{% csrf_token %} -->
-	<!-- 	<input type="hidden" name="username" value={{ user.username }}> -->
-	<!-- 	<input type="file" name="profile_pic" accept="image/*" required> -->
-	<!-- 	<button type="submit">Upload Profile Picture</button> -->
-	<!-- </form> -->
 
-	<div>
-		<h2>Change status</h2>
-		<textarea id="new_status" placeholder="Status" required>{{ user.status }}</textarea>
-		<button onclick="changeUserValue('new_status', document.getElementById('new_status').value, '{{ user.username }}')">Change status</button>
-	</div>
+    <h3 class="mt-2">{{ user.username }}</h3>
+    <div class="form-floating" id="floatingStatus" placeholder="change status">
+        <textarea type="" spellcheck="false" class="form-control focus-ring fw-light fst-italic px-0 py-0" id="new_status" placeholder="edit your status" required>{{ user.status }}</textarea>
+    </div>
+    <button class="btn" id="submit_status" onclick="changeUserValue('new_status', document.getElementById('new_status').value, '{{ user.username }}')">Update status message</button>
+</div>
 
-	<div>
-		<h2>Friends list</h2>
-		<ul>
-			{% for friend in user.friends.all %}
-				<li>{{ friend.username }}</li>
-			{% endfor %}
-		</ul>
-		<h2>Friends requests</h2>
-		<ul>
-			{% for friend in user.friends_request.all %}
-				<li>{{ friend.username }}</li>
-			{% endfor %}
-		</ul>
-	</div>
+<div class="container text-center">
+    <div class="row mb-4 ps-5-lg" id="histoFriend" style="">
+        <ul class="list-group mx-auto col-lg me-auto-lg mt-4" id="gameStatsContainer" style="max-width: 400px; max-height: 46vh; min-height: 46vh;">
+            <li class="list-group-item list-title">
+                <h4>Played games: {{ user.total_games }}  Won: {{ user.total_victories }} </h4>
+                <h5>last ten games</h5>
+            </li>
+            <li class="list-group-item text-success">user vs oponent 5|1 03.08.2024</li>
+            <li class="list-group-item text-danger">user vs oponent 1|5 03.08.2024</li>
+            <li class="list-group-item text-success">user vs oponent 5|1 03.08.2024</li>
+            <li class="list-group-item text-danger">user vs oponent 1|5 03.08.2024</li>
+            <li class="list-group-item text-success">user vs oponent 5|1 03.08.2024</li>
+            <li class="list-group-item text-danger">user vs oponent 1|5 03.08.2024</li>
+            <li class="list-group-item text-success">user vs oponent 5|1 03.08.2024</li>
+            <li class="list-group-item text-danger">user vs oponent 1|5 03.08.2024</li>
+            <li class="list-group-item text-success">user vs oponent 5|1 03.08.2024</li>
+            <li class="list-group-item text-danger">user vs oponent 1|5 03.08.2024</li>
+        </ul>
+        <ul class="list-group mx-auto col-lg ms-auto-lg me-5-lg mt-4" id="friendList" style="max-width: 400px; max-height: 46vh; min-height: 46vh;">
+            <li class="list-group-item list-title">
+                <div class="container">
+                    <input class="form-control col" id="add_friend" placeholder="User to befriend" required></input>
+                    <button class="btn col" onclick="changeUserValue('add_friend', document.getElementById('add_friend').value, '{{ user.username }}')">request</button>
+                </div>
+            </li>
+            <li class="list-group-item list-title">
+                <h4>Friendlist </h4>
+            <div class="mx-auto" id="separator"></div>
+            </li>
+            {% for friend in user.friends.all %}
+            <li class="list-group-item">{{ friend.username }}</li>
+            {% endfor %}
+            <li class="list-group-item list-title">
+                <h4 class="mt-5">Friend requests </h4>
+            <div class="mx-auto" id="separator"></div>
+            </li>
+            {% for friend in user.friends_requests.all %}
+            <li class="list-group-item">{{ friend.username }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<!-- <p>Paddle color: <span style="background-color: {{ user.skin }};">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p> -->
+<!-- <p>Grade: {{ user.grade }}</p> -->
+<!-- <p>Is online: {{ user.is_online }}</p> -->
+<!-- <p>Is playing: {{ user.is_playing }}</p> -->
 
-	<div>
-		<h2>add friend</h2>
-		<textarea id="add_friend" placeholder="Username of someone" required></textarea>
-		<button onclick="changeUserValue('add_friend', document.getElementById('add_friend').value, '{{ user.username }}')">send friend request</button>
-	</div>
 
-	<div>
-		<h2>Change username</h2>
-		<textarea id="new_username" placeholder="UserName" required>{{ user.username }}</textarea>
-		<button onclick="changeUserValue('new_username', document.getElementById('new_username').value, '{{ user.username }}')">Change username</button>
-	</div>
-
-	<div>
-		<h2>Change email</h2>
-		<textarea id="email" placeholder="Email" required>{{ user.email }}</textarea>
-		<button onclick="changeUserValue('new_email', document.getElementById('email').value, '{{ user.username }}')">Change email</button>
-	</div>
-
-	<div>
-		<h2>Change password</h2>
-		<form id="changePasswordForm">
-			{% csrf_token %}
-			<input type="hidden" name="username" value={{ user.username }}>
-			<input type="password" name="old_password" placeholder="Old password" required>
-			<input type="password" name="new_password" placeholder="New password" required>
-			<input type="password" name="new_password_confirm" placeholder="Confirm new password" id="new_password_to_send" required>
-			<button onclick="changeUserValue('new_password', document.getElementById('new_password_to_send').value, '{{ user.username }}')">Change password</button>
-		</form>
-
+<div class="container" id="modifyProfileContainer">
+    <ul class="list-group list-group-horizontal-sm">
+        <li class="list-group-item flex-fill">
+            <div class="form-floating" id="floatingUsername" placeholder="change username">
+                <input type="" class="form-control" id="new_username" placeholder="change username" required>
+                <label for="new_username">change username</label>
+            </div>
+        </li>
+        <li class="list-group-item flex-fill">
+            <button class="btn" onclick="changeUserValue('new_username', document.getElementById('new_username').value, '{{ user.username }}')">Confirm</button>
+        </li>
+    </ul>
+    <ul class="list-group list-group-horizontal-sm">
+        <li class="list-group-item flex-fill">
+            <div class="form-floating" id="floatingEmail" placeholder="change email">
+                <input type="email" class="form-control" id="new_email" placeholder="change email" required>
+                <label for="new_email"> {{ user.email }}</label>
+            </div>
+        </li>
+        <li class="list-group-item flex-fill">
+            <button class="btn" onclick="changeUserValue('new_email', document.getElementById('new_email').value, '{{ user.username }}')">Confirm</button>
+        </li>
+    </ul>
+    <form id="changePasswordForm">
+        <input type="hidden" name="username" value={{ user.username }}>
+        <ul class="list-group list-group-horizontal-sm">
+            {% csrf_token %}
+            <li class="list-group-item flex-fill">
+                <div class="form-floating" id="floatingNewPassword" placeholder="New password">
+                    <input type="password" class="form-control" id="new_password_input" name="new_password" placeholder="New password" required>
+                    <label for="new_password_input">New password</label>
+                </div>
+            </li>
+            <li class="list-group-item flex-fill">
+                <div class="form-floating" id="floatingConfirmPassword" placeholder="Retype new password">
+                    <input type="password" class="form-control" name="new_password_confirm" placeholder="Retype new password" id="new_password_to_send" required>
+                    <label for="new_password_to_send">Retype new password</label>
+                </div>
+            </li>
+        </ul>
+        <ul class="list-group list-group-horizontal-sm">
+            <li class="list-group-item flex-fill">
+                <div class="form-floating" id="floatingOldPassword" placeholder="Old password">
+                    <input type="password" class="form-control" id="old_password_input" name="old_password" placeholder="Current password" required>
+                    <label for="old_password_input">Current password</label>
+                </div>
+            </li>
+            <li class="list-group-item flex-fill">
+                <button class="btn" onclick="changeUserValue('new_password', document.getElementById('new_password_to_send').value, '{{ user.username }}')">Confirm</button>
+        </ul>
+    </form>
+</div>
 {% else %}
-	<p>User not connected</p>
+<h1>Something went wrong</h1>
 {% endif %}
+
 
 {% include "accountCreation.html" %}
 {% include "accountLogin.html" %}

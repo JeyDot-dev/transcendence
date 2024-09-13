@@ -1,5 +1,6 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+<nav class="navbar navbar-expand-lg" id="theNavBar">
     <div class="container-fluid">
         <a class="navbar-brand" href="/" data-link>Transcendance</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -13,36 +14,37 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/pong" data-link>Pong</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about" data-link>About</a>
+                </li>
+                        {% if user.is_staff %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Dropdown
+                        Admin-stuff
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/userManager" data-link>User profile</a></li>
-                        <li><a class="dropdown-item" href="/about" data-link>About</a></li>
-                        {% if user.is_staff %}
-                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/admin">Admin</a></li>
                         <li><a class="dropdown-item" href="https://localhost:447">Graphs</a></li>
                         <li><a class="dropdown-item" href="https://transcendence.jjorge.ch:447">Graphs(for VPS)</a></li>
-                        {% endif %}
                     </ul>
                 </li>
+                        {% endif %}
             </ul>
             <ul class="navbar-nav ms-auto">
-                {% if user.is_authenticated %}
+                {% if not user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/logout" data-link>Logout</a>
+                    <a class="nav-link" href="/userManager" data-link> Sign in </a>
                 </li>
-                <li class="nav-ite ">
-                    <span class="navbar-text ms-auto">Hello, {{ user.username }}</span>
-                </li>
-                {% endif %}
-                {% if user.is_staff %}
+                {% else %}
+                {% csrf_token %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin" data-link>Admin</a>
+                    <a class="nav-link" title="Logout" href="#" onclick="logout();return false;">Logout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="userLink" href="/userManager" data-link> {{ user.username }} </a>
                 </li>
                 {% endif %}
             </ul>
         </div>
     </div>
+</nav>

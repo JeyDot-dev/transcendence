@@ -35,6 +35,7 @@ main {
     padding-left: 12vw;
     padding-right: 12vw;
     color: #FFFFFF;
+    min-height: 75vh;
 }
 
 body {
@@ -67,11 +68,13 @@ p {
 }
 
 footer {
-    margin-top: 2vh;
+    margin-top: 10vh;
     text-align: center;
     color: #F0F3FF;
-    font-size: 0.8rem;
     font-style: italic;
+}
+footer p{
+    font-size: 0.96rem;
 }
 
 inline {
