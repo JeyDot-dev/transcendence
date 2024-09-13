@@ -5,8 +5,6 @@ from django.shortcuts import get_object_or_404
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
-from database.models import Game as GameDB, Player as PlayerDB
-from .game_objects import Game, Player
 
 games_pool = {}
 # logger = logging.getLogger(__name__)
@@ -14,6 +12,7 @@ games_pool = {}
 
 class LocalPongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        from database.models import Game as GameDB, Player as PlayerDB
         from .game_objects import Game, Player
 
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
@@ -23,7 +22,9 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
 
         # Vérifier si le jeu est déjà en mémoire
         if self.game_id in games_pool:
-            logger.info(f"Connecting to an existing game instance for game {self.game_id}")
+            logger.info(
+                f"Connecting to an existing game instance for game {self.game_id}"
+            )
             games_pool[self.game_id]["connections"] += 1
             self.game = games_pool[self.game_id]["game"]
             self.log_game_state("Existing Game param")
@@ -38,15 +39,25 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
                 player2 = await sync_to_async(lambda: GameDB.player2)()
 
                 # Créer une nouvelle instance de game avec les joueurs de la base de données
-                self.game = Game(self.game_id, [], 2, 1280, 720, self.notifyEvent, 'dbGame')
-                self.game.addPlayer(Player(id=player1.id, skin="skin1", name=player1.name), 0)
-                self.game.addPlayer(Player(id=player2.id, skin="skin2", name=player2.name), 1)
+                self.game = Game(
+                    self.game_id, [], 2, 1280, 720, self.notifyEvent, "dbGame"
+                )
+                self.game.addPlayer(
+                    Player(id=player1.id, skin="skin1", name=player1.name), 0
+                )
+                self.game.addPlayer(
+                    Player(id=player2.id, skin="skin2", name=player2.name), 1
+                )
             else:
-                logger.info(f"No game in the database, creating a new local game instance for game {self.game_id}")
+                logger.info(
+                    f"No game in the database, creating a new local game instance for game {self.game_id}"
+                )
                 # Créer un jeu local si aucun jeu DB n'existe
-                self.game = Game(self.game_id, [], 2, 1280, 720, self.notifyEvent, 'localGame')
-                player1 = Player(id=0, skin="skin1", name='Player1')
-                player2 = Player(id=1, skin="skin2", name='Player2')
+                self.game = Game(
+                    self.game_id, [], 2, 1280, 720, self.notifyEvent, "localGame"
+                )
+                player1 = Player(id=0, skin="skin1", name="Player1")
+                player2 = Player(id=1, skin="skin2", name="Player2")
                 self.game.addPlayer(player1, 0)  # Joueur 1 (gauche)
                 self.game.addPlayer(player2, 1)  # Joueur 2 (droite)
 
@@ -68,10 +79,13 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
                 {"type": "init", "game": await build_game_state(self.game)}
             )
         )
+
     def get_game_from_db(self, game_id):
         """
         Méthode pour récupérer une instance de Game depuis la base de données
         """
+        from database.models import Game as GameDB, Player as PlayerDB
+
         try:
             return GameDB.objects.get(game_ws_id=game_id)
         except GameDB.DoesNotExist:
@@ -139,10 +153,7 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
             await asyncio.sleep(10)
 
             # Vérifier s'il reste des connexions après le délai
-        if (
-            self.game_id in games_pool
-            and games_pool[self.game_id]["connections"] <= 0
-        ):
+        if self.game_id in games_pool and games_pool[self.game_id]["connections"] <= 0:
             logger.info(f"No more connections for game {self.game_id}. Cleaning up.")
 
             # Annuler la tâche de physique si elle est en cours d'exécution
@@ -163,9 +174,8 @@ async def handle_key(game, types, key, who):
     if types not in ["keydown", "keyup"]:
         return
 
-
     if key == "space" and types == "keydown":
-        if not getattr(game, 'pause_handled', False):
+        if not getattr(game, "pause_handled", False):
             if game.isPaused:
                 game.resume()
             else:
@@ -173,14 +183,14 @@ async def handle_key(game, types, key, who):
             game.pause_handled = True
         return
     elif key == "space" and types == "keyup":
-        game.pause_handled = False 
+        game.pause_handled = False
 
     action = None
     if key in ["w", "arrowup"]:
         action = "up"
     elif key in ["s", "arrowdown"]:
         action = "down"
-    
+
     if action is None:
         return
 
@@ -193,12 +203,14 @@ async def handle_key(game, types, key, who):
         paddle.keys_pressed[action] = False
 
     # Gestion des mouvements en fonction des touches pressées
-    if paddle.keys_pressed['up'] and not paddle.keys_pressed['down']:
+    if paddle.keys_pressed["up"] and not paddle.keys_pressed["down"]:
         paddle.velocity = -1  # Monter
-    elif paddle.keys_pressed['down'] and not paddle.keys_pressed['up']:
+    elif paddle.keys_pressed["down"] and not paddle.keys_pressed["up"]:
         paddle.velocity = 1  # Descendre
     else:
-        paddle.velocity = 0  # Aucun mouvement si les deux touches sont relâchées ou pressées
+        paddle.velocity = (
+            0  # Aucun mouvement si les deux touches sont relâchées ou pressées
+        )
     # logger.debug(f"Paddle update - Player: {who}, Action: {action}, Type: {types}, New Velocity: {game.paddles[who].velocity}")
     # logger.debug(f"New Paddle0 Position: x={game.paddles[0].x} y={game.paddles[0].y}")
     # logger.debug(f"New Paddle1 Position: x={game.paddles[1].x} y={game.paddles[1].y}")
@@ -234,7 +246,7 @@ async def build_game_state(game):
         },
         "score": game.score,
         "isPlayed": game.isPlayed,
-        "isPaused": game.isPaused
+        "isPaused": game.isPaused,
     }
 
 
@@ -267,5 +279,5 @@ async def update_game_state(game):
         },
         "score": game.score,
         "isPlayed": game.isPlayed,
-        "isPaused": game.isPaused
+        "isPaused": game.isPaused,
     }
