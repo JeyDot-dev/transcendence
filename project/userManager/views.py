@@ -37,9 +37,8 @@ def logout_view(request):
 		request.user.auth_token.delete()
 	except:
 		pass
-
 	logout(request)
-
+	request.user.set_online(False)
 	return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -98,7 +97,8 @@ def change_value(request, field):
 	elif field == 'new_email':
 		user.set_email(request.data['new_value'])
 	elif field == 'new_password':
-		user.set_password(request.data['new_value'])
+		request.user.set_password(request.data['new_value'])
+		user.save()
 		logout(request)
 	elif field == 'new_status':
 		user.set_status(request.data['new_value'])
@@ -134,6 +134,15 @@ def get_user_list(request):
 		users = UserInfos.objects.all()
 	users_list = [user.to_dict_public() for user in users]
 	return Response({'users': users_list}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+def get_user(request, field):
+	user = get_object_or_404(UserInfos, username=field)
+	if not user:
+		return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+	return Response({'user': user.to_dict_public()}, status=status.HTTP_200_OK)
 
 # ==========================
 #         HTML VIEWS

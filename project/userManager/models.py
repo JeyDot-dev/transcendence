@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_email, ValidationError
 
-
 class UserInfos(AbstractUser):
     profile_pic = models.ImageField(
         upload_to="profile_pics/",
