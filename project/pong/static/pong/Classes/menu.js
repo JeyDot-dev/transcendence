@@ -107,7 +107,7 @@ export class Menu {
         return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
 
-    ModalListener = async (myModal) => {
+    ModalListener = async (modalNewTournament) => {
         document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
             event.preventDefault();
             try {
@@ -130,6 +130,7 @@ export class Menu {
         });
     }
 
+
     // TODO: hauteur du canvas 
     createMenuItems() {
         this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
@@ -140,10 +141,14 @@ export class Menu {
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
             console.log("Clicked On: Local Tournament");
-            const myModal = new bootstrap.Modal(document.getElementById('myModal'));
+            const myModal = new bootstrap.Modal(document.getElementById('modalNewTournament'));
             myModal.show();
             this.hideText()
             this.ModalListener(myModal);
+
+            const closeModalNewTournament = document.getElementById('modalNewTournament').addEventListener('hidden.bs.modal', event => {
+                this.show();
+            });
         });
         this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
