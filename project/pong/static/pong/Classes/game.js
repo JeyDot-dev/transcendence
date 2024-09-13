@@ -202,7 +202,7 @@ export class Game {
         );
     }
     initBackToMainMenu() {
-        this.backToMainMenu = new BackToMainMenu(this.threeRoot, this.socketManager, this);
+        this.backToMainMenu = new BackToMainMenu(this.threeRoot, this.socketManager, this, 'game');
         this.backToMainMenu.addToScene(this.scene);
         this.backToMainMenu.initListener();
     }
@@ -412,8 +412,8 @@ export class Game {
             this.scene.remove(this.gameGroup);
         }
     
-        document.removeEventListener('keydown', this.handleKeyDown.bind(this));
-        document.removeEventListener('keyup', this.handleKeyUp.bind(this));
+        document.removeEventListener('keydown', this.handleKeyDownBound, false);
+        document.removeEventListener('keyup', this.handleKeyUpBound, false);
     
         const leftControls = document.getElementById('mobile-controls-left');
         const rightControls = document.getElementById('mobile-controls-right');
@@ -423,6 +423,10 @@ export class Game {
         if (this.socketManager) {
             this.socketManager.close(); // Ferme le socket si nécessaire
         }
+        if (this.backToMainMenu) {
+            this.backToMainMenu.destroyListener();
+        }
+        this.backToMainMenu.setVisibility(false);
         this.stopPhysics();
     }
     show() {

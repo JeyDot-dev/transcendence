@@ -3,6 +3,7 @@ import { TWEEN } from '../three.module.js';
 import { FontLoader } from '../FontLoader.js';
 import { Text3d } from './text3d.js';
 import { Arena } from './arena.js';
+import { BackToMainMenu } from './menu.js';
 // import { SkeletonHelper } from '../threejs/Three.js';
 
 export class TournamentMenu {
@@ -17,9 +18,13 @@ export class TournamentMenu {
         this.raycaster = new THREE.Raycaster();
         this.clickableGroup = new THREE.Group();
         this.onMouseClickBound = this.onMouseClick.bind(this); // Créer une seule référence liée ici
-        this.mainMenu = mainMenu;
 
+        this.mainMenu = mainMenu;
+        this.backToMainMenu = new BackToMainMenu(threeRoot, socketManager, this, 'tournament', mainMenu);
+        this.backToMainMenu.initListener();
+        this.backToMainMenu.addToScene(this.threeRoot.scene);
         this.socketManager.setLastMenu(this);
+
         this.initialize();
 
         this.directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.7);
@@ -128,7 +133,9 @@ export class TournamentMenu {
         const currentPool = this.tournamentPools[this.tournamentPools.length - 1];
         const game = currentPool.getGameByClickableZone(clickedObject);
         if (game && !game.isPlayed) {
+            this.backToMainMenu.destroyListener();
             this.playGame(game);
+            this.backToMainMenu.initListener();
         }
     }
     async handleGameWinner(game) {
