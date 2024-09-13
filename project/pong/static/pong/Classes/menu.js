@@ -28,9 +28,9 @@ export class Menu {
         this.shop = null;
         this.options = null;
 
-        this.onMouseMove = this.onMouseMove.bind(this);
-        this.onMouseClick = this.onMouseClick.bind(this);
-        this.onKeyDown = this.onKeyDown.bind(this);
+        this.onMouseMoveBound = this.onMouseMove.bind(this);
+        this.onMouseClickBound = this.onMouseClick.bind(this);
+        this.onKeyDownBound = this.onKeyDown.bind(this);
 
         this.colorPalette = [
             new THREE.Color(0xff00c1),
@@ -72,7 +72,7 @@ export class Menu {
         threeRoot.addAnimatedObject(this);
 
         // Activer l'écoute des événements de clavier
-        window.addEventListener('keydown', this.onKeyDown);
+        window.addEventListener('keydown', this.onKeyDownBound, false);
         if (this.isMobile()) {
             this.mouseControlEnabled = false;
         }
@@ -121,6 +121,11 @@ export class Menu {
                 console.error('Error fetching JSON: ', error);
             }
         });
+        const modalElement = document.getElementById('myModal');
+        modalElement.addEventListener('hidden.bs.modal', () => {
+            if (!form.submitted) {
+                this.show();
+            }        });
     }
 
     // TODO: hauteur du canvas 
@@ -303,6 +308,11 @@ export class Menu {
     }
 
     newLocalTournament(t_id) {
+        console.log('YOOOOOO LA MIF');
+        if (this.tournamentLocal) {
+            console.log('YOOOOOO LA MIF je destroy l\'anciens');
+            this.tournamentLocal.destroy();
+        }
         this.hideText();
         this.threeRoot.updateCameraSettings({
             fov: 60,
