@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const url = e.target.action;
             const data = new FormData(e.target);
             //navigateTo(url, data);
-            sendJSON(url, data);
+            navigateTo(url, data);
         }
     });
 });
