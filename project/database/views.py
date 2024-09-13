@@ -93,5 +93,5 @@ def get_old_tournament(request, t_id):
     old = tournament.ressend_tournament()
     return JsonResponse({
         'tournament_id': tournament.id,
-        'pools': old;
+        'pools': old,
     })
