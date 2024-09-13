@@ -159,18 +159,34 @@ export class SocketManager {
             this.gameInitilized = false;
             this.onGameEnd();
             this.game.destroy();
-            if (this.lastMenu) {
-                this.lastMenu.show();
-                this.lastMenu.tweenCameraToItem();
-            }
+            this.goToLastMenu();
         } else {
-            // console.log('defaultOnMessageCallback ELSE:', data);
             if (this.game) {
                 this.game.wsMessageManager(data);
             }
         }
     }
-
+    clearGame() {
+        this.gameId = null;
+        deleteCookie('localGameId');
+        this.localGameId = null;
+        deleteCookie('matchMakingGameId');
+        this.matchMakingGameId = null;
+        this.gameInitilized = false;
+        this.onGameEnd();
+        this.game.destroy();
+        if (this.lastMenu) {
+            this.lastMenu.show();
+            this.lastMenu.tweenCameraToItem();
+        }
+    }
+    goToLastMenu() {
+        console.log('Go to Last Menu', this.lastMenu);
+        if (this.lastMenu) {
+            this.lastMenu.show();
+            this.lastMenu.tweenCameraToItem();
+        }
+    }
     // Implémentation par défaut pour le onOpenCallback
     defaultOnOpenCallback() {
         console.log("WebSocket connection opened (default handler)");
