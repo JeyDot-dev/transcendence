@@ -28,6 +28,11 @@ SECRET_KEY = "django-insecure-47+cfy5ik+#v4zze7ww3aq-mmw=mq_ju$5tl1w+#p$ad)_e&os
 DEBUG = False
 
 ALLOWED_HOSTS = ["transcendence.jjorge.ch", "195.15.214.88", "localhost"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://transcendence.jjorge.ch",
+    "https://195.15.214.88",
+    "https://localhost",
+]
 
 
 # Application definition
@@ -41,12 +46,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest_framework",
     "database.apps.DatabaseConfig",
     "channels",
+    "navbar",
     "pong",
     "userManager",
-    "navbar",
 ]
 
 MIDDLEWARE = [
@@ -57,7 +61,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "transcendence.middleware.FetchOnlyMiddleware",
+    # "transcendence.middleware.FetchOnlyMiddleware",
 ]
 
 ROOT_URLCONF = "transcendence.urls"
@@ -156,7 +160,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static_production")
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     BASE_DIR / "pong/static/pong",
-    BASE_DIR / "userManager/static/userManager",
+    BASE_DIR / "userManager/static",
     BASE_DIR / "database/static/database",
     BASE_DIR / "navbar/static/navbar",
 ]
@@ -167,25 +171,28 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-        },
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": "INFO",  # Change this to DEBUG if needed for Django messages
-        },
-        # Ajoutez votre module spécifique si nécessaire
-        "pong.local_consumers": {  # Remplacez 'myapp.consumers' par le chemin correct de votre consumer
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,  # Cela empêchera les logs de remonter aux autres loggers
-        },
-    },
-}
+MEDIA_URL = "/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "userManager/static")
+
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "handlers": {
+#         "console": {
+#             "level": "DEBUG",
+#             "class": "logging.StreamHandler",
+#         },
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": ["console"],
+#             "level": "INFO",  # Change this to DEBUG if needed for Django messages
+#         },
+#         # Ajoutez votre module spécifique si nécessaire
+#         "pong.local_consumers": {  # Remplacez 'myapp.consumers' par le chemin correct de votre consumer
+#             "handlers": ["console"],
+#             "level": "DEBUG",
+#             "propagate": False,  # Cela empêchera les logs de remonter aux autres loggers
+#         },
+#     },
+# }

@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     "database.apps.DatabaseConfig",
     "channels",
     "pong",
-
     "userManager",
     "navbar",
 ]
