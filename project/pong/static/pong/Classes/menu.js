@@ -5,6 +5,7 @@ import { BouncingBallInCube } from './background.js';
 import { SocketManager } from './SocketManager.js';
 import { TournamentMenu } from './Tournament.js';
 import { Shop } from './Shop.js'
+import { ModalManager } from './ModalManager.js'
 
 export class Menu {
     constructor(threeRoot, socketManager) {
@@ -15,22 +16,26 @@ export class Menu {
         this.socketManager = socketManager;
         this.menuGroup = new THREE.Group();
 
+        this.modalManager = new ModalManager();
+        this.formSubmittedSuccessfully = false;
+
         this.mouseControlEnabled = true;
         this.canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
         this.showMenuEnabled = true;
-
+        
         this.tweenCameraToItem();
-
+        
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
         this.fontLoader = new FontLoader();
         this.menuItems = [];
+        this.currentSelectedIndex = 0;
         this.shop = null;
         this.options = null;
 
-        this.onMouseMove = this.onMouseMove.bind(this);
-        this.onMouseClick = this.onMouseClick.bind(this);
-        this.onKeyDown = this.onKeyDown.bind(this);
+        this.onMouseMoveBound = this.onMouseMove.bind(this);
+        this.onMouseClickBound = this.onMouseClick.bind(this);
+        this.onKeyDownBound = this.onKeyDown.bind(this);
 
         this.colorPalette = [
             new THREE.Color(0xff00c1),
@@ -72,7 +77,8 @@ export class Menu {
         threeRoot.addAnimatedObject(this);
 
         // Activer l'écoute des événements de clavier
-        window.addEventListener('keydown', this.onKeyDown);
+        this.show();
+        // window.addEventListener('keydown', this.onKeyDownBound, false);
         if (this.isMobile()) {
             this.mouseControlEnabled = false;
         }
@@ -92,37 +98,63 @@ export class Menu {
         return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
 
-    ModalListener = async (myModal) => {
-        document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
-            event.preventDefault();
-            try {
-                let form = document.getElementById('newTournamentForm');
-                let formData = new FormData(form);
+    // ModalListener = async (modalNewTournament) => {
+    //     document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
+    //         event.preventDefault();
+    //         try {
+    //             let form = document.getElementById('newTournamentForm');
+    //             let formData = new FormData(form);
 
-                let jsonObject = {};
-                for (const [key, value] of formData.entries()) {
-                    jsonObject[key] = value;
-                }
-                const response = await sendJSON('/database/newTournament', jsonObject);
-                console.log('response is ' + response);
-                const obj = JSON.parse(response);
-                if (obj.status.localeCompare('success') == 0) {
-                    myModal.hide();
-                    this.newLocalTournament(obj.t_id);
-                }
-                else if (obj.status.localeCompare('failure') == 0) {
-                    const newDiv = document.createElement('div');
-                    newDiv.textContent = 'All usernames must be different';
-                    newDiv.style.color = "red";
-                    const label = document.querySelector('#top');
-                    label.insertAdjacentElement('afterend', newDiv);
-                }    
-            } catch (error) {
-                console.error('Error fetching JSON: ', error);
-            }
-        });
+    //             let jsonObject = {};
+    //             for (const [key, value] of formData.entries()) {
+    //                 jsonObject[key] = value;
+    //             }
+    //             const response = await sendJSON('/database/newTournament', jsonObject);
+    //             console.log("---> request: ", jsonObject);
+    //             console.log('response is ' + response);
+    //             const obj = JSON.parse(response);
+    //             if (obj.status.localeCompare('success') == 0) {
+    //                 modalNewTournament.hide();
+    //                 this.formSubmittedSuccessfully = true;
+    //                 this.newLocalTournament(obj.t_id);
+    //             }
+    //             else if (obj.status.localeCompare('failure') == 0) {
+    //                 const newDiv = document.createElement('div');
+    //                 newDiv.textContent = 'All usernames must be different';
+    //                 newDiv.style.color = "red";
+    //                 const label = document.querySelector('#top');
+    //                 label.insertAdjacentElement('afterend', newDiv);
+    //             }
+    //         } catch (error) {
+    //             console.error('Error fetching JSON: ', error);
+    //         }
+    //     });
+    // }
+    // Gestion de la soumission pour le tournoi
+    async handleTournamentSubmit(event) {
+        let form = document.getElementById('newTournamentForm');
+        let formData = new FormData(form);
+        console.log('formData: ', formData);
+
+        let jsonObject = {};
+        for (const [key, value] of formData.entries()) {
+            jsonObject[key] = value;
+        }
+        
+        const response = await sendJSON('/database/newTournament', jsonObject);
+        console.log("Response: ", response);
+
+        const obj = JSON.parse(response);
+        if (obj.status.localeCompare('success') == 0) {
+            this.modalManager.closeModal();
+            this.formSubmittedSuccessfully = true;
+            this.newLocalTournament(obj.t_id);
+        }
     }
-
+    async handleOptionsSubmit(event) {
+        let form = document.getElementById('newOptionsForm');
+        let farmData = new FormData(form);
+    }
     // TODO: hauteur du canvas 
     createMenuItems() {
         this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
@@ -133,10 +165,18 @@ export class Menu {
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
             console.log("Clicked On: Local Tournament");
-            const myModal = new bootstrap.Modal(document.getElementById('myModal'));
-            myModal.show();
-            this.hideText()
-            this.ModalListener(myModal);
+            this.disableEventListener();
+            this.modalManager.openModal('modalNewTournament', this.handleTournamentSubmit.bind(this), this);
+            // const myModal = new bootstrap.Modal(document.getElementById('modalNewTournament'));
+            // myModal.show();
+            // this.hideText()
+            // this.ModalListener(myModal);
+            // const myModalEl = document.getElementById('modalNewTournament')
+            // myModalEl.addEventListener('hidden.bs.modal', event => {
+            //     if (this.formSubmittedSuccessfully === false) {
+            //         this.show();
+            //     }
+            // });
         });
         this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
@@ -146,6 +186,7 @@ export class Menu {
         });
         this.optionsMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[5], new THREE.Vector3(0, 0, -640), () => {
             console.log("Clicked On: Options");
+
         });
 
         this.menuItems = [
@@ -163,7 +204,7 @@ export class Menu {
         // Activer les écouteurs d'événements
         // window.addEventListener('mousemove', this.onMouseMove, false);
         // window.addEventListener('click', this.onMouseClick, false);
-        
+
         // Rendre les éléments du menu visibles
         this.menuItems.forEach(item => {
             item.textMesh.visible = true;
@@ -176,16 +217,14 @@ export class Menu {
             this.directionalLight.visible = true;
         }
         setTimeout(() => {
-            window.addEventListener('mousemove', this.onMouseMove, false);
-            window.addEventListener('click', this.onMouseClick, false);
+            this.enableEventListener();
         }, 1500);
     }
     
     hide() {
         console.log('Menu Hide');
         // Désactiver les écouteurs d'événements
-        window.removeEventListener('mousemove', this.onMouseMove, false);
-        window.removeEventListener('click', this.onMouseClick, false);
+        this.disableEventListener();
         
         // Masquer les éléments du menu
         this.menuItems.forEach(item => {
@@ -204,9 +243,8 @@ export class Menu {
     hideText() {
         console.log('Menu Text');
         // Désactiver les écouteurs d'événements
-        window.removeEventListener('mousemove', this.onMouseMove, false);
-        window.removeEventListener('click', this.onMouseClick, false);
-
+        this.disableEventListener();
+        
         // Masquer les éléments du menu
         this.menuItems.forEach(item => {
             item.textMesh.visible = false;
@@ -217,10 +255,20 @@ export class Menu {
             this.directionalLight.visible = false;
         }
     }
-
+    disableEventListener() {
+        window.removeEventListener('mousemove', this.onMouseMoveBound, false);
+        window.removeEventListener('click', this.onMouseClickBound, false);
+        window.removeEventListener('keydown', this.onKeyDownBound, false);
+    }
+    enableEventListener() {        
+        window.addEventListener('mousemove', this.onMouseMoveBound, false);
+        window.addEventListener('click', this.onMouseClickBound, false);
+        window.addEventListener('keydown', this.onKeyDownBound, false);
+    }
+    
     onMouseMove(event) {
         // if (!this.mouseControlEnabled) return;  // Désactiver le mouvement de la caméra si la souris est désactivée
-
+        
         this.mouse.x = ((event.clientX - this.canvasBounds.left) / this.canvasBounds.width) * 2 - 1;
         this.mouse.y = -((event.clientY - this.canvasBounds.top) / this.canvasBounds.height) * 2 + 1;
 
@@ -277,6 +325,7 @@ export class Menu {
     }
 
     onKeyDown(event) {
+        // event.preventDefault(); // Empêche le comportement par défaut (scrolling)
         // if (event.key === 'c') {
         //     this.mouseControlEnabled = !this.mouseControlEnabled;  // Basculer l'état du mouvement de la caméra
         // }
@@ -288,8 +337,27 @@ export class Menu {
         //     }
         //     this.showMenuEnabled = !this.showMenuEnabled;  // Basculer l'état de l'affichage du menu
         // }
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            this.navigateMenu(1);
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            this.navigateMenu(-1);
+        } else if (event.key === 'Enter') {
+            this.selectCurrentItem();
+        }
     }
-
+    navigateMenu(direction) {
+        this.menuItems[this.currentSelectedIndex].removePaddles();
+    
+        this.currentSelectedIndex = (this.currentSelectedIndex + direction + this.menuItems.length) % this.menuItems.length;
+    
+        this.menuItems[this.currentSelectedIndex].addPaddles();
+    }
+    selectCurrentItem() {
+        const currentItem = this.menuItems[this.currentSelectedIndex];
+        currentItem.onClick();
+    }
     render() {
         this.renderer.render(this.scene, this.camera);
     }
@@ -303,6 +371,10 @@ export class Menu {
     }
 
     newLocalTournament(t_id) {
+        console.log("Yo la miff, ", this.tournamentLocal);
+        if (this.tournamentLocal !== undefined) {
+            this.tournamentLocal.destroy();
+        }
         this.hideText();
         this.threeRoot.updateCameraSettings({
             fov: 60,
@@ -430,7 +502,7 @@ class MenuItem {
 }
 
 export class BackToMainMenu {
-    constructor(threeRoot, socketManager, toDestroy) {
+    constructor(threeRoot, socketManager, toDestroy, type, menu) {
         this.threeRoot = threeRoot;
         this.socketManager = socketManager;
         this.group = new THREE.Group();
@@ -440,6 +512,8 @@ export class BackToMainMenu {
         this.onMouseClickBound = this.onMouseClick.bind(this); // Créer une seule référence liée ici
         this.handleEscapeBound = this.handleEscape.bind(this);
         this.toDestroy = toDestroy;
+        this.type = type;
+        this.menuToGoBack = menu;
 
         this.createBackToMenuText();
 
@@ -461,6 +535,12 @@ export class BackToMainMenu {
         fontLoader.load(
             './static/assets/LEMON_MILK_Regular.json',
             (font) => {
+                let position;
+                if (this.type == 'game') {
+                    position = new THREE.Vector3(-160, -450, 0);
+                } else {
+                    position = new THREE.Vector3(-220, -450, 200);
+                }
                 this.backText = new Text3d(
                     this.threeRoot.camera,
                     this.threeRoot.scene,
@@ -470,7 +550,7 @@ export class BackToMainMenu {
                     0xff00c1,   // Color
                     'Back to Menu ?',  // Text content
                     1.01,  // Glow size
-                    new THREE.Vector3(-160, -450, 0)  // Position
+                    position
                 );
                 this.createBoundingBox();
                 this.backText.addToGroup(this.group);
@@ -499,6 +579,7 @@ export class BackToMainMenu {
     }
 
     toggleVisibility() {
+        console.log('Open Back to menu');
         this.setVisibility(!this.isVisible);
         if (this.isVisible && this.backText) {
             this.backText.alignTextWithCamera();
@@ -535,8 +616,15 @@ export class BackToMainMenu {
         // this.socketManager.lastMenu.show();
         // this.socketManager.lastMenu.show();
         this.destroyListener();
-        this.toggleVisibility();
-        this.socketManager.clearGame();
+        // this.toggleVisibility();
+        this.setVisibility(false);
+        if (this.type == 'game') {
+            this.socketManager.clearGame();
+        }
+        if (this.type == 'tournament') {
+            this.toDestroy.destroy();
+            this.menuToGoBack.show();
+        }
         // this.socketManager.lastMenu.tweenCameraToItem();
         // this.toDestroy.destroy();
     }

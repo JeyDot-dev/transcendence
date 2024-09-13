@@ -1,5 +1,6 @@
 import { THREE } from '../three.module.js';
 import { TextGeometry } from "../TextGeometry.js";
+import { TWEEN } from '../three.module.js';
 
 export class Text3d {
     constructor(camera, scene, font, size = 0.5, depth = 0.1, color = 0xfffff, text = "NULL", glow = 0,
@@ -103,14 +104,20 @@ export class Text3d {
         }
     }
     alignTextWithCamera() {
-        this.mesh.quaternion.copy(this.camera.quaternion);
-        // this.mesh.rotation.x = Math.PI / 3;
-        // this.rotation.x = Math.PI / 3;
-        this.quaternion = this.camera.quaternion.clone();
-        if (this.glowTextMesh) {
-            this.glowTextMesh.quaternion.copy(this.camera.quaternion);
-            // this.glowTextMesh.rotation.x = Math.PI / 3;
-        }
+        let startQuaternion = new THREE.Quaternion().copy(this.mesh.quaternion);
+        let endQuaternion = new THREE.Quaternion().copy(this.camera.quaternion);
+        this.quaternion = endQuaternion;
+
+        new TWEEN.Tween({ t: 0 })
+            .to({ t: 1 }, 1000)  // Durée du tween 1s
+            .onUpdate(function (progress) {
+                this.mesh.quaternion.slerpQuaternions(startQuaternion, endQuaternion, progress.t);
+                
+                if (this.glowTextMesh) {
+                    this.glowTextMesh.quaternion.slerpQuaternions(startQuaternion, endQuaternion, progress.t);
+                }
+            }.bind(this))
+            .start();
     }
     // setSize(newSize, group) {
     //     this.size = newSize;
