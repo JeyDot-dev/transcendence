@@ -15,6 +15,8 @@ export class Menu {
         this.socketManager = socketManager;
         this.menuGroup = new THREE.Group();
 
+        this.formSubmittedSuccessfully = false;
+
         this.mouseControlEnabled = true;
         this.canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
         this.showMenuEnabled = true;
@@ -92,7 +94,7 @@ export class Menu {
         return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
 
-    ModalListener = async (myModal) => {
+    ModalListener = async (modalNewTournament) => {
         document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
             event.preventDefault();
             try {
@@ -104,10 +106,12 @@ export class Menu {
                     jsonObject[key] = value;
                 }
                 const response = await sendJSON('/database/newTournament', jsonObject);
+                console.log("---> request: ", jsonObject);
                 console.log('response is ' + response);
                 const obj = JSON.parse(response);
                 if (obj.status.localeCompare('success') == 0) {
-                    myModal.hide();
+                    modalNewTournament.hide();
+                    this.formSubmittedSuccessfully = true;
                     this.newLocalTournament(obj.t_id);
                 }
                 else if (obj.status.localeCompare('failure') == 0) {
@@ -116,7 +120,7 @@ export class Menu {
                     newDiv.style.color = "red";
                     const label = document.querySelector('#top');
                     label.insertAdjacentElement('afterend', newDiv);
-                }    
+                }
             } catch (error) {
                 console.error('Error fetching JSON: ', error);
             }
@@ -133,10 +137,16 @@ export class Menu {
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
             console.log("Clicked On: Local Tournament");
-            const myModal = new bootstrap.Modal(document.getElementById('myModal'));
+            const myModal = new bootstrap.Modal(document.getElementById('modalNewTournament'));
             myModal.show();
             this.hideText()
             this.ModalListener(myModal);
+            const myModalEl = document.getElementById('modalNewTournament')
+            myModalEl.addEventListener('hidden.bs.modal', event => {
+                if (this.formSubmittedSuccessfully === false) {
+                    this.show();
+                }
+            });
         });
         this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
@@ -163,7 +173,7 @@ export class Menu {
         // Activer les écouteurs d'événements
         // window.addEventListener('mousemove', this.onMouseMove, false);
         // window.addEventListener('click', this.onMouseClick, false);
-        
+
         // Rendre les éléments du menu visibles
         this.menuItems.forEach(item => {
             item.textMesh.visible = true;
@@ -180,13 +190,13 @@ export class Menu {
             window.addEventListener('click', this.onMouseClick, false);
         }, 1500);
     }
-    
+
     hide() {
         console.log('Menu Hide');
         // Désactiver les écouteurs d'événements
         window.removeEventListener('mousemove', this.onMouseMove, false);
         window.removeEventListener('click', this.onMouseClick, false);
-        
+
         // Masquer les éléments du menu
         this.menuItems.forEach(item => {
             item.textMesh.visible = false;
@@ -303,6 +313,10 @@ export class Menu {
     }
 
     newLocalTournament(t_id) {
+        console.log("Yo la miff, ", this.tournamentLocal);
+        if (this.tournamentLocal !== undefined) {
+            this.tournamentLocal.destroy();
+        }
         this.hideText();
         this.threeRoot.updateCameraSettings({
             fov: 60,
