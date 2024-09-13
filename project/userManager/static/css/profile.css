@@ -6,9 +6,19 @@
 main textarea, label, {
     color: white;
 }
+.form-control{
+    background-color: rgba(0, 0, 0, 0.5);
+    border-color: lightblue;
+}
+.form-control:focus {
+    background-color: rgba(232, 32, 180, 0.2);
+}
+
+#histoFriend ul{
+    overflow-y: auto;
+}
 #friendList{
     max-height: 100%;
-    overflow-y: auto;
 }
 #separator {
     height: 2px;
@@ -65,7 +75,13 @@ main textarea, label, {
     height: 100%;
     width: 10vw;
 }
-.modifyProfileContainer{
+#modifyProfileContainer{
+    /* width: 50vw; */
+}
+#modifyProfileContainer .list-group{
+
+    padding-right: 2vw;
+    padding-left: 2vw;
 }
 .list-group-horizontal .list-group-item {
     width: 100%;
