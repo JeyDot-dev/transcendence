@@ -15,8 +15,7 @@ from .forms import *
 
 def tournamentWinner(request, t_id):
     tourny = get_object_or_404(Tournament, pk=t_id)
-    tourny.winner = tourny.players.get(is_winner=True)
-    return render(request, 'database/Tournamentwinner.html', {'tournament': tourny})
+    tourny.winner = tourny.players.get(is_winner=True) 
 
 
 def newGame(request):
@@ -88,3 +87,11 @@ def game_winner(request, game_ws_id):
     else:
         logger.warning(f"No winner found for game {game_ws_id}.")
         return JsonResponse({'error': 'No winner found for this game.'}, status=404)
+    
+def get_old_tournament(request, t_id):
+    tournament = get_object_or_404(Tournament, pk=t_id)
+    old = tournament.ressend_tournament()
+    return JsonResponse({
+        'tournament_id': tournament.id,
+        'pools': old,
+    })
