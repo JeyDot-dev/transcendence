@@ -24,6 +24,9 @@ html {
     /* animation-iteration-count: infinite; */
     /* animation-direction: alternate; */
 }
+.form-control::placeholder {
+    color: gray;
+}
 .modal-content {
     background: rgba(0, 0, 0, 0.8);
     color: white;
@@ -32,6 +35,12 @@ html {
     font-family: 'Roboto Condensed';
     color: white;
 
+}
+.modal-content .form-control{
+    color: white;
+}
+.modal-content .form-control:focus{
+    color: black;
 }
 .modal-dialog label {
     font-family: 'Roboto Condensed';
@@ -94,7 +103,7 @@ footer p{
     background-size: 200% 100%;
     background-position: left center;
     border: none;
-    transition: background-position 0.8s ease;
+    transition: background-position 0.4s ease;
 }
 
 .btn:hover {

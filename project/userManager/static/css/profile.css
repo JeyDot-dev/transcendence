@@ -12,7 +12,9 @@ main textarea, label, {
 .btn-login-page {
     width: 25vw;
     max-width: 400px;
+    min-width: 200px;
     height: 10vh;
+    font-family: 'Lemon/Milk', sans-serif;
 }
 .form-control{
     background-color: rgba(0, 0, 0, 0.5);
@@ -24,21 +26,33 @@ main textarea, label, {
     /* background-color: rgba(50, 30, 30, 0.2);; */
 }
 #modifyProfileContainer label {
-    color: mediumorchid;
+    color: white;
+    font-family: 'Roboto Condensed';
 }
 #modifyProfileContainer .form-control{
-    color: mediumorchid;
+    font-family: 'Roboto Condensed';
+    color: white;
     background-color: rgba(0, 0, 0, 0.5);
     border-color: lightblue;
     border: none;
     outline: none;
 }
 
+#modifyProfileContainer .btn{
+    height: 100%;
+    width: 100%;
+}
 #histoFriend ul{
     overflow-y: auto;
 }
 #friendList{
     max-height: 100%;
+}
+#friendList input{
+    color: white;
+}
+#friendList input:focus{
+    color: black;
 }
 #separator {
     height: 2px;
@@ -85,10 +99,6 @@ main textarea, label, {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-}
-.btn{
-    height: 100%;
-    width: 100%;
 }
 #submit_status{
     height: 100%;
