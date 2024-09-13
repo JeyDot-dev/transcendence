@@ -311,7 +311,7 @@ export class Menu {
             position: { x: 0, y: -1000, z: 0 },
             lookAt: { x: 0, y: 0, z: 0 }
         }, 2000);
-        this.tournamentLocal = new TournamentMenu(this.threeRoot, this.background, this.socketManager, t_id);
+        this.tournamentLocal = new TournamentMenu(this.threeRoot, this.background, this.socketManager, t_id, this);
     }
     newShop() {
         this.hideText();

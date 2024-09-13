@@ -6,7 +6,7 @@ import { Arena } from './arena.js';
 // import { SkeletonHelper } from '../threejs/Three.js';
 
 export class TournamentMenu {
-    constructor(threeRoot, background, socketManager, t_id) {
+    constructor(threeRoot, background, socketManager, t_id, mainMenu) {
         this.threeRoot = threeRoot;
         this.background = background;
         this.socketManager = socketManager;
@@ -17,8 +17,9 @@ export class TournamentMenu {
         this.raycaster = new THREE.Raycaster();
         this.clickableGroup = new THREE.Group();
         this.onMouseClickBound = this.onMouseClick.bind(this); // Créer une seule référence liée ici
+        this.mainMenu = mainMenu;
 
-        // this.socketManager.setLastMenu(this);
+        this.socketManager.setLastMenu(this);
         this.initialize();
 
         this.directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.7);
@@ -205,7 +206,8 @@ export class TournamentMenu {
         this.endTournamentAnimation = new TournamentWinner(this.threeRoot, lastGame.winner);
         setTimeout(() => {
             this.destroy();
-            this.threeRoot.scene.remove(this.endTournamentAnimation.textGroup)
+            this.threeRoot.scene.remove(this.endTournamentAnimation.textGroup);
+            this.socketManager.setLastMenu(this.mainMenu);
             this.socketManager.goToLastMenu();
         }, 3000);
     }
