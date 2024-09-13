@@ -202,7 +202,7 @@ export class Game {
         );
     }
     initBackToMainMenu() {
-        this.backToMainMenu = new BackToMainMenu(this.threeRoot, this.socketManager);
+        this.backToMainMenu = new BackToMainMenu(this.threeRoot, this.socketManager, this);
         this.backToMainMenu.addToScene(this.scene);
         this.backToMainMenu.initListener();
     }
@@ -425,7 +425,28 @@ export class Game {
         }
         this.stopPhysics();
     }
-
+    show() {
+        console.log('Showing the game');
+    
+        this.gameGroup.visible = true;
+    
+        document.addEventListener('keydown', this.handleKeyDownBound, false);
+        document.addEventListener('keyup', this.handleKeyUpBound, false);
+    
+        this.initPhysics();
+        this.threeRoot.addAnimatedObject(this);
+    }
+    hide() {
+        console.log('Hiding the game');
+    
+        this.gameGroup.visible = false;
+    
+        document.removeEventListener('keydown', this.handleKeyDownBound);
+        document.removeEventListener('keyup', this.handleKeyUpBound);
+    
+        this.stopPhysics();
+        this.threeRoot.removeAnimatedObject(this);
+    }
     // TODO: Mobile
     isMobile() {
         return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

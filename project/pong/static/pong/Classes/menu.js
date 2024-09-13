@@ -159,10 +159,11 @@ export class Menu {
     }
 
     show() {
+        console.log('Menu Show');
         // Activer les écouteurs d'événements
-        window.addEventListener('mousemove', this.onMouseMove, false);
-        window.addEventListener('click', this.onMouseClick, false);
-
+        // window.addEventListener('mousemove', this.onMouseMove, false);
+        // window.addEventListener('click', this.onMouseClick, false);
+        
         // Rendre les éléments du menu visibles
         this.menuItems.forEach(item => {
             item.textMesh.visible = true;
@@ -174,13 +175,18 @@ export class Menu {
         if (this.directionalLight) {
             this.directionalLight.visible = true;
         }
+        setTimeout(() => {
+            window.addEventListener('mousemove', this.onMouseMove, false);
+            window.addEventListener('click', this.onMouseClick, false);
+        }, 1500);
     }
-
+    
     hide() {
+        console.log('Menu Hide');
         // Désactiver les écouteurs d'événements
         window.removeEventListener('mousemove', this.onMouseMove, false);
         window.removeEventListener('click', this.onMouseClick, false);
-
+        
         // Masquer les éléments du menu
         this.menuItems.forEach(item => {
             item.textMesh.visible = false;
@@ -196,6 +202,7 @@ export class Menu {
         }
     }
     hideText() {
+        console.log('Menu Text');
         // Désactiver les écouteurs d'événements
         window.removeEventListener('mousemove', this.onMouseMove, false);
         window.removeEventListener('click', this.onMouseClick, false);
@@ -270,17 +277,17 @@ export class Menu {
     }
 
     onKeyDown(event) {
-        if (event.key === 'c') {
-            this.mouseControlEnabled = !this.mouseControlEnabled;  // Basculer l'état du mouvement de la caméra
-        }
-        if (event.key === 'h') {
-            if (this.showMenuEnabled) {
-                this.hide();
-            } else {
-                this.show();
-            }
-            this.showMenuEnabled = !this.showMenuEnabled;  // Basculer l'état de l'affichage du menu
-        }
+        // if (event.key === 'c') {
+        //     this.mouseControlEnabled = !this.mouseControlEnabled;  // Basculer l'état du mouvement de la caméra
+        // }
+        // if (event.key === 'h') {
+        //     if (this.showMenuEnabled) {
+        //         this.hide();
+        //     } else {
+        //         this.show();
+        //     }
+        //     this.showMenuEnabled = !this.showMenuEnabled;  // Basculer l'état de l'affichage du menu
+        // }
     }
 
     render() {
@@ -423,7 +430,7 @@ class MenuItem {
 }
 
 export class BackToMainMenu {
-    constructor(threeRoot, socketManager) {
+    constructor(threeRoot, socketManager, toDestroy) {
         this.threeRoot = threeRoot;
         this.socketManager = socketManager;
         this.group = new THREE.Group();
@@ -432,6 +439,7 @@ export class BackToMainMenu {
         this.raycaster = new THREE.Raycaster();
         this.onMouseClickBound = this.onMouseClick.bind(this); // Créer une seule référence liée ici
         this.handleEscapeBound = this.handleEscape.bind(this);
+        this.toDestroy = toDestroy;
 
         this.createBackToMenuText();
 
@@ -457,12 +465,12 @@ export class BackToMainMenu {
                     this.threeRoot.camera,
                     this.threeRoot.scene,
                     font,
-                    85,   // Font size
-                    25,   // Depth
+                    35,   // Font size
+                    15,   // Depth
                     0xff00c1,   // Color
-                    'Back to Main Menu ?',  // Text content
+                    'Back to Menu ?',  // Text content
                     1.01,  // Glow size
-                    new THREE.Vector3(0, 0, 0)  // Position
+                    new THREE.Vector3(-160, -450, 0)  // Position
                 );
                 this.createBoundingBox();
                 this.backText.addToGroup(this.group);
@@ -523,8 +531,13 @@ export class BackToMainMenu {
     }
     handleBackToMenuClick() {
         console.log('Clicked on Back to main menu');
+        // this.socketManager.lastMenu.show();
+        // this.socketManager.lastMenu.show();
+        // this.socketManager.lastMenu.show();
         this.destroyListener();
-        this.socketManager.lastMenu.show();
-        this.socketManager.lastMenu.tweenCameraToItem();
+        this.toggleVisibility();
+        this.socketManager.clearGame();
+        // this.socketManager.lastMenu.tweenCameraToItem();
+        // this.toDestroy.destroy();
     }
 }
