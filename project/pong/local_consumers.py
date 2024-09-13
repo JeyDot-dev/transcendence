@@ -19,7 +19,6 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         self.group_name = f"game_{self.game_id}"
 
-        # Joindre le groupe correspondant au game_id
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
         # Vérifier si le jeu est déjà en mémoire

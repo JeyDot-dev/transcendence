@@ -4,6 +4,7 @@ import { Text3d } from './text3d.js';
 import { BouncingBallInCube } from './background.js';
 import { SocketManager } from './SocketManager.js';
 import { TournamentMenu } from './Tournament.js';
+import { Shop } from './Shop.js'
 
 export class Menu {
     constructor(threeRoot, socketManager) {
@@ -18,31 +19,14 @@ export class Menu {
         this.canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
         this.showMenuEnabled = true;
 
-        // Configuration de la caméra pour le menu
-        // threeRoot.updateCameraSettings({
-        //     fov: 60,
-        //     near: 0.5,
-        //     far: 10000,
-        //     position: { x: 0, y: -1000, z: 0 },
-        //     lookAt: { x: 0, y: 0, z: 0 }
-        // });
-        // threeRoot.tweenCamera({
-        //         fov: 60,
-        //         near: 0.5,
-        //         far: 10000,
-        //         position: { x: 0, y: -1000, z: 0 },
-        //         lookAt: { x: 0, y: 0, z: 0 }
-        // }, 2000);
         this.tweenCameraToItem();
-        // // Charger une image en tant que fond
-        // const loader = new THREE.TextureLoader();
-        // loader.load('/static/assets/saturne.jpg', function(texture) {
-        //     threeRoot.scene.background = texture;
-        // });
+
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
         this.fontLoader = new FontLoader();
         this.menuItems = [];
+        this.shop = null;
+        this.options = null;
 
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseClick = this.onMouseClick.bind(this);
@@ -53,7 +37,8 @@ export class Menu {
             new THREE.Color(0x9600ff),
             new THREE.Color(0x4900ff),
             new THREE.Color(0x00b8ff),
-            new THREE.Color(0x00fff9)
+            new THREE.Color(0x00fff9),
+            new THREE.Color(0x00ff83)
         ];
 
         // Charger les polices et initialiser les objets du menu
@@ -121,9 +106,17 @@ export class Menu {
                 const response = await sendJSON('/database/newTournament', jsonObject);
                 console.log('response is ' + response);
                 const obj = JSON.parse(response);
-                console.log('t_id is ' + obj.t_id);
-                myModal.hide();
-                this.newLocalTournament(obj.t_id);
+                if (obj.status.localeCompare('success') == 0) {
+                    myModal.hide();
+                    this.newLocalTournament(obj.t_id);
+                }
+                else if (obj.status.localeCompare('failure') == 0) {
+                    const newDiv = document.createElement('div');
+                    newDiv.textContent = 'All usernames must be different';
+                    newDiv.style.color = "red";
+                    const label = document.querySelector('#top');
+                    label.insertAdjacentElement('afterend', newDiv);
+                }    
             } catch (error) {
                 console.error('Error fetching JSON: ', error);
             }
@@ -148,7 +141,10 @@ export class Menu {
         this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
         });
-        this.optionsMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[4], new THREE.Vector3(0, 0, -440), () => {
+        this.shopMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Shop', this.colorPalette[4], new THREE.Vector3(0, 0, -440), () => {
+            this.newShop();
+        });
+        this.optionsMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[5], new THREE.Vector3(0, 0, -640), () => {
             console.log("Clicked On: Options");
         });
 
@@ -157,15 +153,17 @@ export class Menu {
             this.matchmakingMenuMain,
             this.localTournamentMenuMain,
             this.tournamentMenuMain,
+            this.shopMenuMain,
             this.optionsMenuMain
         ];
     }
 
     show() {
+        console.log('Menu Show');
         // Activer les écouteurs d'événements
-        window.addEventListener('mousemove', this.onMouseMove, false);
-        window.addEventListener('click', this.onMouseClick, false);
-
+        // window.addEventListener('mousemove', this.onMouseMove, false);
+        // window.addEventListener('click', this.onMouseClick, false);
+        
         // Rendre les éléments du menu visibles
         this.menuItems.forEach(item => {
             item.textMesh.visible = true;
@@ -177,13 +175,18 @@ export class Menu {
         if (this.directionalLight) {
             this.directionalLight.visible = true;
         }
+        setTimeout(() => {
+            window.addEventListener('mousemove', this.onMouseMove, false);
+            window.addEventListener('click', this.onMouseClick, false);
+        }, 1500);
     }
-
+    
     hide() {
+        console.log('Menu Hide');
         // Désactiver les écouteurs d'événements
         window.removeEventListener('mousemove', this.onMouseMove, false);
         window.removeEventListener('click', this.onMouseClick, false);
-
+        
         // Masquer les éléments du menu
         this.menuItems.forEach(item => {
             item.textMesh.visible = false;
@@ -199,6 +202,7 @@ export class Menu {
         }
     }
     hideText() {
+        console.log('Menu Text');
         // Désactiver les écouteurs d'événements
         window.removeEventListener('mousemove', this.onMouseMove, false);
         window.removeEventListener('click', this.onMouseClick, false);
@@ -273,17 +277,17 @@ export class Menu {
     }
 
     onKeyDown(event) {
-        if (event.key === 'c') {
-            this.mouseControlEnabled = !this.mouseControlEnabled;  // Basculer l'état du mouvement de la caméra
-        }
-        if (event.key === 'h') {
-            if (this.showMenuEnabled) {
-                this.hide();
-            } else {
-                this.show();
-            }
-            this.showMenuEnabled = !this.showMenuEnabled;  // Basculer l'état de l'affichage du menu
-        }
+        // if (event.key === 'c') {
+        //     this.mouseControlEnabled = !this.mouseControlEnabled;  // Basculer l'état du mouvement de la caméra
+        // }
+        // if (event.key === 'h') {
+        //     if (this.showMenuEnabled) {
+        //         this.hide();
+        //     } else {
+        //         this.show();
+        //     }
+        //     this.showMenuEnabled = !this.showMenuEnabled;  // Basculer l'état de l'affichage du menu
+        // }
     }
 
     render() {
@@ -307,7 +311,24 @@ export class Menu {
             position: { x: 0, y: -1000, z: 0 },
             lookAt: { x: 0, y: 0, z: 0 }
         }, 2000);
-        this.tournamentLocal = new TournamentMenu(this.threeRoot, this.background, this.socketManager, t_id);
+        this.tournamentLocal = new TournamentMenu(this.threeRoot, this.background, this.socketManager, t_id, this);
+    }
+    newShop() {
+        this.hideText();
+        this.threeRoot.updateCameraSettings({
+            fov: 60,
+            near: 0.5,
+            far: 3000,
+            position: { x: 0, y: -1000, z: 0 },
+            lookAt: { x: 0, y: 0, z: 0 }
+        }, 2000);
+        // this.threeRoot.anim
+        if (!this.shop) {
+            this.shop = new Shop(this.threeRoot, this.socketManager);
+        } else {
+            this.shop.show();
+        }
+        this.shop.tweenCameraToItem();
     }
     returnToMenu() {
         // this.socketManager
@@ -405,5 +426,118 @@ class MenuItem {
     removePaddles() {
         this.paddles.forEach(paddle => this.groupRef.remove(paddle));
         this.paddles = [];
+    }
+}
+
+export class BackToMainMenu {
+    constructor(threeRoot, socketManager, toDestroy) {
+        this.threeRoot = threeRoot;
+        this.socketManager = socketManager;
+        this.group = new THREE.Group();
+        this.isVisible = false;
+        this.mouse = new THREE.Vector2();
+        this.raycaster = new THREE.Raycaster();
+        this.onMouseClickBound = this.onMouseClick.bind(this); // Créer une seule référence liée ici
+        this.handleEscapeBound = this.handleEscape.bind(this);
+        this.toDestroy = toDestroy;
+
+        this.createBackToMenuText();
+
+        this.setVisibility(false);  // Initially hidden
+    }
+    initListener() {
+        document.addEventListener('keydown', this.handleEscapeBound, false);
+    }
+    handleEscape(event) {
+        if (event.code === 'Escape') {
+            this.toggleVisibility();
+        }
+    }
+    destroyListener() {
+        document.removeEventListener('keydown', this.handleEscapeBound, false);
+    }
+    createBackToMenuText() {
+        const fontLoader = new FontLoader();
+        fontLoader.load(
+            './static/assets/LEMON_MILK_Regular.json',
+            (font) => {
+                this.backText = new Text3d(
+                    this.threeRoot.camera,
+                    this.threeRoot.scene,
+                    font,
+                    35,   // Font size
+                    15,   // Depth
+                    0xff00c1,   // Color
+                    'Back to Menu ?',  // Text content
+                    1.01,  // Glow size
+                    new THREE.Vector3(-160, -450, 0)  // Position
+                );
+                this.createBoundingBox();
+                this.backText.addToGroup(this.group);
+                this.group.position.x += 200;
+            },
+            undefined,
+            (error) => {
+                console.error('Error loading font:', error);
+            }
+        );
+    }
+    createBoundingBox() {
+        this.boundingBox = new THREE.Box3().setFromObject(this.backText.mesh);
+    }
+
+    updateBoundingBox() {
+        this.boundingBox.setFromObject(this.backText.mesh); // Recalculer la bounding box si nécessaire
+    }
+    addToScene(scene) {
+        scene.add(this.group);
+    }
+
+    setVisibility(visible) {
+        this.group.visible = visible;
+        this.isVisible = visible;
+    }
+
+    toggleVisibility() {
+        this.setVisibility(!this.isVisible);
+        if (this.isVisible && this.backText) {
+            this.backText.alignTextWithCamera();
+            this.enableClicks();
+        } else {
+            this.disableClicks();
+        }
+    }
+    disableClicks() {
+        document.removeEventListener('click', this.onMouseClickBound, false);
+        console.log('Clicks are disabled.');
+    }
+
+    enableClicks() {
+        document.addEventListener('click', this.onMouseClickBound, false);
+        console.log('Clicks are enabled.');
+    }
+    onMouseClick(event) {
+        const canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
+
+        this.mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1;
+
+        this.raycaster.setFromCamera(this.mouse, this.threeRoot.camera);
+        const intersects = this.raycaster.intersectObjects(this.group.children, true);
+
+        if (intersects.length > 0) {
+            this.handleBackToMenuClick();
+        }
+    }
+    handleBackToMenuClick() {
+        console.log('Clicked on Back to main menu');
+        // this.socketManager.lastMenu.show();
+        // this.socketManager.lastMenu.show();
+        // this.socketManager.lastMenu.show();
+        this.destroyListener();
+        this.toggleVisibility();
+        this.socketManager.clearGame();
+        // this.socketManager.lastMenu.tweenCameraToItem();
+        // this.toDestroy.destroy();
     }
 }

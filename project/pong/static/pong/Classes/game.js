@@ -7,6 +7,7 @@ import { Puck } from './puck.js';
 import { FontLoader } from '../FontLoader.js';
 import { Text3d } from './text3d.js';
 import { TournamentMenu } from './Tournament.js';
+import { BackToMainMenu } from './menu.js';
 
 export class Game {
     constructor(threeRoot, gameData, socketManager) {
@@ -23,6 +24,8 @@ export class Game {
         this.offSet = new THREE.Vector2(gameData.width / 2, gameData.height / 2);
         this.gameGroup = new THREE.Group();
         this.isPaused = gameData.isPaused;
+        this.handleKeyDownBound = this.handleKeyDown.bind(this);
+        this.handleKeyUpBound = this.handleKeyUp.bind(this);
 
         this.colorPalette = [
             new THREE.Color(0xff00c1),
@@ -52,7 +55,8 @@ export class Game {
         console.log('Init Physics');
         this.initPhysics(gameData);
         this.threeRoot.addAnimatedObject(this);
-        
+        console.log('Init Back to main menu');
+        this.initBackToMainMenu();
         console.log("Init Input Handling");
         this.initInputHandling();
         console.log("End of Game constructor")
@@ -66,7 +70,13 @@ export class Game {
             far: 3000,
             position: { x: 0, y: -500, z: 1000 },
             lookAt: { x: 0, y: 0, z: 0 }
-        }, 2000);
+        }, 2000).then(() => {
+            this.p1Text.alignTextWithCamera();
+            this.p2Text.alignTextWithCamera();
+            this.timeText.alignTextWithCamera();
+            this.p1NameText.alignTextWithCamera();
+            this.p2NameText.alignTextWithCamera();
+        });
     }
     initArena(width, height) {
         this.arena = new Arena(width, 25, height, this.colorPalette[3], this.colorPalette[0], 25, 25, 0xde95d0);
@@ -105,7 +115,7 @@ export class Game {
     initText(score, timer) {
         const fontLoader = new FontLoader();
         fontLoader.load(
-            'https://threejs.org/examples/fonts/helvetiker_bold.typeface.json',
+            './static/assets/LEMON_MILK_Regular.json',
             (font) => {
                 this.timeText = new Text3d(
                     this.camera,
@@ -116,13 +126,13 @@ export class Game {
                     0xffffff,
                     timer.toString(),
                     1.05,
-                    new THREE.Vector3(0, 125 / 2, 300)
+                    new THREE.Vector3(0, 285, 300)
                 );
-                this.p1Text = new Text3d(this.camera, this.scene, font, 100, 10, 0x33ccff, score[0].toString(), 1.05,
-                    new THREE.Vector3(-200, 100 / 2, 300)
+                this.p1Text = new Text3d(this.camera, this.scene, font, 100, 25, this.colorPalette[4], score[0].toString(), 1.05,
+                    new THREE.Vector3(-200, 300, 300)
                 );
-                this.p2Text = new Text3d(this.camera, this.scene, font, 100, 10, 0xff2975, score[1].toString(), 1.05,
-                    new THREE.Vector3(200, 100 / 2, 300)
+                this.p2Text = new Text3d(this.camera, this.scene, font, 100, 25, this.colorPalette[1], score[1].toString(), 1.05,
+                    new THREE.Vector3(200, 300, 300)
                 );
                 this.timeText.addToGroup(this.gameGroup);
                 this.p1Text.addToGroup(this.gameGroup);
@@ -172,16 +182,18 @@ export class Game {
     initPlayerName(playerNames) {
         const fontLoader = new FontLoader();
         fontLoader.load(
-            'https://threejs.org/examples/fonts/helvetiker_bold.typeface.json',
+            './static/assets/LEMON_MILK_Regular.json',
             (font) => {
-                this.p1NameText = new Text3d(this.camera, this.scene, font, 35, 10, 0x33ccff, playerNames[0], 1.05,
+                this.p1NameText = new Text3d(this.camera, this.scene, font, 35, 10, this.colorPalette[4], playerNames[0], 1.05,
                     new THREE.Vector3(-600, 300, 300)
                 );
-                this.p2NameText = new Text3d(this.camera, this.scene, font, 35, 10, 0xff2975, playerNames[1], 1.05,
+                this.p2NameText = new Text3d(this.camera, this.scene, font, 35, 10, this.colorPalette[1], playerNames[1], 1.05,
                     new THREE.Vector3(600, 300, 300)
                 );
                 this.p1NameText.addToGroup(this.gameGroup);
                 this.p2NameText.addToGroup(this.gameGroup);
+                // this.p1NameText.alignTextWithCamera();
+                // this.p2NameText.alignTextWithCamera();
             },
             undefined, // onProgress callback (optional)
             (error) => {
@@ -189,72 +201,71 @@ export class Game {
             }
         );
     }
+    initBackToMainMenu() {
+        this.backToMainMenu = new BackToMainMenu(this.threeRoot, this.socketManager, this);
+        this.backToMainMenu.addToScene(this.scene);
+        this.backToMainMenu.initListener();
+    }
     changePlayerName(playerNameOne, playerNameTwo) {
         this.p1NameText.updateText(playerNameOne);
         this.p2NameText.updateText(playerNameTwo);
     }
+    handleKeyDown(event) {
+        const key = event.key.toLowerCase();
 
-    initInputHandling() {
-        if (!this.socketManager) {
-            console.log("Socket manager UNDIFINED");
-            return ;
+        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'space'].includes(event.key.toLowerCase())) {
+            event.preventDefault(); // Empêche le comportement par défaut (scrolling)
         }
-            document.addEventListener('keydown', event => {
-                const key = event.key.toLowerCase();
-
-                if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'space'].includes(event.key.toLowerCase())) {
-                    event.preventDefault(); // Empêche le comportement par défaut (scrolling)
-                }
-                if (event.code === 'Space') {
-                    console.log('keydown: space');
-                    this.socketManager.sendMessage({ type: 'keydown', key: 'space', who: 0 });
-                    return;
-                }
-                if (!this.pressedKeys[key]) {
-                    this.pressedKeys[key] = true; 
-                    
-                    if (['w', 's'].includes(key)) {
-                        console.log('keydown: w s');
-                        this.socketManager.sendMessage({ type: 'keydown', key: key, who: 0 });
-                    }
-                    if (['arrowup', 'arrowdown'].includes(key)) {
-                        console.log('keydown: arrow');
-                        this.socketManager.sendMessage({ type: 'keydown', key: key, who: 1 });
-                    }
-                }
-                if (['k'].includes(key)) {
-                    console.log('Close WebSocket with key K');
-                    this.socketManager.reconnect();
-                }
-            });
+        if (event.code === 'Space') {
+            console.log('keydown: space');
+            this.socketManager.sendMessage({ type: 'keydown', key: 'space', who: 0 });
+            return;
+        }
+        if (!this.pressedKeys[key]) {
+            this.pressedKeys[key] = true; 
             
-            document.addEventListener('keyup', event => {
-                const key = event.key.toLowerCase();
+            if (['w', 's'].includes(key)) {
+                console.log('keydown: w s');
+                this.socketManager.sendMessage({ type: 'keydown', key: key, who: 0 });
+            }
+            if (['arrowup', 'arrowdown'].includes(key)) {
+                console.log('keydown: arrow');
+                this.socketManager.sendMessage({ type: 'keydown', key: key, who: 1 });
+            }
+        }
+        if (['k'].includes(key)) {
+            console.log('Close WebSocket with key K');
+            this.socketManager.reconnect();
+        }
+    }
+    handleKeyUp(event) {
+        const key = event.key.toLowerCase();
 
-                if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'space'].includes(event.key.toLowerCase())) {
-                    event.preventDefault();
-                }
-                if (event.code === 'Space') {
-                    console.log('keyup: space');
-                    this.socketManager.sendMessage({ type: 'keyup', key: 'space', who: 0 });
-                    return;
-                }
-                if (this.pressedKeys[key]) {
-                    delete this.pressedKeys[key];
+        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'space'].includes(event.key.toLowerCase())) {
+            event.preventDefault();
+        }
+        if (event.code === 'Space') {
+            console.log('keyup: space');
+            this.socketManager.sendMessage({ type: 'keyup', key: 'space', who: 0 });
+            return;
+        }
+        if (this.pressedKeys[key]) {
+            delete this.pressedKeys[key];
 
-                    if (['w', 's'].includes(key)) {
-                        console.log('keyup: w s');
-                        this.socketManager.sendMessage({ type: 'keyup', key: key, who: 0 });
-                    }
-                    if (['arrowup', 'arrowdown'].includes(key)) {
-                        console.log('keyup: arrow');
-                        event.preventDefault(); // Empêche le comportement par défaut (scrolling)
-                        this.socketManager.sendMessage({ type: 'keyup', key: key, who: 1 });
-                    }
-                }
-            });
-
-        // Ajout des boutons si l'utilisateur est sur mobile
+            if (['w', 's'].includes(key)) {
+                console.log('keyup: w s');
+                this.socketManager.sendMessage({ type: 'keyup', key: key, who: 0 });
+            }
+            if (['arrowup', 'arrowdown'].includes(key)) {
+                console.log('keyup: arrow');
+                event.preventDefault(); // Empêche le comportement par défaut (scrolling)
+                this.socketManager.sendMessage({ type: 'keyup', key: key, who: 1 });
+            }
+        }
+    }
+    initInputHandling() {
+        document.addEventListener('keydown', this.handleKeyDownBound, false);
+        document.addEventListener('keyup', this.handleKeyUpBound, false);
         if (this.isMobile()) {
             this.addMobileControls();
         }
@@ -284,80 +295,21 @@ export class Game {
         }, 1000 / 60);
     }
     updatePhysics(fixedDeltaTime) {
-        if (this.isPaused) return ;
-        if (!this.ballPosition) {
-            this.ballPosition = this.cube.position.clone();
+        if (!this.isPaused) {
+            if (!this.ballPosition) {
+                this.ballPosition = this.cube.position.clone();
+            }
+        
+            this.velocityDelta.set(this.ballVelocity.x, this.ballVelocity.y, 0);
+            this.velocityDelta.multiplyScalar(this.ballSpeed * fixedDeltaTime);
+        
+            this.ballPosition.add(this.velocityDelta);
         }
-    
-        this.velocityDelta.set(this.ballVelocity.x, this.ballVelocity.y, 0);
-        this.velocityDelta.multiplyScalar(this.ballSpeed * fixedDeltaTime);
-    
-        this.ballPosition.add(this.velocityDelta);
     }
     stopPhysics() {
         clearInterval(this.physics);
         this.physics = null;
     }
-    handleKeyDown(e) {
-        if (this.pressedKeys.includes(e.key)) return;
-        this.pressedKeys.push(e.key);
-
-        let message_form = {
-            type: 'keydown',
-            key: "unknown",
-            player_id: this.playerId
-        };
-
-        switch (e.key) {
-            case 'w':
-                message_form.key = "up";
-                break;
-            case 's':
-                message_form.key = "down";
-                break;
-            case 'ArrowUp':
-                message_form.key = "arrowup";
-                break;
-            case 'ArrowDown':
-                message_form.key = "arrowdown";
-                break;
-            default:
-                break;
-        }
-        if (this.socketManager) {
-            this.socketManager.sendMessage(message_form);
-        }
-    }
-
-    handleKeyUp(e) {
-        if (!this.pressedKeys.includes(e.key)) return;
-        this.pressedKeys = this.pressedKeys.filter(key => key !== e.key);
-
-        let message_form = {
-            type: 'keyup',
-            key: "unknown",
-            player_id: this.playerId
-        };
-
-        switch (e.key) {
-            case 'w':
-                message_form.key = "up";
-                break;
-            case 's':
-                message_form.key = "down";
-                break;
-            case 'ArrowUp':
-                message_form.key = "arrowup";
-                break;
-            case 'ArrowDown':
-                message_form.key = "arrowdown";
-                break;
-        }
-        if (this.socketManager) {
-            this.socketManager.sendMessage(message_form);
-        }
-    }
-
     updateGame(game) {
         console.log('Update Game(Reconnection)', game.players);
         this.ball.move(game.ball.x - this.offSet.x, -game.ball.y + this.offSet.y);
@@ -473,7 +425,28 @@ export class Game {
         }
         this.stopPhysics();
     }
-
+    show() {
+        console.log('Showing the game');
+    
+        this.gameGroup.visible = true;
+    
+        document.addEventListener('keydown', this.handleKeyDownBound, false);
+        document.addEventListener('keyup', this.handleKeyUpBound, false);
+    
+        this.initPhysics();
+        this.threeRoot.addAnimatedObject(this);
+    }
+    hide() {
+        console.log('Hiding the game');
+    
+        this.gameGroup.visible = false;
+    
+        document.removeEventListener('keydown', this.handleKeyDownBound);
+        document.removeEventListener('keyup', this.handleKeyUpBound);
+    
+        this.stopPhysics();
+        this.threeRoot.removeAnimatedObject(this);
+    }
     // TODO: Mobile
     isMobile() {
         return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

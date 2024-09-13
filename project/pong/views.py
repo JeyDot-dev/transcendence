@@ -48,16 +48,11 @@ def create_tournament(request):
 
 
 def index(request):
-    formset = PlayerFormSet(queryset=Player.objects.none())
+    """Renders the main index page."""
     form = newTournamentForm()
+    formset = PlayerFormSet(queryset=Player.objects.none())
     return render(request, "pong/pong.html", {'form': form, 'formset': formset})
 
 def pong2d(request):
     return render(request, "pong/pong2d.html")
 
-def launchTournamentLocalGame(request):
-    data = {
-          "p1": json.dumps({"name":"PlayerUno"}),
-          "p2": json.dumps({"name":"PlayerDos"}),
-	}
-    return render(request, "pong/localTournamentGame.html", data)
