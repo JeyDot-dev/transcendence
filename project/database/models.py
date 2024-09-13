@@ -64,13 +64,23 @@ class Tournament(models.Model):
     def oldPoolInfo(self, rn):
         pairs = []
         for game in self.games.filter(pool=rn):
+            played = True if game.is_played else False 
             pairs.append({
-            'game_id': game.id,
-            'game_ws_id': game.game_ws_id,
-            'players': [game.player1.name, game.player2.name],
-            'winner' : game.winner
+                'game_id': game.id,
+                'game_ws_id': game.game_ws_id,
+                'players': [game.player1.name, game.player2.name],
+                'winner' : game.winner,
+                'is_played': played
             })
         return pairs
+    
+    def ressend_tournament(self):
+        tournament = []
+        for i in range(1, self.round + 1):
+            tournament.append(self.oldPoolInfo(i))
+        return tournament
+        
+
 
 
 class Game(models.Model):
