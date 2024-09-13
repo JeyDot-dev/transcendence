@@ -2,12 +2,12 @@
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 
 {% if not user.is_authenticated  %}
-<div>
-	<h2>Log in to play</h2>
-	<button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#loginModal">
+<div class="vertical-container">
+	<h2 class="mt-5">Sign up for more goodies</h2>
+	<button type="button" class="btn btn-login-page mb-4" data-bs-toggle="modal" data-bs-target="#loginModal">
 		Login
 	</button>
-	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signupModal">
+	<button type="button" class="btn btn-login-page" data-bs-toggle="modal" data-bs-target="#signupModal">
 		Create account
 	</button>
 </div>
@@ -57,7 +57,7 @@
         <ul class="list-group mx-auto col-lg ms-auto-lg me-5-lg mt-4" id="friendList" style="max-width: 400px; max-height: 46vh; min-height: 46vh;">
             <li class="list-group-item list-title">
                 <div class="container">
-                    <input class="form-control col" id="add_friend" placeholder="User to befriend" required></input>
+                    <input autocomplete="off" class="form-control col" id="add_friend" placeholder="User to befriend" required></input>
                     <button class="btn col" onclick="changeUserValue('add_friend', document.getElementById('add_friend').value, '{{ user.username }}')">request</button>
                 </div>
             </li>
@@ -88,7 +88,7 @@
     <ul class="list-group list-group-horizontal-sm">
         <li class="list-group-item flex-fill">
             <div class="form-floating" id="floatingUsername" placeholder="change username">
-                <input type="" class="form-control" id="new_username" placeholder="change username" required>
+                <input autocomplete="off" type="" class="form-control" id="new_username" placeholder="change username" required>
                 <label for="new_username">change username</label>
             </div>
         </li>

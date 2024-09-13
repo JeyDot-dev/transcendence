@@ -5,7 +5,7 @@
 		<h5 class="modal-title" id="loginModalPage">Welcome back!</h5>
 		<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 	</div>
-	<div class="modal-body">
+	<div class="modal-body crt">
                 <span id="loginSpan"></span>
 		<form id="loginForm">
 			{% csrf_token %}
@@ -15,7 +15,7 @@
 			<label for="login_password" class="form-label">Password</label>
 			<input type="password" class="form-control" id="login_password" name="login_password" required>
 
-			<input type="submit" class="btn btn-primary m-4" value="Login" />
+			<input type="submit" class="btn btn-primary mt-4" value="Login" />
 		</form>
 </div>
 </div>

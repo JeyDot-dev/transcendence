@@ -6,12 +6,32 @@
 main textarea, label, {
     color: white;
 }
+#add_friend {
+    border: none;
+}
+.btn-login-page {
+    width: 25vw;
+    max-width: 400px;
+    height: 10vh;
+}
 .form-control{
     background-color: rgba(0, 0, 0, 0.5);
-    border-color: lightblue;
+    /* border-color: lightblue; */
 }
-.form-control:focus {
-    background-color: rgba(232, 32, 180, 0.2);
+#modifyProfileContainer .form-control:focus {
+    color: black;
+    background-color: rgba(255, 255, 255, 0.9);
+    /* background-color: rgba(50, 30, 30, 0.2);; */
+}
+#modifyProfileContainer label {
+    color: mediumorchid;
+}
+#modifyProfileContainer .form-control{
+    color: mediumorchid;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-color: lightblue;
+    border: none;
+    outline: none;
 }
 
 #histoFriend ul{
@@ -67,7 +87,6 @@ main textarea, label, {
     align-items: center;
 }
 .btn{
-    color: darkorchid;
     height: 100%;
     width: 100%;
 }
@@ -113,7 +132,4 @@ main textarea, label, {
 /* } */
 main ul, main input, .list-group, .list-group-item, .form-control, textarea {
     background-color: rgba(0, 0, 0, 0.5);
-}
-.form-control:focus {
-    background-color: rgba(232, 32, 180, 0.2);
 }
