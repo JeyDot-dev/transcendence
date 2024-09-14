@@ -214,12 +214,3 @@ function uploadProfilePicture(formData) {
         alert('An error occurred during profile picture upload');
     });
 }
-
-// document.getElementById('profilePictureForm').addEventListener('submit', function(e) {
-// 	e.preventDefault();
-// 	console.log('submitting');
-// 	var form = document.getElementById('profilePictureForm');
-// 	var formData = new FormData(form);
-//
-// 	uploadProfilePicture(formData);
-// });
