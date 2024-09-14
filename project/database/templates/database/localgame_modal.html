@@ -1,0 +1,29 @@
+{% load static %}
+
+<script type="module" src="{% static 'generatePlayers.js' %}"></script>
+
+<div class="modal fade" id="modalNewGame" tabindex="-1" aria-labelledby="loginModalPage" aria-hidden="true" style="color: #000">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalPage">Game Registeration</h5>
+                <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <form id="newGameForm" method="post">
+                        {% csrf_token %}
+                        <label for="player1_name">Joueur 1</label>
+                        {{ formGame.player1_name }}
+                        <br>
+                        <label for="player2_name">Joueur 2</label>
+                        {{ formGame.player2_name }}
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" id="submitNewGameForm" class="btn btn-primary" form="newGameForm">Start Game</button>
+            </div>
+        </div>
+    </div>
+</div>
