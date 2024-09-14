@@ -180,4 +180,5 @@ def get_user_list(request):
 
 
 def index(request):
-    return render(request, "index.html", {"user": request.user})
+    ten_games = request.user.match_history.all().order_by('-date')[:10]
+    return render(request, "index.html", {"user": request.user, "game_history":ten_games})

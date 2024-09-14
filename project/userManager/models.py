@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_email, ValidationError
+from database.models import Game
 
 
 class UserInfos(AbstractUser):
@@ -21,7 +22,8 @@ class UserInfos(AbstractUser):
     is_3d = models.BooleanField(default=False)
     friends = models.ManyToManyField("self", blank=True)
     friends_requests = models.ManyToManyField("self", blank=True)
-    match_history = models.ManyToManyField("MatchResults", blank=True)
+    #match_history = models.ManyToManyField("MatchResults", blank=True)
+    match_history = models.ManyToManyField(Game, blank=True)
 
     REQUIRED_FIELDS = ["email", "password"]
 
