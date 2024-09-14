@@ -91,6 +91,30 @@ def test_token(request):
 # ALL USER RELATED VIEWS LIKE PROFILE, FRIENDS, ETC. GO HERE
 
 
+# @api_view(["PATCH"])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([TokenAuthentication, SessionAuthentication])
+# @parser_classes([MultiPartParser, FormParser])
+# def change_profile_pic(request):
+#     user = get_object_or_404(UserInfos, username=request.data.get("username"))
+#     if not user:
+#         return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+#
+#     if "profile_pic" not in request.FILES:
+#         return Response(
+#             {"message": "No profile picture provided"},
+#             status=status.HTTP_400_BAD_REQUEST,
+#         )
+#
+#     user.profile_pic = request.FILES["profile_pic"]
+#     user.save()
+#     return Response(
+#         {"message": "Profile picture changed successfully"}, status=status.HTTP_200_OK
+#     )
+
+
+from PIL import Image
+
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
@@ -106,12 +130,20 @@ def change_profile_pic(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    # Try to open the file as an image
+    try:
+        Image.open(request.FILES["profile_pic"])
+    except IOError:
+        return Response(
+            {"message": "Uploaded file is not a valid image"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     user.profile_pic = request.FILES["profile_pic"]
     user.save()
     return Response(
         {"message": "Profile picture changed successfully"}, status=status.HTTP_200_OK
     )
-
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
