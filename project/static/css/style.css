@@ -37,13 +37,18 @@ html {
 
 }
 .modal-content .form-control{
+    background-color: rgba(0, 0, 0, 0.5);
     color: white;
 }
 .modal-content .form-control:focus{
+    background-color: rgba(255, 255, 255, 0.9);
     color: black;
 }
 .modal-dialog label {
     font-family: 'Roboto Condensed';
+}
+.btn-close {
+    color: white;
 }
 #nav-border {
     height: 2px;
