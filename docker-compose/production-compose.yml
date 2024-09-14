@@ -38,7 +38,6 @@ services:
       - certs_data:/usr/share/logstash/certs
       - logstash_data:/usr/share/logstash/data
       - "../containers/logstash/:/usr/share/logstash/pipeline:ro"
-      # - "./logstash_ingest_data/:/usr/share/logstash/ingest_data/"
     environment:
       - xpack.monitoring.enabled=false
       - ELASTIC_USER=${ELASTIC_USER}
@@ -105,7 +104,7 @@ services:
     networks:
         - elk
         - backend
-    command: ["redis-server", "--loglevel", "debug"]
+    # command: ["redis-server", "--loglevel", "debug"]
     logging:
       driver: gelf
       options:
