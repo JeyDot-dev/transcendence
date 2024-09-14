@@ -150,6 +150,13 @@ export class Menu {
             this.formSubmittedSuccessfully = true;
             this.newLocalTournament(obj.t_id);
         }
+        else if (obj.status.localeCompare('failure') == 0) {
+            const newDiv = document.createElement('div');
+            newDiv.textContent = 'All usernames must be different';
+            newDiv.style.color = "red";
+            const label = document.querySelector('#top');
+            label.insertAdjacentElement('afterend', newDiv);
+        }
     }
     async handleOptionsSubmit(event) {
         let form = document.getElementById('newOptionsForm');
