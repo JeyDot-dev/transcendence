@@ -3,6 +3,7 @@ import random, string
 #import request
 import math
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +93,7 @@ class Game(models.Model):
     tournament = models.ForeignKey(Tournament, related_name='games', on_delete=models.CASCADE, blank=True, null=True)
     pool = models.IntegerField(default=1)
     is_played = models.BooleanField(default=False)
+    date = models.DateTimeField(default=datetime.now, blank=True)
 
     def __str__(self):
         return self.player1.name + " VS " + self.player2.name 

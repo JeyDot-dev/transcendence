@@ -43,16 +43,16 @@
                 <h4>Played games: {{ user.total_games }}  Won: {{ user.total_victories }} </h4>
                 <h5>last ten games</h5>
             </li>
-            <li class="list-group-item text-success">user vs oponent 5|1 03.08.2024</li>
-            <li class="list-group-item text-danger">user vs oponent 1|5 03.08.2024</li>
-            <li class="list-group-item text-success">user vs oponent 5|1 03.08.2024</li>
-            <li class="list-group-item text-danger">user vs oponent 1|5 03.08.2024</li>
-            <li class="list-group-item text-success">user vs oponent 5|1 03.08.2024</li>
-            <li class="list-group-item text-danger">user vs oponent 1|5 03.08.2024</li>
-            <li class="list-group-item text-success">user vs oponent 5|1 03.08.2024</li>
-            <li class="list-group-item text-danger">user vs oponent 1|5 03.08.2024</li>
-            <li class="list-group-item text-success">user vs oponent 5|1 03.08.2024</li>
-            <li class="list-group-item text-danger">user vs oponent 1|5 03.08.2024</li>
+            {% for game in game_history %}
+            <li class="list-group-item 
+            {% if game.winner.name == user.username %} 
+                text-success
+            {% else %}
+                text-danger
+            {% endif %}">{{ game }} {{game.points1}}|{{game.points2}} {{ game.date|date:"d.m.y H:i" }}</li>
+            {% empty %}
+            <li>PLay games to show history.</li>
+            {% endfor %}
         </ul>
         <ul class="list-group mx-auto col-lg ms-auto-lg me-5-lg mt-4" id="friendList" style="max-width: 400px; max-height: 46vh; min-height: 46vh;">
             <li class="list-group-item list-title">
