@@ -32,9 +32,10 @@ def newGame(request):
             player1.save()
             player2.save()
             game = Game.objects.create(player1=player1, player2=player2)
-            #return redirect("play", game_id = game.id)
             return JsonResponse({'status': 'success', 'game_id': game.game_ws_id})
         return JsonResponse({'status': 'failure'})
+    else:
+        raise Http404()
 
 def newTournament(request):
     if request.method == 'POST':
@@ -63,9 +64,7 @@ def newTournament(request):
                 response = JsonResponse({'status': 'failure', 't_id': 0})
                 return response
     else:
-        formset = PlayerFormSet(queryset=Player.objects.none())
-        form = newTournamentForm()
-    return render(request, "pong/pong.html", {'form': Tform, 'formset': formset})
+        raise Http404()
 
 def nextPool(request, t_id):
     logger.info(f"________Next pool t_id: {t_id}__________")
