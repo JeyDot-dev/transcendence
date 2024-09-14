@@ -180,5 +180,12 @@ def get_user_list(request):
 
 
 def index(request):
-    ten_games = request.user.match_history.all().order_by('-date')[:10]
-    return render(request, "index.html", {"user": request.user, "game_history":ten_games})
+    user = request.user
+    ten_games = user.match_history.all().order_by('-date')[:10]
+    user.set_total_games(user.match_history.all().count())
+    i = 0
+    for game in user.match_history.all():
+        if game.winner.name == user.username:
+            i += 1
+    user.set_total_victories(i)
+    return render(request, "index.html", {"user": user, "game_history":ten_games})

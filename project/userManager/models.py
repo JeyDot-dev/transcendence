@@ -22,7 +22,6 @@ class UserInfos(AbstractUser):
     is_3d = models.BooleanField(default=False)
     friends = models.ManyToManyField("self", blank=True)
     friends_requests = models.ManyToManyField("self", blank=True)
-    #match_history = models.ManyToManyField("MatchResults", blank=True)
     match_history = models.ManyToManyField(Game, blank=True)
 
     REQUIRED_FIELDS = ["email", "password"]
@@ -128,6 +127,7 @@ class UserInfos(AbstractUser):
             self.friends_requests.add(friend)
 
         self.save()
+
 
 class MatchResults(models.Model):
 	winner = models.ForeignKey(UserInfos, on_delete=models.CASCADE, related_name='winner')
