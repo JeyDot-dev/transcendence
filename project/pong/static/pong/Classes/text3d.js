@@ -1,5 +1,6 @@
 import { THREE } from '../three.module.js';
 import { TextGeometry } from "../TextGeometry.js";
+import { TWEEN } from '../three.module.js';
 
 export class Text3d {
     constructor(camera, scene, font, size = 0.5, depth = 0.1, color = 0xfffff, text = "NULL", glow = 0,
@@ -13,6 +14,7 @@ export class Text3d {
         this.color = color;
         this.scene = scene;
         this.rotation = rotation;
+        this.quaternion = null;
         this.material = new THREE.MeshStandardMaterial({ color: color });
         this.geometry = new TextGeometry(this.text, {
             font: font,
@@ -87,6 +89,12 @@ export class Text3d {
             this.glowTextMesh.position.set(position.x - offsetX, position.y - offsetY, position.z);
         }
     }
+    setVisible(isVisible) {
+        this.mesh.visible = isVisible;
+        if (this.glowTextMesh) {
+            this.glowTextMesh.visible = isVisible;
+        }
+    }
     setColor(newColor) {
         if (this.color == newColor) return;
         this.color = newColor;
@@ -94,6 +102,22 @@ export class Text3d {
         if (this.glowTextMesh) {
             this.glowTextMesh.material.uniforms.glowColor.value.set(newColor);
         }
+    }
+    alignTextWithCamera() {
+        let startQuaternion = new THREE.Quaternion().copy(this.mesh.quaternion);
+        let endQuaternion = new THREE.Quaternion().copy(this.camera.quaternion);
+        this.quaternion = endQuaternion;
+
+        new TWEEN.Tween({ t: 0 })
+            .to({ t: 1 }, 1000)  // Durée du tween 1s
+            .onUpdate(function (progress) {
+                this.mesh.quaternion.slerpQuaternions(startQuaternion, endQuaternion, progress.t);
+                
+                if (this.glowTextMesh) {
+                    this.glowTextMesh.quaternion.slerpQuaternions(startQuaternion, endQuaternion, progress.t);
+                }
+            }.bind(this))
+            .start();
     }
     // setSize(newSize, group) {
     //     this.size = newSize;
@@ -142,10 +166,17 @@ export class Text3d {
             curveSegments: 12
         });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.mesh.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
+        if (this.quaternion) {
+            this.mesh.quaternion.copy(this.quaternion);
+        } else {
+            this.mesh.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
+        }
         // this.scene.add(this.mesh);
         if (this.glowTextMesh) {
             this.createGlowMesh(this.camera, this.scene, this.color, this.glowTextMesh.scale.x);
+            if (this.quaternion) {
+                this.glowTextMesh.quaternion.copy(this.quaternion);
+            }
         }
         this.addToGroup(group);
 

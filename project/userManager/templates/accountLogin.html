@@ -1,7 +1,7 @@
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalPage" aria-hidden="true" style="color: #000">
 <div class="modal-dialog">
-	<div class="modal-content">
-	<div class="modal-header">
+	<div class="modal-content crt">
+	<div data-bs-theme="dark" class="modal-header">
 		<h5 class="modal-title" id="loginModalPage">Welcome back!</h5>
 		<button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
 	</div>
@@ -10,12 +10,12 @@
 		<form id="loginForm">
 			{% csrf_token %}
 			<label for="login_username" class="form-label">Username</label>
-			<input type="text" class="form-control" id="login_username" name="login_username" required>
+			<input spellcheck="false" type="text" class="form-control" id="login_username" name="login_username" required>
 
 			<label for="login_password" class="form-label">Password</label>
 			<input type="password" class="form-control" id="login_password" name="login_password" required>
 
-			<input type="submit" class="btn btn-primary m-4" value="Login" />
+			<input type="submit" class="btn btn-primary mt-4" value="Login" />
 		</form>
 </div>
 </div>

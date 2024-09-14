@@ -1,30 +1,20 @@
-function generatePlayerForms() {
-    var formCount = document.querySelectorAll('#player-formset .form-group').length;
-    var numForms = parseInt(document.getElementById('num-players').value);
-    var playerFormset = document.getElementById('player-formset');
-         
-    // Clear existing forms
-    playerFormset.innerHTML = '';
+document.getElementById('add_players').addEventListener('click', function() {
+    console.log('added players');
+    let formCount = document.querySelectorAll('#formsetContainer .form-group').length;
 
-    // Append the management form
-    var managementForm = document.createElement('div');
-    managementForm.innerHTML = '{{ formset.management_form|safe }}';
-    playerFormset.appendChild(managementForm.firstChild);
+    const formsetContainer = document.getElementById('formsetContainer');
+    const numPlayersToAdd = parseInt(document.getElementById('num-players').value);  // Get the number of forms from input
 
-    // Add the specified number of forms
-    for (var i = 0; i < numForms; i++) {
-        var newForm = document.createElement('div');
-        newForm.className = 'form-group';
-        var emptyFormHtml = `{{ formset.empty_form.as_p|escapejs }}`;
-        newForm.innerHTML = emptyFormHtml.replace(/__prefix__/g, i);
-        playerFormset.appendChild(newForm);
+    for (let i = 0; i < numPlayersToAdd; i++) {
+        const newFormHtml = `
+            <div class="form-group">
+                <label for="id_form-${formCount}-name">Player Name:</label>
+                <input type="text" name="form-${formCount}-name" class="form-control" id="id_form-${formCount}-name">
+                <div class="error-message" id="error-${formCount}-name" style="color: red;"></div>
+            </div>`;
+        formsetContainer.insertAdjacentHTML('beforeend', newFormHtml);
+        formCount++;
     }
 
-    // Update the TOTAL_FORMS count
-    document.querySelector('#id_form-TOTAL_FORMS').value = numForms;
-
-    // Show the form container
-    document.getElementById('player-form-container').style.display = 'block';
-
-    return 0;
-}
+    document.querySelector('input[name="form-TOTAL_FORMS"]').value = formCount;
+});

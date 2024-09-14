@@ -5,6 +5,8 @@ all: help
 	@echo "make = make help"
 makemigrations:
 	docker exec django python manage.py makemigrations
+makemigrations-noinput:
+	docker exec django python manage.py makemigrations --noinput
 migrate:
 	docker exec django python manage.py migrate
 collectstatic:

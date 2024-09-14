@@ -9,60 +9,23 @@
         </div>
     </div>
 </div>
-<div id="camera-control-panel">
-    <h3>Camera Control</h3>
-    <label for="camera-pos-x">Pos X:</label>
-    <input id="camera-pos-x" type="number" step="1" value="0"><br>
-    <label for="camera-pos-y">Pos Y:</label>
-    <input id="camera-pos-y" type="number" step="1" value="0"><br>
-    <label for="camera-pos-z">Pos Z:</label>
-    <input id="camera-pos-z" type="number" step="1" value="0"><br>
-    <label for="camera-lookat-x">LookAt X:</label>
-    <input id="camera-lookat-x" type="number" step="1" value="0"><br>
-    <label for="camera-lookat-y">LookAt Y:</label>
-    <input id="camera-lookat-y" type="number" step="1" value="0"><br>
-    <label for="camera-lookat-z">LookAt Z:</label>
-    <input id="camera-lookat-z" type="number" step="1" value="0"><br>
-    <button id="update-camera">Update Camera</button>
-</div>
+<!-- <div id="camera-control-panel"> -->
+<!--     <h3>Camera Control</h3> -->
+<!--     <label for="camera-pos-x">Pos X:</label> -->
+<!--     <input id="camera-pos-x" type="number" step="1" value="0"><br> -->
+<!--     <label for="camera-pos-y">Pos Y:</label> -->
+<!--     <input id="camera-pos-y" type="number" step="1" value="0"><br> -->
+<!--     <label for="camera-pos-z">Pos Z:</label> -->
+<!--     <input id="camera-pos-z" type="number" step="1" value="0"><br> -->
+<!--     <label for="camera-lookat-x">LookAt X:</label> -->
+<!--     <input id="camera-lookat-x" type="number" step="1" value="0"><br> -->
+<!--     <label for="camera-lookat-y">LookAt Y:</label> -->
+<!--     <input id="camera-lookat-y" type="number" step="1" value="0"><br> -->
+<!--     <label for="camera-lookat-z">LookAt Z:</label> -->
+<!--     <input id="camera-lookat-z" type="number" step="1" value="0"><br> -->
+<!--     <button id="update-camera">Update Camera</button> -->
+<!-- </div> -->
+
+{% include 'database/tournament_modal.html' %}
+
 <script type="module" src="{% static 'pong3d.js' %}"></script>
-
-
-<script type="module" src="{% static 'generatePlayers.js' %}"></script>
-
-<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="loginModalPage" aria-hidden="true" style="color: #000">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="loginModalPage">Tournament Registeration</h5>
-                <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="container">
-                    <form id="newTournamentForm" method="post">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="id_tournament_title">Title</label>
-                            {{ form.tournament_title }}
-                        </div>
-                        <p>Player names</p>
-                        {{ formset.management_form }}
-                        {% for form in formset %}
-                            <div class="form-group">
-                                {{ form.as_p }}
-                            </div>
-                        {% endfor %}
-                    </form>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" id="submitTournamentForm" class="btn btn-primary" form="newTournamentForm">Start Tournament</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-
-

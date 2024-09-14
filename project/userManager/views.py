@@ -1,6 +1,11 @@
 from django.contrib.auth import login, logout
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes, authentication_classes, parser_classes
+from rest_framework.decorators import (
+    api_view,
+    permission_classes,
+    authentication_classes,
+    parser_classes,
+)
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -20,18 +25,24 @@ logger = logging.getLogger(__name__)
 #         AUTH VIEWS
 # ==========================
 
-@api_view(['POST'])
-def login_view(request):
-	user = get_object_or_404(UserInfos, username=request.data['username'])
-	if user.check_password(request.data['password']):
-		token, created = Token.objects.get_or_create(user=user)
-		login(request, user)
-		user.set_online(True)
-		return Response({'message': 'Login successful', 'token': token.key, 'user': user.to_dict()}, status=status.HTTP_200_OK)
-	
-	return Response({'message': 'Login failed'}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
+@api_view(["POST"])
+def login_view(request):
+    user = get_object_or_404(UserInfos, username=request.data["username"])
+    if user.check_password(request.data["password"]):
+        token, created = Token.objects.get_or_create(user=user)
+        login(request, user)
+        user.set_online(True)
+        return Response(
+            {"message": "Login successful", "token": token.key, "user": user.to_dict()},
+            status=status.HTTP_200_OK,
+        )
+
+    request.user.set_online(False)
+    return Response({"message": "Login failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
 def logout_view(request):
 	try:
 		request.user.auth_token.delete()
@@ -41,25 +52,35 @@ def logout_view(request):
 	request.user.set_online(False)
 	return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
 
-@api_view(['POST'])
+@api_view(["POST"])
 def signup(request):
-	serializer = UserSerializer(data=request.data)
-	if serializer.is_valid():
-		user = serializer.save()
-		user.set_password(request.data['password'])
-		user.save()
-		token = Token.objects.create(user=user)
-		login(request, user)
-		return Response({'message': 'User created successfully', 'token': token.key, 'user': user.to_dict()}, status=status.HTTP_201_CREATED)
-	error_messages = ' '.join([f'{field}: {error[0]}' for field, error in serializer.errors.items()])
-	return Response({'message': error_messages }, status=status.HTTP_400_BAD_REQUEST)
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        user.set_password(request.data["password"])
+        user.save()
+        token = Token.objects.create(user=user)
+        login(request, user)
+        return Response(
+            {
+                "message": "User created successfully",
+                "token": token.key,
+                "user": user.to_dict(),
+            },
+            status=status.HTTP_201_CREATED,
+        )
+    error_messages = " ".join(
+        [f"{field}: {error[0]}" for field, error in serializer.errors.items()]
+    )
+    return Response({"message": error_messages}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 def test_token(request):
-	return Response({'message': 'Token is valid'})
+    return Response({"message": "Token is valid"})
+
 
 # ==========================
 #         USER VIEWS
@@ -67,23 +88,30 @@ def test_token(request):
 
 # ALL USER RELATED VIEWS LIKE PROFILE, FRIENDS, ETC. GO HERE
 
-@api_view(['PATCH'])
+
+@api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 @parser_classes([MultiPartParser, FormParser])
 def change_profile_pic(request):
-    user = get_object_or_404(UserInfos, username=request.data.get('username'))
+    user = get_object_or_404(UserInfos, username=request.data.get("username"))
     if not user:
-        return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-    
-    if 'profile_pic' not in request.FILES:
-        return Response({'message': 'No profile picture provided'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    user.profile_pic = request.FILES['profile_pic']
-    user.save()
-    return Response({'message': 'Profile picture changed successfully'}, status=status.HTTP_200_OK)
+        return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-@api_view(['POST'])
+    if "profile_pic" not in request.FILES:
+        return Response(
+            {"message": "No profile picture provided"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user.profile_pic = request.FILES["profile_pic"]
+    user.save()
+    return Response(
+        {"message": "Profile picture changed successfully"}, status=status.HTTP_200_OK
+    )
+
+
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 def change_value(request, field):
@@ -124,16 +152,26 @@ def change_value(request, field):
 	
 	return Response({'message': field + ' changed successfully'}, status=status.HTTP_200_OK)
 
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 def get_user_list(request):
-	if searchTerm := request.GET.get('searchTerm', ''):
-		users = UserInfos.objects.filter(username__icontains=searchTerm)
-	else:
-		users = UserInfos.objects.all()
-	users_list = [user.to_dict_public() for user in users]
-	return Response({'users': users_list}, status=status.HTTP_200_OK)
+    if searchTerm := request.GET.get("searchTerm", ""):
+        users = UserInfos.objects.filter(username__icontains=searchTerm)
+    else:
+        users = UserInfos.objects.all()
+    users_list = [user.to_dict_public() for user in users]
+    return Response({"users": users_list}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+def get_user(request, field):
+	user = get_object_or_404(UserInfos, username=field)
+	if not user:
+		return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+	return Response({'user': user.to_dict_public()}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -150,5 +188,17 @@ def get_user(request, field):
 
 # ALL HTML VIEWS GO HERE
 
+
 def index(request):
-	return render(request, "index.html", {'user': request.user})
+    user = request.user
+    ten_games = []
+
+    if user.is_authenticated:
+        ten_games = user.match_history.all().order_by("-date")[:10]
+        user.set_total_games(user.match_history.all().count())
+        victories = sum(
+            1 for game in user.match_history.all() if game.winner.name == user.username
+        )
+        user.set_total_victories(victories)
+
+    return render(request, "index.html", {"user": user, "game_history": ten_games})
