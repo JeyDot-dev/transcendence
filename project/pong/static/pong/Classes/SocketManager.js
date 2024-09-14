@@ -22,11 +22,11 @@ export class SocketManager {
 
     getWebSocketUrl() {
         if (this.type === 'local') {
-            return `wss://${window.location.host}/ws/pong/local/${this.gameId}/`;
+            return `ws://${window.location.host}/ws/pong/local/${this.gameId}/`;
         } else if (this.type === 'customGame') {
-            return `wss://${window.location.host}/ws/pong/local/${this.gameId}/`;
+            return `ws://${window.location.host}/ws/pong/local/${this.gameId}/`;
         } else if (this.type === 'remote') {
-            return `wss://${window.location.host}/ws/pong/${this.gameId}/`;
+            return `ws://${window.location.host}/ws/pong/${this.gameId}/`;
         } else {
             throw new Error('Type de connexion inconnu');
         }
