@@ -37,6 +37,9 @@ main textarea, label, {
     border: none;
     outline: none;
 }
+.modal .btn{
+    width: 100%;
+}
 
 #modifyProfileContainer .btn{
     height: 100%;

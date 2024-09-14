@@ -33,7 +33,7 @@
     <div class="form-floating" id="floatingStatus" placeholder="change status">
         <textarea type="" spellcheck="false" class="form-control focus-ring fw-light fst-italic px-0 py-0" id="new_status" placeholder="edit your status" required>{{ user.status }}</textarea>
     </div>
-    <button class="btn" id="submit_status" onclick="changeUserValue('new_status', document.getElementById('new_status').value, '{{ user.username }}')">Update status message</button>
+    <button style="min-width: 100px;" class="btn" id="submit_status" onclick="changeUserValue('new_status', document.getElementById('new_status').value, '{{ user.username }}')">Update status message</button>
 </div>
 
 <div class="container text-center">
