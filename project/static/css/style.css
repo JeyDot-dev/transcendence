@@ -2,14 +2,42 @@
     scrollbar-gutter: auto;
 }
 
-@media (max-width: 1045px) {
+/* @media (max-width: 750px) { */
+/*     h1{ */
+/*         font-size: 2.4rem; */
+/*     } */
+/* } */
+@media (max-width: 750px) {
+    html{
+        font-size: 10px;
+    }
+    h1{
+        font-size: 2.7rem !important;
+    }
+    
+}
+@media (max-width: 1200px) {
     html {
         font-size: 14px;
     }
+    h1{
+        font-size: 5rem;
+    }
 }
-@media (min-width: 1045px) {
+@media (min-width: 1200px) {
     html {
         font-size: 16px;
+    }
+    h1{
+        font-size: 6rem;
+    }
+    .home{
+        padding-left: 9vw;
+        padding-right: 9vw;
+           list-style-position: inside;
+            
+    }
+    .home li{
     }
 }
 
@@ -19,10 +47,13 @@ html {
     line-height: 1;
     /* text-shadow: 0.06rem 0 0.06rem #ea36af, -0.125rem 0 0.06rem #75fa69; */
     letter-spacing: 0.125em;
-    animation-duration: 0.01s;
+    /* animation-duration: 0.01s; */
     /* animation-name: textflicker; */
     /* animation-iteration-count: infinite; */
     /* animation-direction: alternate; */
+}
+.btn-group-vertical{
+    display: none;
 }
 .form-control::placeholder {
     color: gray;
@@ -37,13 +68,18 @@ html {
 
 }
 .modal-content .form-control{
+    background-color: rgba(0, 0, 0, 0.5);
     color: white;
 }
 .modal-content .form-control:focus{
+    background-color: rgba(255, 255, 255, 0.9);
     color: black;
 }
 .modal-dialog label {
     font-family: 'Roboto Condensed';
+}
+.btn-close {
+    color: white;
 }
 #nav-border {
     height: 2px;
@@ -65,10 +101,15 @@ h1, h2, h3, h4, h5{
     font-family: 'Lemon/Milk light';
     color: #F0F3FF;
 }
+#commandesJeu{
+    font-size: 1.5rem;
+    font-family: 'Roboto Condensed';
+
+}
 h1 {
-    margin-top: 1.6vh;
+    margin-top: 8vh;
     font-family: 'Lemon/Milk', sans-serif;
-    font-size: 7rem;
+    /* font-size: 7rem; */
     margin-bottom: 1vh;
 }
 
@@ -115,6 +156,9 @@ footer p{
     background-position: right center;
 }
 inline {
+    animation: wow 8s linear infinite !important;
+}
+.wow {
     animation: wow 8s linear infinite !important;
 }
 @keyframes textflicker {
