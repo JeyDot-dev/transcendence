@@ -141,5 +141,14 @@
 {% endif %}
 
 
+<script>
+document.querySelector('input[type="file"]').addEventListener('change', function() {
+    const file = this.files[0];
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+        alert("Le fichier est trop volumineux !");
+        this.value = ''; // Réinitialiser l'input
+    }
+});
+</script>
 {% include "accountCreation.html" %}
 {% include "accountLogin.html" %}
