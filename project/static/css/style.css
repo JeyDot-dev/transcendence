@@ -24,6 +24,9 @@ html {
     /* animation-iteration-count: infinite; */
     /* animation-direction: alternate; */
 }
+.btn-group-vertical{
+    display: none;
+}
 .form-control::placeholder {
     color: gray;
 }
