@@ -51,7 +51,7 @@ def index(request):
     """Renders the main index page."""
     form = newTournamentForm()
     formset = PlayerFormSet(queryset=Player.objects.none())
-    return render(request, "pong/pong.html", {'form': form, 'formset': formset})
+    return render(request, "pong/pong.html", {'form': form, 'formset': formset, 'user':request.user})
 
 def pong2d(request):
     return render(request, "pong/pong2d.html")

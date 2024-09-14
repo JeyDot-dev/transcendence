@@ -195,10 +195,19 @@ export class TournamentMenu {
             }
         });
 
-        if (currentPool.gamesMap.size === 1 && allGamesPlayed) {
-            console.log('current pool games map: ', currentPool.gamesMap);
+        //if (currentPool.gamesMap.size === 1 && allGamesPlayed) {
+        //    console.log('current pool games map: ', currentPool.gamesMap);
+        //    console.log('La dernière partie est jouée. Fin du tournoi.');
+        //    const lastGame = currentPool.gamesMap.values().next().value;
+        //    console.log('Last Game: ', lastGame);
+        //    this.endTournament(lastGame);
+        //    return;
+        //}
+
+        if (currentPool.gamesMap.size === 0 && allGamesPlayed) {
             console.log('La dernière partie est jouée. Fin du tournoi.');
-            const lastGame = currentPool.gamesMap.values().next().value;
+            lastPool = this.tournamentPools[this.tournamentPools.length - 2];
+            const lastGame = lastPool.gamesMap.values().next().value;
             console.log('Last Game: ', lastGame);
             this.endTournament(lastGame);
             return;
