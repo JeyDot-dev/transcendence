@@ -12,8 +12,6 @@ logger = logging.getLogger(__name__)
 
 from .models import Game, Player, Tournament
 from .forms import *
-# Create your views here.
-
 
 def tournamentWinner(request, t_id):
     tourny = get_object_or_404(Tournament, pk=t_id)
@@ -41,7 +39,6 @@ def newTournament(request):
         Tform = newTournamentForm(request.POST)
         formset = PlayerFormSet(request.POST)
         if Tform.is_valid() and formset.is_valid():
-            logger.info(f"______Forms valid_______")
             tournament = Tournament(name=Tform.cleaned_data["tournament_title"])
             tournament.save()
             for form in formset:
@@ -72,11 +69,9 @@ def newTournament(request):
 
 
 def nextPool(request, t_id):
-    logger.info(f"________Next pool t_id: {t_id}__________")
     tournament = get_object_or_404(Tournament, pk=t_id)
     tournament.make_games()
     if request.user.is_authenticated:
-        logger.info(f"________USER LOGED IN: {request.user.username}__________")
         user = request.user
         game = tournament.games.filter(
             (Q(player1__name=user.username) | Q(player2__name=user.username))

@@ -4,7 +4,6 @@ import { TextGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/example
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/controls/OrbitControls.js';
 import { gsap } from 'https://cdn.jsdelivr.net/npm/gsap@3.11.5/dist/gsap.min.js';
 
-// Initialisation de la scène, caméra, et rendu
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 500;
@@ -15,7 +14,6 @@ document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
-// Charger la police et créer le texte 3D
 const loader = new FontLoader();
 loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
     const textGeometry = new TextGeometry('Hello', {
@@ -29,8 +27,7 @@ loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json
     const vertices = textGeometry.attributes.position.array;
     const totalVertices = textGeometry.attributes.position.count;
 
-    // Diviser les particules en groupes
-    const groupSize = Math.floor(totalVertices / 3); // Par exemple, 3 objets distincts
+    const groupSize = Math.floor(totalVertices / 3);
     const particleGroups = [[], [], []];
 
     for (let i = 0; i < totalVertices; i++) {
@@ -39,12 +36,9 @@ loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json
             vertices[i * 3 + 1],
             vertices[i * 3 + 2]
         );
-
-        // Répartition des particules entre les groupes
         const groupIndex = Math.floor(i / groupSize);
         particleGroups[groupIndex].push(vertex);
     }
-
     createParticleObjects(particleGroups);
 });
 
@@ -72,7 +66,6 @@ function createParticleObjects(particleGroups) {
         scene.add(particles);
     }
 
-    // Créer et animer vers de nouvelles formes
     const targetShapes = [
         generateSphereVertices(50, 32, 32),
         generateCubeVertices(100),

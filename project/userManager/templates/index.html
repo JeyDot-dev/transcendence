@@ -78,11 +78,6 @@
         </ul>
     </div>
 </div>
-<!-- <p>Paddle color: <span style="background-color: {{ user.skin }};">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p> -->
-<!-- <p>Grade: {{ user.grade }}</p> -->
-<!-- <p>Is online: {{ user.is_online }}</p> -->
-<!-- <p>Is playing: {{ user.is_playing }}</p> -->
-
 
 <div class="container" id="modifyProfileContainer">
     <ul class="list-group list-group-horizontal-sm">
@@ -141,14 +136,14 @@
 {% endif %}
 
 
-<script>
-document.querySelector('input[type="file"]').addEventListener('change', function() {
-    const file = this.files[0];
-    if (file.size > 5 * 1024 * 1024) { // 5MB
-        alert("Le fichier est trop volumineux !");
-        this.value = ''; // Réinitialiser l'input
-    }
-});
-</script>
+<!--<script>-->
+<!--document.querySelector('input[type="file"]').addEventListener('change', function() {-->
+<!--    const file = this.files[0];-->
+<!--    if (file.size > 5 * 1024 * 1024) {-->
+<!--        alert("Le fichier est trop volumineux !");-->
+<!--        this.value = '';-->
+<!--    }-->
+<!--});-->
+<!--</script>-->
 {% include "accountCreation.html" %}
 {% include "accountLogin.html" %}
