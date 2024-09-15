@@ -183,7 +183,7 @@ export class Menu {
     // TODO: hauteur du canvas 
     createMenuItems() {
         this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
-            this.formSubmittedSuccessfully = false;
+            this.formSubmittedSuccessfully = false; 
             this.disableEventListener();
             this.modalManager.openModal('modalNewGame', this.handleNewGameSubmit.bind(this), this);
             //this.newLocalGame();

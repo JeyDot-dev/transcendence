@@ -19,9 +19,15 @@
                         <div id="formsetContainer">
                             {{ formset.management_form }}  
                         </div>
-                        <label for="num-players">Number of Players:</label>
-                        <input type="number" id="num-players" min="4" value="4" max="16">
-                        <button type="button" id="add_players">Add Players</button>
+                        <form action="#">
+                            <label for="num-players">Number of Players:</label>
+                            <select id="num-players" name="num-players">
+                                <option value="4">4</option>
+                                <option value="8">8</option>
+                                <option value="16">16</option>
+                            </select>
+                            <button type="button" id="add_players">Add Players</button>
+                        </form>
                     </form>
                 </div>
             </div>
