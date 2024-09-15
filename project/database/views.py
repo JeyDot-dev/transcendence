@@ -52,7 +52,16 @@ def newTournament(request):
                     player.is_winner = True
                     player.save()
                     tournament.players.add(player)
-            tournament.save()
+            if tournament.players.count() < 2 and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                tournament.delete()
+                response = JsonResponse({'status': 'failure', 'reason': "You need at least two players"})
+                return response
+            elif not tournament.players.count() in (4, 8, 16) and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                tournament.delete()
+                response = JsonResponse({'status': 'failure', 'reason': "You must have 4, 8 or 16 players"})
+                return response
+            else:
+                tournament.save()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 players = [player.name for player in list(tournament.players.all())]
                 response = JsonResponse({'status': 'success', 't_id': tournament.id, "players": players})
@@ -60,9 +69,17 @@ def newTournament(request):
         else:
             logger.info(f"Form errors: {Tform.errors}")
             logger.info(f"Form errors: {formset.errors}")
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                response = JsonResponse({'status': 'failure', 't_id': 0})
+            if Tform.is_valid() and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                for form_errors in formset.errors:
+                    if form_errors:
+                        first_field = next(iter(form_errors))
+                        error_message = form_errors[first_field]
+                response = JsonResponse({'status': 'failure', 'reason': error_message})
                 return response
+            elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                response = JsonResponse({'status': 'failure', 'reason': "Tournament title is required"})
+                return response
+    
     else:
         raise Http404()
 

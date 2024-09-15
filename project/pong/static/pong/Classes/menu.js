@@ -151,11 +151,9 @@ export class Menu {
             this.newLocalTournament(obj.t_id);
         }
         else if (obj.status.localeCompare('failure') == 0) {
-            const newDiv = document.createElement('div');
-            newDiv.textContent = 'All usernames must be different';
+            const newDiv = document.getElementById('form_error');
+            newDiv.innerHTML = obj.reason;
             newDiv.style.color = "red";
-            const label = document.querySelector('#top');
-            label.insertAdjacentElement('afterend', newDiv);
         }
     }
     async handleNewGameSubmit(event) {

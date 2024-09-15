@@ -41,14 +41,14 @@ class Tournament(models.Model):
     def make_games(self):
         winners = [player for player in list(self.players.all()) if player.is_winner]
         random.shuffle(winners)
-        if len(winners) == 3:
+        """if len(winners) == 3:
             self.games.create(player1=winners[0], player2=winners[1], game_ws_id=generate_unique_id(), pool=self.round_number)
             self.games.create(player1=winners[0], player2=winners[2], game_ws_id=generate_unique_id(), pool=self.round_number)
             self.games.create(player1=winners[2], player2=winners[1], game_ws_id=generate_unique_id(), pool=self.round_number)
-        else: 
-            #since is_winner doesn't change if you don't play, the player left out will automaticly rise
-            while len(winners) >= 2:
-                self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number)
+        else:"""
+        #since is_winner doesn't change if you don't play, the player left out will automaticly rise
+        while len(winners) >= 2:
+            self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number)
         self.round_number = models.F('round_number') + 1
         self.save()
             
@@ -81,9 +81,6 @@ class Tournament(models.Model):
             tournament.append(self.oldPoolInfo(i))
         return tournament
         
-
-
-
 class Game(models.Model):
     player1 = models.ForeignKey(Player, related_name='player1', on_delete=models.CASCADE)
     player2 = models.ForeignKey(Player, related_name='player2', on_delete=models.CASCADE)
