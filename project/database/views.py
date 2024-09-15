@@ -93,12 +93,6 @@ def nextPool(request, t_id):
     logger.info(f"________Next pool t_id: {t_id}__________")
     tournament = get_object_or_404(Tournament, pk=t_id)
     tournament.make_games()
-    if request.user.is_authenticated:
-        logger.info(f"________USER LOGED IN: {request.user.username}__________")
-        user = request.user
-        game = tournament.games.filter((Q(player1__name=user.username) | Q(player2__name=user.username)) & Q(is_played=False)).first()
-        if game:
-            user.match_history.add(game)
     games = tournament.JSONgames()
     return JsonResponse({
         'tournament_id': tournament.id,
