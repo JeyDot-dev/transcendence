@@ -14,7 +14,11 @@
                     <form id="newGameForm" method="post">
                         {% csrf_token %}
                         <label for="player1_name">Joueur 1</label>
-                        {{ formGame.player1_name }}
+                        <input type="text" id="player1_name" name="player1_name"
+                            {% if user.is_authenticated %}
+                                value="{{ user.username }}"
+                            {% endif %}
+                        >
                         <br>
                         <label for="player2_name">Joueur 2</label>
                         {{ formGame.player2_name }}
