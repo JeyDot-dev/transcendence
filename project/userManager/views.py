@@ -15,6 +15,9 @@ from .models import UserInfos
 from django.shortcuts import get_object_or_404, render
 
 from PIL import Image
+import os
+import uuid
+from django.conf import settings
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
@@ -48,6 +51,11 @@ def signup(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
+        if len(request.data["username"]) < 2:
+            return Response(
+                {"message": "Username must be at least 3 characters long"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         user.set_password(request.data["password"])
         user.save()
         token = Token.objects.create(user=user)
@@ -86,15 +94,23 @@ def change_profile_pic(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Try to open the file as an image
     try:
         Image.open(request.FILES["profile_pic"])
     except IOError:
+        if hasattr(request.FILES["profile_pic"], 'temporary_file_path'):
+            os.remove(request.FILES["profile_pic"].temporary_file_path())  # Delete the file
         return Response(
             {"message": "Uploaded file is not a valid image"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    file_extension = os.path.splitext(request.FILES["profile_pic"].name)[1]
+    new_filename = str(uuid.uuid4()) + file_extension
+
+    while os.path.exists(os.path.join(settings.MEDIA_ROOT, new_filename)):
+        new_filename = str(uuid.uuid4()) + file_extension
+
+    request.FILES["profile_pic"].name = new_filename
     user.profile_pic = request.FILES["profile_pic"]
     user.save()
     return Response(
@@ -109,42 +125,48 @@ def change_value(request, field):
     if not user:
         return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    if field == "new_username":
-        user.set_username(request.data["new_value"])
-    elif field == "new_email":
-        user.set_email(request.data["new_value"])
-    elif field == "new_password":
-        user.set_password(request.data["new_value"])
-        logout(request)
-    elif field == "new_status":
-        user.set_status(request.data["new_value"])
-    elif field == "set_online":
-        user.set_online(request.data["new_value"])
-    elif field == "set_playing":
-        user.set_playing(request.data["new_value"])
-    elif field == "set_grade":
-        user.set_grade(request.data["new_value"])
-    elif field == "set_total_games":
-        user.set_total_games(request.data["new_value"])
-    elif field == "set_total_victories":
-        user.set_total_victories(request.data["new_value"])
-    elif field == "set_skin":
-        user.set_skin(request.data["new_value"])
-    elif field == "add_friend":
-        try:
-            user.add_friend(request.data["new_value"])
-        except:
+    try:
+        if field == "new_username":
+            user.set_username(request.data["new_value"])
+        elif field == "new_email":
+            user.set_email(request.data["new_value"])
+        elif field == "new_password":
+            user.set_password(request.data["new_value"])
+            logout(request)
+        elif field == "new_status":
+            user.set_status(request.data["new_value"])
+        elif field == "set_online":
+            user.set_online(request.data["new_value"])
+        elif field == "set_playing":
+            user.set_playing(request.data["new_value"])
+        elif field == "set_grade":
+            user.set_grade(request.data["new_value"])
+        elif field == "set_total_games":
+            user.set_total_games(request.data["new_value"])
+        elif field == "set_total_victories":
+            user.set_total_victories(request.data["new_value"])
+        elif field == "set_skin":
+            user.set_skin(request.data["new_value"])
+        elif field == "add_friend":
+            try:
+                user.add_friend(request.data["new_value"])
+            except:
+                return Response(
+                    {"message": "Friend not found"}, status=status.HTTP_404_NOT_FOUND
+                )
+        else:
             return Response(
-                {"message": "Friend not found"}, status=status.HTTP_404_NOT_FOUND
+                {"message": "Field not found"}, status=status.HTTP_404_NOT_FOUND
             )
-    else:
-        return Response(
-            {"message": "Field not found"}, status=status.HTTP_404_NOT_FOUND
-        )
 
-    return Response(
-        {"message": field + " changed successfully"}, status=status.HTTP_200_OK
-    )
+        return Response(
+            {"message": field + " changed successfully"}, status=status.HTTP_200_OK
+        )
+    except Exception as e:
+        logger.error(e)
+        return Response(
+            {"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 @api_view(["GET"])
