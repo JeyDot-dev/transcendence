@@ -37,7 +37,9 @@ console.log("Pong3d.js LOADING");
 // Si FLAG == 1: Init le canvas
 
 let isRunning = false;
-
+const options = {
+    
+}
 const threeRoot = new THREERoot();
 document.addEventListener('loadView', function(event) {
     console.log("localGame.js LOADED");

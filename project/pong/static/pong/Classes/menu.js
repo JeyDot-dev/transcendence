@@ -152,8 +152,22 @@ export class Menu {
         }
     }
     async handleOptionsSubmit(event) {
+        console.log('Handle options submit');
         let form = document.getElementById('newOptionsForm');
-        let farmData = new FormData(form);
+        let formData = new FormData(form);
+        
+        let jsonObject = {};
+        for (const [key, value] of formData.entries()) {
+            jsonObject[key] = value;
+        }
+        if (jsonObject) {
+            this.modalManager.closeModal();
+            this.formSubmittedSuccessfully = true;
+            console.log('Options submitted', jsonObject);
+            setTimeout(() => {
+                this.enableEventListener();
+            }, 300);
+        }
     }
     // TODO: hauteur du canvas 
     createMenuItems() {
@@ -173,11 +187,11 @@ export class Menu {
             // this.ModalListener(myModal);
             // const myModalEl = document.getElementById('modalNewTournament')
             // myModalEl.addEventListener('hidden.bs.modal', event => {
-            //     if (this.formSubmittedSuccessfully === false) {
-            //         this.show();
-            //     }
-            // });
-        });
+                //     if (this.formSubmittedSuccessfully === false) {
+                    //         this.show();
+                    //     }
+                    // });
+                });
         this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
             console.log("Clicked On: Tournament");
         });
@@ -185,8 +199,8 @@ export class Menu {
             this.newShop();
         });
         this.optionsMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[5], new THREE.Vector3(0, 0, -640), () => {
-            console.log("Clicked On: Options");
-
+            this.disableEventListener();
+            this.modalManager.openModal('modalNewOptions', this.handleOptionsSubmit.bind(this), this);
         });
 
         this.menuItems = [

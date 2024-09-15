@@ -20,7 +20,7 @@ export class ModalManager {
 
         const submitButton = modalElement.querySelector('button[type="submit"]');
         if (submitButton) {
-            submitButton.removeEventListener('click', this.handleSubmit); // Supprimer anciens écouteurs
+            submitButton.removeEventListener('click', this.handleSubmit);
             submitButton.addEventListener('click', (event) => {
                 event.preventDefault(); // Empêche seulement la soumission, pas l'interaction des champs
                 if (this.isSubmitting) return;
