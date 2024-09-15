@@ -389,7 +389,7 @@ export class Menu {
         currentItem.onClick();
     }
     render() {
-        this.renderer.render(this.scene, this.camera);
+        // this.renderer.render(this.scene, this.camera);
     }
 
     newLocalGame(customGameId) {

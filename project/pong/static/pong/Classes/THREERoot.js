@@ -69,6 +69,7 @@ export class THREERoot {
 
     render() {
         // this.composer.render();
+        this.renderer.render(this.scene, this.camera);
     }
 
     animate() {
@@ -86,9 +87,9 @@ export class THREERoot {
             if (typeof obj.update === 'function') {
                 obj.update();
             }
-            if (typeof obj.render === 'function') {
-                // obj.render();
-            }
+            // if (typeof obj.render === 'function') {
+            //     // obj.render();
+            // }
         });
 
         // End FPS counter
