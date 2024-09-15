@@ -52,9 +52,9 @@ def newTournament(request):
                 tournament.delete()
                 response = JsonResponse({'status': 'failure', 'reason': "You need at least two players"})
                 return response
-            elif tournament.players.count() in (3, 5, 6, 10, 12) and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            elif not tournament.players.count() in (4, 8, 16) and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 tournament.delete()
-                response = JsonResponse({'status': 'failure', 'reason': "You cannot play with 3,5,6,10 or 12 players"})
+                response = JsonResponse({'status': 'failure', 'reason': "You must have 4, 8 or 16 players"})
                 return response
             else:
                 tournament.save()
