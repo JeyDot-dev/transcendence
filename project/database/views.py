@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http40
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.template import loader
+from database.models import generate_unique_id
 import random, string
 import logging
 
@@ -28,11 +29,12 @@ def newGame(request):
             player1, new1= Player.objects.get_or_create(name=player1_name)
             player2, new1 = Player.objects.get_or_create(name=player2_name)
             player1.is_winner = False
-            player2.is_winner = False 
+            player2.is_winner = False
+            game_ws_id = generate_unique_id()
             player1.save()
             player2.save()
-            game = Game.objects.create(player1=player1, player2=player2)
-            return JsonResponse({'status': 'success', 'game_id': game.game_ws_id})
+            game = Game.objects.create(player1=player1, player2=player2, game_ws_id=game_ws_id)
+            return JsonResponse({'status': 'success', 'game_ws_id': game.game_ws_id})
         return JsonResponse({'status': 'failure'})
     else:
         raise Http404()

@@ -175,7 +175,7 @@ export class Menu {
         if (obj.status.localeCompare('success') == 0) {
             this.modalManager.closeModal();
             this.formSubmittedSuccessfully = true;
-            this.newLocalGame(obj.t_id);
+            this.newLocalGame(obj.game_ws_id);
         }
     }
     async handleOptionsSubmit(event) {
@@ -391,9 +391,9 @@ export class Menu {
         this.renderer.render(this.scene, this.camera);
     }
 
-    newLocalGame() {
+    newLocalGame(customGameId) {
         console.log("Clicked On: Local");
-        this.socketManager.connectLocalGame();
+        this.socketManager.connectCustomGame(customGameId);
         // this.socketManager.setGameId(666);
         // this.socketManager.setType('local');
         this.hide();
