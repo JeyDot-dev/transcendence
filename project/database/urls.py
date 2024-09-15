@@ -8,5 +8,4 @@ urlpatterns = [
     path('game_winner/<str:game_ws_id>/', views.game_winner, name='game_winner'),
     path('newGame/', views.newGame, name='newGame'),
     path('fetch_tournament/<int:t_id>/', views.get_old_tournament, name='fetch_tournament'),
-
 ]
