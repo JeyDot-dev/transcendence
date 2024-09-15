@@ -1,5 +1,5 @@
 from django.urls import re_path
-from .local_consumers import LocalPongConsumer
+from .consumers import LocalPongConsumer
 from .mm_consumers import MatchmakingConsumer
 
 websocket_urlpatterns = [

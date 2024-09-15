@@ -29,7 +29,7 @@ export class THREERoot {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(this.width, this.height);
         this.renderer.shadowMap.enabled = true;
-        this.composer = new EffectComposer(this.renderer);
+        // this.composer = new EffectComposer(this.renderer);
         this.container.appendChild(this.renderer.domElement);
 
 
@@ -39,12 +39,12 @@ export class THREERoot {
         // this.container.appendChild(this.stats.dom);
 
         // Create a render target with MSAA for post-processing
-        this.renderTarget = new THREE.WebGLMultisampleRenderTarget(this.width, this.height, { format: THREE.RGBAFormat });
+        // this.renderTarget = new THREE.WebGLMultisampleRenderTarget(this.width, this.height, { format: THREE.RGBAFormat });
         
         // Create the EffectComposer with the MSAA render target
-        this.composer = new EffectComposer(this.renderer, this.renderTarget);
-        const renderPass = new RenderPass(this.scene, this.camera);
-        this.composer.addPass(renderPass);
+        // this.composer = new EffectComposer(this.renderer, this.renderTarget);
+        // const renderPass = new RenderPass(this.scene, this.camera);
+        // this.composer.addPass(renderPass);
 
         const spinner = document.getElementById("fidget-spinner");
         spinner.removeChild(spinner.firstChild);
@@ -64,11 +64,11 @@ export class THREERoot {
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(width, height);
-        this.composer.setSize(width, height);
+        // this.composer.setSize(width, height);
     }
 
     render() {
-        this.composer.render();
+        // this.composer.render();
     }
 
     animate() {
@@ -87,7 +87,7 @@ export class THREERoot {
                 obj.update();
             }
             if (typeof obj.render === 'function') {
-                obj.render();
+                // obj.render();
             }
         });
 
