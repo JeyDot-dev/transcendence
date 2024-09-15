@@ -8,7 +8,7 @@ from asgiref.sync import sync_to_async
 
 games_pool = {}
 # logger = logging.getLogger(__name__)
-
+physics_lock = asyncio.Lock()
 
 class LocalPongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -21,55 +21,57 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
         # Vérifier si le jeu est déjà en mémoire
-        if self.game_id in games_pool:
-            logger.info(
-                f"Connecting to an existing game instance for game {self.game_id}"
-            )
-            games_pool[self.game_id]["connections"] += 1
-            self.game = games_pool[self.game_id]["game"]
-            self.log_game_state("Existing Game param")
-        else:
-            # Essayer de récupérer la game depuis la base de données
-            GameDB = await sync_to_async(self.get_game_from_db)(self.game_id)
-
-            if GameDB is not None:
-                logger.info(f"Game found in the database for game {self.game_id}")
-                # Récupérer les joueurs depuis la base de données
-                player1 = await sync_to_async(lambda: GameDB.player1)()
-                player2 = await sync_to_async(lambda: GameDB.player2)()
-
-                # Créer une nouvelle instance de game avec les joueurs de la base de données
-                self.game = Game(
-                    self.game_id, [], 2, 1280, 720, self.notifyEvent, "dbGame"
-                )
-                self.game.addPlayer(
-                    Player(id=player1.id, skin="skin1", name=player1.name), 0
-                )
-                self.game.addPlayer(
-                    Player(id=player2.id, skin="skin2", name=player2.name), 1
-                )
-            else:
+        async with physics_lock:
+            if self.game_id in games_pool:
                 logger.info(
-                    f"No game in the database, creating a new local game instance for game {self.game_id}"
+                    f"Connecting to an existing game instance for game {self.game_id}"
                 )
-                # Créer un jeu local si aucun jeu DB n'existe
-                self.game = Game(
-                    self.game_id, [], 2, 1280, 720, self.notifyEvent, "localGame"
-                )
-                player1 = Player(id=0, skin="skin1", name="Player1")
-                player2 = Player(id=1, skin="skin2", name="Player2")
-                self.game.addPlayer(player1, 0)  # Joueur 1 (gauche)
-                self.game.addPlayer(player2, 1)  # Joueur 2 (droite)
+                games_pool[self.game_id]["connections"] += 1
+                self.game = games_pool[self.game_id]["game"]
+                self.log_game_state("Existing Game param")
+            else:
+                # Essayer de récupérer la game depuis la base de données
+                GameDB = await sync_to_async(self.get_game_from_db)(self.game_id)
 
-            # Démarrer la physique
-            self.physics_task = asyncio.create_task(self.game.physics_loop())
-            self.game.running = True
+                if GameDB is not None:
+                    logger.info(f"Game found in the database for game {self.game_id}")
+                    # Récupérer les joueurs depuis la base de données
+                    player1 = await sync_to_async(lambda: GameDB.player1)()
+                    player2 = await sync_to_async(lambda: GameDB.player2)()
 
-            # Ajouter le jeu à games_pool
-            games_pool[self.game_id] = {
-                "game": self.game,
-                "connections": 1,  # Premier client connecté
-            }
+                    # Créer une nouvelle instance de game avec les joueurs de la base de données
+                    self.game = Game(
+                        self.game_id, [], 2, 1280, 720, self.notifyEvent, "dbGame"
+                    )
+                    self.game.addPlayer(
+                        Player(id=player1.id, skin="skin1", name=player1.name), 0
+                    )
+                    self.game.addPlayer(
+                        Player(id=player2.id, skin="skin2", name=player2.name), 1
+                    )
+                else:
+                    logger.info(
+                        f"No game in the database, creating a new local game instance for game {self.game_id}"
+                    )
+                    # Créer un jeu local si aucun jeu DB n'existe
+                    self.game = Game(
+                        self.game_id, [], 2, 1280, 720, self.notifyEvent, "localGame"
+                    )
+                    player1 = Player(id=0, skin="skin1", name="Player1")
+                    player2 = Player(id=1, skin="skin2", name="Player2")
+                    self.game.addPlayer(player1, 0)  # Joueur 1 (gauche)
+                    self.game.addPlayer(player2, 1)  # Joueur 2 (droite)
+
+                # Démarrer la physique
+                if not hasattr(self, "physics_task") or self.physics_task.done():
+                    self.physics_task = asyncio.create_task(self.game.physics_loop())
+                    self.game.running = True
+
+                # Ajouter le jeu à games_pool
+                games_pool[self.game_id] = {
+                    "game": self.game,
+                    "connections": 1,  # Premier client connecté
+                }
 
         await self.accept()
 

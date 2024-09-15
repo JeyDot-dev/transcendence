@@ -1,4 +1,5 @@
 from django.db import models
+from userManager.models import UserInfos
 import random, string
 #import request
 import math
@@ -15,6 +16,7 @@ class Player(models.Model):
     psw = models.CharField(max_length=100)
     matchesWon = models.IntegerField(default=0)
     is_winner = models.BooleanField(default=True) #used for tournaments
+    user = models.ForeignKey(UserInfos, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -134,5 +136,3 @@ def generate_unique_id():
         unique_id = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
         if not Game.objects.filter(game_ws_id=unique_id).exists():
             return unique_id
-    """Génère un identifiant unique pour les jeux et le tournoi."""
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))

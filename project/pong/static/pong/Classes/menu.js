@@ -190,6 +190,7 @@ export class Menu {
         });
         this.matchmakingMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 180), () => {
             console.log("Clicked On: Matchmaking");
+            this.socketManager.setType('matchmaking');
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
             this.formSubmittedSuccessfully = false;
