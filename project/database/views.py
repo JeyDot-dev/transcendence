@@ -19,19 +19,23 @@ def tournamentWinner(request, t_id):
 
 
 def newGame(request):
-    form = newGameForm(request.POST)
-    if form.is_valid():
-        player1_name = form.cleaned_data['player1_name']
-        player2_name = form.cleaned_data['player2_name']
-        player1, new1= Player.objects.get_or_create(name=player1_name)
-        player2, new1 = Player.objects.get_or_create(name=player2_name)
-        player1.is_winner = False
-        player2.is_winner = False 
-        player1.save()
-        player2.save()
-        game = Game.objects.create(player1=player1, player2=player2)
-        return redirect("play", game_id = game.id)
-    return render(request, 'database/newgame.html', {'form': form})
+    if request.method == 'POST':
+        form = newGameForm(request.POST)
+        if form.is_valid():
+            logger.info("_____FORMS VALID________")
+            player1_name = form.cleaned_data['player1_name']
+            player2_name = form.cleaned_data['player2_name']
+            player1, new1= Player.objects.get_or_create(name=player1_name)
+            player2, new1 = Player.objects.get_or_create(name=player2_name)
+            player1.is_winner = False
+            player2.is_winner = False 
+            player1.save()
+            player2.save()
+            game = Game.objects.create(player1=player1, player2=player2)
+            return JsonResponse({'status': 'success', 'game_id': game.game_ws_id})
+        return JsonResponse({'status': 'failure'})
+    else:
+        raise Http404()
 
 def newTournament(request):
     if request.method == 'POST':
@@ -77,9 +81,7 @@ def newTournament(request):
                 return response
     
     else:
-        formset = PlayerFormSet(queryset=Player.objects.none())
-        form = newTournamentForm()
-    return render(request, "pong/pong.html", {'form': Tform, 'formset': formset})
+        raise Http404()
 
 def nextPool(request, t_id):
     logger.info(f"________Next pool t_id: {t_id}__________")
