@@ -92,7 +92,7 @@ def newTournament(request):
 def nextPool(request, t_id):
     logger.info(f"________Next pool t_id: {t_id}__________")
     tournament = get_object_or_404(Tournament, pk=t_id)
-    tournament.make_games()
+    tournament.make_games(request.user)
     games = tournament.JSONgames()
     return JsonResponse({
         'tournament_id': tournament.id,
