@@ -34,6 +34,10 @@ def newGame(request):
             player1.save()
             player2.save()
             game = Game.objects.create(player1=player1, player2=player2, game_ws_id=game_ws_id)
+            if request.user.is_authenticated:
+                    logger.info(f"________USER LOGED IN: {request.user.username}__________")
+                    user = request.user
+                    user.match_history.add(game)
             return JsonResponse({'status': 'success', 'game_ws_id': game.game_ws_id})
         return JsonResponse({'status': 'failure'})
     else:
