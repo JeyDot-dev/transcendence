@@ -13,14 +13,18 @@
                 <div class="container">
                     <form id="newGameForm" method="post">
                         {% csrf_token %}
-                        <label for="player1_name">Joueur 1</label>
+                        <label for="player1_name">Player 1</label>
                         <input type="text" id="player1_name" name="player1_name"
                             {% if user.is_authenticated %}
                                 value="{{ user.username }}"
                             {% endif %}
                         >
                         <br>
-                        <label for="player2_name">Joueur 2</label>
+                        <label for="player2_name">Player 2</label>
+                        {{ formGame.player2_name }}
+                        <label for="Time">Timer</label>
+                        {{ formGame.player2_name }}
+                        <label for="Score">Points to Win</label>
                         {{ formGame.player2_name }}
                     </form>
                 </div>

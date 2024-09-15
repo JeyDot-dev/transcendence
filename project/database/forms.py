@@ -4,6 +4,8 @@ from .models import Player
 class newGameForm(forms.Form):
     player1_name = forms.CharField(label='Player 1 Name', max_length=100)
     player2_name = forms.CharField(label='Player 2 Name', max_length=100)
+    max_time = forms.IntegerField(label='Time', default=120)
+    max_point = forms.IntegerField(label='Score', default=120)
 
 class addPlayer(forms.ModelForm):
     class Meta:

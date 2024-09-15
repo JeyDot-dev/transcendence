@@ -49,7 +49,7 @@ class Tournament(models.Model):
         #since is_winner doesn't change if you don't play, the player left out will automaticly rise
         while len(winners) >= 2:
             game = self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number)
-        if user.is_autenticated:
+        if user.is_authenticated:
             user.match_history.add(game)
         self.round_number = models.F('round_number') + 1
         self.save()
