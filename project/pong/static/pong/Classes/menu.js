@@ -6,6 +6,7 @@ import { SocketManager } from './SocketManager.js';
 import { TournamentMenu } from './Tournament.js';
 import { Shop } from './Shop.js'
 import { ModalManager } from './ModalManager.js'
+import { TWEEN } from '../three.module.js';
 
 export class Menu {
     constructor(threeRoot, socketManager) {
@@ -324,7 +325,7 @@ export class Menu {
                 intersects.push(item);
             }
         });
-
+        
         // Ajouter les paddles aux éléments survolés
         this.menuItems.forEach(item => item.removePaddles());
         if (intersects.length > 0) {
@@ -332,13 +333,13 @@ export class Menu {
             selectedItem.addPaddles();
         }
     }
-
+    
     onMouseClick(event) {
         // this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         // this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
+        
         this.raycaster.setFromCamera(this.mouse, this.camera);
-
+        
         let intersects = [];
         this.menuItems.forEach(item => {
             item.updateBoundingBox();
@@ -347,29 +348,29 @@ export class Menu {
                 intersects.push(item);
             }
         });
-
+        
         if (intersects.length > 0) {
             const selectedItem = intersects[0];
             selectedItem.onClick(); // Appel de la fonction onClick associée à l'item cliqué
         }
     }
-
+    
     onKeyDown(event) {
         // event.preventDefault(); // Empêche le comportement par défaut (scrolling)
         // if (event.key === 'c') {
-        //     this.mouseControlEnabled = !this.mouseControlEnabled;  // Basculer l'état du mouvement de la caméra
-        // }
-        // if (event.key === 'h') {
-        //     if (this.showMenuEnabled) {
-        //         this.hide();
-        //     } else {
-        //         this.show();
-        //     }
-        //     this.showMenuEnabled = !this.showMenuEnabled;  // Basculer l'état de l'affichage du menu
-        // }
-        if (event.key === 'ArrowDown') {
-            event.preventDefault();
-            this.navigateMenu(1);
+            //     this.mouseControlEnabled = !this.mouseControlEnabled;  // Basculer l'état du mouvement de la caméra
+            // }
+            // if (event.key === 'h') {
+                //     if (this.showMenuEnabled) {
+                    //         this.hide();
+                    //     } else {
+                        //         this.show();
+                        //     }
+                        //     this.showMenuEnabled = !this.showMenuEnabled;  // Basculer l'état de l'affichage du menu
+                        // }
+                        if (event.key === 'ArrowDown') {
+                            event.preventDefault();
+                            this.navigateMenu(1);
         } else if (event.key === 'ArrowUp') {
             event.preventDefault();
             this.navigateMenu(-1);
@@ -378,10 +379,11 @@ export class Menu {
         }
     }
     navigateMenu(direction) {
-        this.menuItems[this.currentSelectedIndex].removePaddles();
-
+        // this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        this.menuItems.forEach(item => item.removePaddles());
+        
         this.currentSelectedIndex = (this.currentSelectedIndex + direction + this.menuItems.length) % this.menuItems.length;
-
+        
         this.menuItems[this.currentSelectedIndex].addPaddles();
     }
     selectCurrentItem() {

@@ -1,6 +1,4 @@
 import { THREE } from '../three.module.js';
-import { EffectComposer } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/RenderPass.js';
 import { TWEEN } from '../three.module.js';
 import Stats from 'https://cdnjs.cloudflare.com/ajax/libs/stats.js/17/Stats.js';
 
