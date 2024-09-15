@@ -107,48 +107,10 @@ class UserInfos(AbstractUser):
         self.total_victories = total_victories
         self.save()
 
-
-    # def set_username(self, username: str):
-    #     self.username = username
-    #     self.save()
-    #
-    # def set_email(self, email: str):
-    #     try:
-    #         validate_email(email)
-    #         self.email = email
-    #         self.save()
-    #     except ValidationError:
-    #         # Gérer l'erreur de validation ici
-    #         raise ValueError("L'email fourni n'est pas valide.")
-    #
-    # def set_skin(self, skin: str):
-    #     self.skin = skin
-    #     self.save()
-    #
-    # def set_status(self, status: str):
-    #     self.status = status
-    #     self.save()
-
     def set_online(self, is_online: bool):
          self.is_online = is_online
          self.save()
-    #
-    # def set_playing(self, is_playing: bool):
-    #     self.is_playing = is_playing
-    #     self.save()
-    #
-    # def set_grade(self, grade: int):
-    #     self.grade = grade
-    #     self.save()
-    #
-    # def set_total_games(self, total_games: int):
-    #     self.total_games = total_games
-    #     self.save()
-    #
-    # def set_total_victories(self, total_victories: int):
-    #     self.total_victories = total_victories
-    #     self.save()
-    #
+
     def set_last_tournament_id(self, last_tournament_id: str):
         self.last_tournament_id = last_tournament_id
         self.save()
