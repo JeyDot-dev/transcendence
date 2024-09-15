@@ -10,5 +10,6 @@ urlpatterns = [
 	path('change_value/<str:field>/', views.change_value, name='change_value'),
 	path("get_user_list", views.get_user_list, name="get_user_list"),
 	path("get_user/<str:username>/", views.get_user, name="get_user"),
+	path("profile/<str:username>/", views.profile, name="profile"),
     path('', views.index, name='index')
 ]

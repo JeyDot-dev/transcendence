@@ -145,6 +145,10 @@ function logout() {
 	})
 }
 
+window.addEventListener('beforeunload', function () {
+	changeUserValue("set_online", "false", local_user.username);
+});
+
 function changeUserValue(url_key, value, username) {
     const url = `api/userManager/change_value/${url_key}/`;
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
