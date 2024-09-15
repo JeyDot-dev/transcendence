@@ -183,6 +183,7 @@ export class Menu {
     // TODO: hauteur du canvas 
     createMenuItems() {
         this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
+            this.formSubmittedSuccessfully = false;
             this.disableEventListener();
             this.modalManager.openModal('modalNewGame', this.handleNewGameSubmit.bind(this), this);
             //this.newLocalGame();
@@ -191,6 +192,7 @@ export class Menu {
             console.log("Clicked On: Matchmaking");
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
+            this.formSubmittedSuccessfully = false;
             console.log("Clicked On: Local Tournament");
             this.disableEventListener();
             this.modalManager.openModal('modalNewTournament', this.handleTournamentSubmit.bind(this), this);
