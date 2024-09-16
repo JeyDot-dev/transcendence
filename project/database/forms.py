@@ -20,7 +20,6 @@ class UniquePlayerFormSet(forms.BaseModelFormSet):
     def clean(self):
         super().clean()
 
-        # Get all cleaned data from the formset
         names = []
         for form in self.forms:
             if form.cleaned_data:
@@ -31,7 +30,7 @@ class UniquePlayerFormSet(forms.BaseModelFormSet):
                     names.append(name)
 
 PlayerFormSet = forms.modelformset_factory(Player, form=addPlayer, formset=UniquePlayerFormSet, fields=['name'], extra=1)
-                    
+
 class newTournamentForm(forms.Form):
     tournament_title = forms.CharField(label='Tournament Title', max_length=100)
 

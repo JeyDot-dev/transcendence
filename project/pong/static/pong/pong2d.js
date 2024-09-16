@@ -8,13 +8,11 @@ const ctx = canvas.getContext('2d');
 const ws = new WebSocket('ws://localhost/ws/pong/local/666/');
 let gameState = null;
 
-ws.onmessage = function(event) {
+ws.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    
-    // Vérifier le type de message reçu
+
     if (data.type === 'init') {
-        console.log('init');
-        gameState = data.game;  // Assurez-vous d'accéder à `data.game` pour l'état du jeu
+        gameState = data.game;
         drawGame();
     } else if (data.type === 'update') {
         gameState.ball.x = data.ball.x;
@@ -28,11 +26,9 @@ ws.onmessage = function(event) {
 document.addEventListener('keydown', event => {
     const key = event.key.toLowerCase();
     if (['w', 's'].includes(key)) {
-        console.log('keydown: w s');
         ws.send(JSON.stringify({ type: 'keydown', key: key, who: 0 }));
     }
     if (['arrowup', 'arrowdown'].includes(key)) {
-        console.log('keydown: arrow');
         ws.send(JSON.stringify({ type: 'keydown', key: key, who: 1 }));
     }
 });
@@ -40,11 +36,9 @@ document.addEventListener('keydown', event => {
 document.addEventListener('keyup', event => {
     const key = event.key.toLowerCase();
     if (['w', 's'].includes(key)) {
-        console.log('keyup: w s');
         ws.send(JSON.stringify({ type: 'keyup', key: key, who: 0 }));
     }
-   else if (['arrowup', 'arrowdown'].includes(key)) {
-        console.log('keyup: arrow');
+    else if (['arrowup', 'arrowdown'].includes(key)) {
         ws.send(JSON.stringify({ type: 'keyup', key: key, who: 1 }));
     }
 });
@@ -62,8 +56,8 @@ function drawGame() {
 function drawPaddle(player) {
     ctx.fillStyle = 'white';
     ctx.fillRect(
-        player.position[0] - (player.width / 2),  // Ajuster pour centrer le paddle horizontalement
-        player.position[1] - (player.height / 2), // Ajuster pour centrer le paddle verticalement
+        player.position[0] - (player.width / 2),
+        player.position[1] - (player.height / 2),
         player.width,
         player.height
     );

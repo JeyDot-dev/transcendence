@@ -1,5 +1,4 @@
-document.getElementById('add_players').addEventListener('click', function() {
-    console.log('added players');
+document.getElementById('add_players').addEventListener('click', function () {
     let formCount = document.querySelectorAll('#formsetContainer .form-group').length;
 
     const formsetContainer = document.getElementById('formsetContainer');

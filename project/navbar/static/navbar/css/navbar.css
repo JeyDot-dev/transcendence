@@ -3,7 +3,6 @@
     padding-right: 6vw;
     background: rgb(36,8,82);
     background: linear-gradient(180deg, rgba(36,8,82,1) 0%, rgba(3,22,68,1) 82%);
-    /* background-color: #031644; */
 }
 
 .navbar-brand:focus {
@@ -15,13 +14,7 @@
 .navbar-brand {
     font-size: 2rem;
     font-family: 'Lemon/Milk', sans-serif;
-    /* text-shadow: */
-    /*    0.05rem 0.05rem 0 rgba(255, 0, 0, 0.9), */
-    /*    -0.05rem -0.05rem 0 rgba(0, 255, 0, 0.9), */
-    /*    0.05rem -0.05rem 0 rgba(0, 0, 255, 0.9), */
-    /*    0.1rem 0.1rem 0.2rem rgba(222, 1, 173, 1); */
     color: #FFFFFF;
-    /* animation: blinker 30s linear infinite !important; */
 }
 .navbar-toggler-icon{
     opacity: 100;
