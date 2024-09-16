@@ -4,23 +4,24 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div data-bs-theme="dark" class="modal-header">
-                <h5 class="modal-title" id="loginModalPage">Tournament Registeration</h5>
+                <h5 class="modal-title" id="loginModalPage">Tournament Registration</h5>
                 <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="container">
+                    <div id="form_error"></div>
                     <form id="newTournamentForm" method="post">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label id ="top" for="id_tournament_title">Tournament Title</label>
+                            <label id="top" for="id_tournament_title">Tournament Title</label>
                             {{ form.tournament_title }}
                         </div>
                         <div id="formsetContainer">
                             {{ formset.management_form }}  
                         </div>
                         <label for="num-players">Number of Players:</label>
-                        <input type="number" id="num-players" min="4" value="4">
-                        <button type="button" id='add_players'>Add Players</button>
+                        <input type="number" id="num-players" min="4" value="4" max="16">
+                        <button type="button" id="add_players">Add Players</button>
                     </form>
                 </div>
             </div>
@@ -32,23 +33,28 @@
 </div>
 
 <script>
-document.getElementById('add_players').addEventListener('click', function() {
-    let formCount = document.querySelectorAll('#formsetContainer .form-group').length;
 
-    const formsetContainer = document.getElementById('formsetContainer');
-    const numPlayersToAdd = parseInt(document.getElementById('num-players').value);  // Get the number of forms from input
+    const isAuthenticated = {{ user.is_authenticated|lower }};
+    const username = '{{ user.username|escapejs }}';
 
-    for (let i = 0; i < numPlayersToAdd; i++) {
-        const newFormHtml = `
-            <div class="form-group">
-                <label for="id_form-${formCount}-name">Player Name:</label>
-                <input type="text" name="form-${formCount}-name" class="form-control" id="id_form-${formCount}-name">
-                <div class="error-message" id="error-${formCount}-name" style="color: red;"></div>
-            </div>`;
-        formsetContainer.insertAdjacentHTML('beforeend', newFormHtml);
-        formCount++;
-    }
+    document.getElementById('add_players').addEventListener('click', function() {
+        console.log('added players');
+        let formCount = document.querySelectorAll('#formsetContainer .form-group').length;
 
-    document.querySelector('input[name="form-TOTAL_FORMS"]').value = formCount;
-});
+        const formsetContainer = document.getElementById('formsetContainer');
+        const numPlayersToAdd = parseInt(document.getElementById('num-players').value);  // Get the number of forms from input
+
+        for (let i = formCount; i < numPlayersToAdd; i++) {
+            const newFormHtml = `
+                <div class="form-group">
+                    <label for="id_form-${i}-name">Player Name:</label>
+                    <input type="text" name="form-${i}-name" class="form-control" id="id_form-${i}-name"
+                           ${isAuthenticated && i === 0 ? 'value="' + username + '"' : ''}>
+                    <div class="error-message" id="error-${i}-name" style="color: red;"></div>
+                </div>`;
+            formsetContainer.insertAdjacentHTML('beforeend', newFormHtml);
+        }
+
+        document.querySelector('input[name="form-TOTAL_FORMS"]').value = numPlayersToAdd;
+    });
 </script>

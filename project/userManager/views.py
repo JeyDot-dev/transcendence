@@ -14,6 +14,8 @@ from rest_framework.authtoken.models import Token
 from .models import UserInfos
 from django.shortcuts import get_object_or_404, render
 
+from PIL import Image
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
@@ -69,7 +71,6 @@ def signup(request):
 def test_token(request):
     return Response({"message": "Token is valid"})
 
-
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
@@ -82,6 +83,15 @@ def change_profile_pic(request):
     if "profile_pic" not in request.FILES:
         return Response(
             {"message": "No profile picture provided"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Try to open the file as an image
+    try:
+        Image.open(request.FILES["profile_pic"])
+    except IOError:
+        return Response(
+            {"message": "Uploaded file is not a valid image"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 

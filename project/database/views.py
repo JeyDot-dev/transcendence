@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http40
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.template import loader
+from database.models import generate_unique_id
 import random, string
 import logging
 from django.http import HttpResponseNotFound
@@ -19,21 +20,25 @@ def tournamentWinner(request, t_id):
 
 
 def newGame(request):
-    form = newGameForm(request.POST)
-    if form.is_valid():
-        player1_name = form.cleaned_data["player1_name"]
-        player2_name = form.cleaned_data["player2_name"]
-        player1, new1 = Player.objects.get_or_create(name=player1_name)
-        player2, new1 = Player.objects.get_or_create(name=player2_name)
-        player1.is_winner = False
-        player2.is_winner = False
-        player1.save()
-        player2.save()
-        game = Game.objects.create(player1=player1, player2=player2)
-        return redirect("play", game_id=game.id)
-    return render(request, "database/newgame.html", {"form": form})
-
-
+    if request.method == 'POST':
+        form = newGameForm(request.POST)
+        if form.is_valid():
+            logger.info("_____FORMS VALID________")
+            player1_name = form.cleaned_data['player1_name']
+            player2_name = form.cleaned_data['player2_name']
+            player1, new1= Player.objects.get_or_create(name=player1_name)
+            player2, new1 = Player.objects.get_or_create(name=player2_name)
+            player1.is_winner = False
+            player2.is_winner = False
+            game_ws_id = generate_unique_id()
+            player1.save()
+            player2.save()
+            game = Game.objects.create(player1=player1, player2=player2, game_ws_id=game_ws_id)
+            return JsonResponse({'status': 'success', 'game_ws_id': game.game_ws_id})
+        return JsonResponse({'status': 'failure'})
+    else:
+        raise Http404()
+        
 def newTournament(request):
     if request.method == "POST":
         Tform = newTournamentForm(request.POST)
@@ -48,8 +53,17 @@ def newTournament(request):
                     player.is_winner = True
                     player.save()
                     tournament.players.add(player)
-            tournament.save()
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            if tournament.players.count() < 2 and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                tournament.delete()
+                response = JsonResponse({'status': 'failure', 'reason': "You need at least two players"})
+                return response
+            elif not tournament.players.count() in (4, 8, 16) and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                tournament.delete()
+                response = JsonResponse({'status': 'failure', 'reason': "You must have 4, 8 or 16 players"})
+                return response
+            else:
+                tournament.save()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 players = [player.name for player in list(tournament.players.all())]
                 response = JsonResponse(
                     {"status": "success", "t_id": tournament.id, "players": players}
@@ -58,15 +72,17 @@ def newTournament(request):
         else:
             logger.info(f"Form errors: {Tform.errors}")
             logger.info(f"Form errors: {formset.errors}")
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                response = JsonResponse({"status": "failure", "t_id": 0})
+            if Tform.is_valid() and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                for form_errors in formset.errors:
+                    if form_errors:
+                        first_field = next(iter(form_errors))
+                        error_message = form_errors[first_field]
+                response = JsonResponse({'status': 'failure', 'reason': error_message})
                 return response
-    else:
-        formset = PlayerFormSet(queryset=Player.objects.none())
-        form = newTournamentForm()
+            elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                response = JsonResponse({'status': 'failure', 'reason': "Tournament title is required"})
+                return response
         raise Http404()
-    return render(request, "pong/pong.html", {"form": Tform, "formset": formset})
-
 
 def nextPool(request, t_id):
     tournament = get_object_or_404(Tournament, pk=t_id)
@@ -101,10 +117,7 @@ def game_winner(request, game_ws_id):
 def get_old_tournament(request, t_id):
     tournament = get_object_or_404(Tournament, pk=t_id)
     old = tournament.ressend_tournament()
-    return JsonResponse(
-        {
-            "tournament_id": tournament.id,
-            "pools": old,
-        }
-    )
-
+    return JsonResponse({
+        'tournament_id': tournament.id,
+        'pools': old,
+    })

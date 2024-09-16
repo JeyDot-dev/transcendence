@@ -1,6 +1,5 @@
 from django.db import models
 import random, string
-#import request
 import math
 from datetime import datetime
 
@@ -35,13 +34,13 @@ class Tournament(models.Model):
     def make_games(self):
         winners = [player for player in list(self.players.all()) if player.is_winner]
         random.shuffle(winners)
-        if len(winners) == 3:
+        """if len(winners) == 3:
             self.games.create(player1=winners[0], player2=winners[1], game_ws_id=generate_unique_id(), pool=self.round_number)
             self.games.create(player1=winners[0], player2=winners[2], game_ws_id=generate_unique_id(), pool=self.round_number)
             self.games.create(player1=winners[2], player2=winners[1], game_ws_id=generate_unique_id(), pool=self.round_number)
-        else: 
-            while len(winners) >= 2:
-                self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number)
+        else:"""
+        while len(winners) >= 2:
+            self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number)
         self.round_number = models.F('round_number') + 1
         self.save()
 
@@ -120,5 +119,10 @@ class Game(models.Model):
         self.looser.save()
 
 def generate_unique_id():
+    """Generate a unique WebSocket ID for games."""
+    while True:
+        unique_id = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        if not Game.objects.filter(game_ws_id=unique_id).exists():
+            return unique_id
     """Génère un identifiant unique pour les jeux et le tournoi."""
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))

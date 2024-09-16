@@ -105,11 +105,29 @@ export class Menu {
             this.newLocalTournament(obj.t_id);
         }
         else if (obj.status.localeCompare('failure') == 0) {
-            const newDiv = document.createElement('div');
-            newDiv.textContent = 'All usernames must be different';
+            const newDiv = document.getElementById('form_error');
+            newDiv.innerHTML = obj.reason;
             newDiv.style.color = "red";
-            const label = document.querySelector('#top');
-            label.insertAdjacentElement('afterend', newDiv);
+        }
+    }
+    async handleNewGameSubmit(event) {
+        let form = document.getElementById('newGameForm');
+        let formData = new FormData(form);
+        console.log('formData: ', formData);
+
+        let jsonObject = {};
+        for (const [key, value] of formData.entries()) {
+            jsonObject[key] = value;
+        }
+
+        const response = await sendJSON('/database/newGame', jsonObject);
+        console.log("Response: ", response);
+
+        const obj = JSON.parse(response);
+        if (obj.status.localeCompare('success') == 0) {
+            this.modalManager.closeModal();
+            this.formSubmittedSuccessfully = true;
+            this.newLocalGame(obj.game_ws_id);
         }
     }
     async handleOptionsSubmit(event) {
@@ -118,11 +136,16 @@ export class Menu {
     }
     createMenuItems() {
         this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
-            this.newLocalGame();
+            this.formSubmittedSuccessfully = false;
+            this.disableEventListener();
+            this.modalManager.openModal('modalNewGame', this.handleNewGameSubmit.bind(this), this);
+            //this.newLocalGame();
         });
         this.matchmakingMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 180), () => {
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
+            this.formSubmittedSuccessfully = false;
+            console.log("Clicked On: Local Tournament");
             this.disableEventListener();
             this.modalManager.openModal('modalNewTournament', this.handleTournamentSubmit.bind(this), this);
         });
@@ -274,8 +297,8 @@ export class Menu {
         this.renderer.render(this.scene, this.camera);
     }
 
-    newLocalGame() {
-        this.socketManager.connectLocalGame();
+    newLocalGame(customGameId) {
+        this.socketManager.connectCustomGame(customGameId);
         this.hide();
     }
 
