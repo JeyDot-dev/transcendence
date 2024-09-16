@@ -41,21 +41,16 @@ class PongConsumer(AsyncWebsocketConsumer):
                     # Récupérer les joueurs depuis la base de données
                     player1 = await sync_to_async(lambda: GameDB.player1)()
                     player2 = await sync_to_async(lambda: GameDB.player2)()
-                    # timer, maxScore, topspin, backspin, sidespin = await sync_to_async(lambda: (
-                    #     GameDB.timer, GameDB.max_score, GameDB.topspin, GameDB.backspin, GameDB.sidespin
-                    # ))()
+                    timer, maxScore, topspin, backspin, sidespin = await sync_to_async(lambda: (
+                        GameDB.timer, GameDB.score, GameDB.top_spin, GameDB.back_spin, GameDB.side_spin
+                    ))()
                     logger.info(f"Player 1: {player1.name}, ID: {player1.id}")
                     logger.info(f"Player 2: {player2.name}, ID: {player2.id}")
 
-                    timer = await sync_to_async(lambda: GameDB.timer)()
-                    score = await sync_to_async(lambda: GameDB.score)()
-                    top_spin = await sync_to_async(lambda: GameDB.top_spin)()
-                    back_spin = await sync_to_async(lambda: GameDB.top_spin)()
-                    logger.info(f"Game {self.game_id}: Timer = {timer}, Score = {score}, top_spin = {top_spin}, back_spin = {back_spin}")
                     # Créer une nouvelle instance de game avec les joueurs de la base de données
                     self.game = Game(
                         self.game_id, [], 2, 1280, 720, self.notifyEvent,
-                        "dbGame", 300, 10, True, True, True
+                        "dbGame", timer, maxScore, topspin, backspin, sidespin
                     )
                     self.game.addPlayer(
                         Player(id=1, skin="skin1", name=player1.name), 0
@@ -210,7 +205,6 @@ async def handle_key(game, types, key, who, consumer):
     if types not in ["keydown", "keyup"]:
         return
 
-    # Handle spacebar for pausing the game
     if key == "space" and types == "keydown":
         if not getattr(game, "pause_handled", False):
             if game.isPaused:
@@ -224,16 +218,14 @@ async def handle_key(game, types, key, who, consumer):
 
     action = None
 
-    # Movement keys
     if key in ["w", "arrowup"]:
         action = "up"
     elif key in ["s", "arrowdown"]:
         action = "down"
 
-    # Backspin and topspin keys
-    if key in ["a", "arrowright"]:
+    if game.allowBackspin and key in ["a", "arrowright"]:
         action = "backspin"
-    elif key in ["d", "arrowleft"]:
+    elif game.allowTopspin and key in ["d", "arrowleft"]:
         action = "topspin"
 
     if action is None:
@@ -241,7 +233,6 @@ async def handle_key(game, types, key, who, consumer):
 
     paddle = game.paddles[who]
 
-    # Handle movement and spin logic
     if action in ["up", "down"]:
         if types == "keydown":
             paddle.keys_pressed[action] = True

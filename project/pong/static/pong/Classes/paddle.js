@@ -1,8 +1,9 @@
 import { THREE } from '../three.module.js';
 
 export class Paddle {
-    constructor(width, height, color, x, y, velocity = new THREE.Vector2(0, 0), id) {
+    constructor(width, height, color, x, y, velocity = new THREE.Vector2(0, 0), id, threeRoot) {
         this.velocity = velocity;
+        this.threeRoot = threeRoot;
         this.geometry = new THREE.BoxGeometry(1, 1, 1);
         this.material = new THREE.MeshStandardMaterial({ color: color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -58,8 +59,14 @@ export class Paddle {
             blending: THREE.AdditiveBlending,
             transparent: true
         });
-
+        
         const glowMesh = new THREE.Mesh(this.geometry.clone(), shaderMaterial);
+        const glowScaleFactor = 1.05;  // Increase this value to make the glow larger
+        glowMesh.scale.set(
+            glowScaleFactor,
+            glowScaleFactor,
+            glowScaleFactor
+        );
         this.mesh.add(glowMesh);  // Attach the glow to the paddle mesh
         return glowMesh;
     }
@@ -80,6 +87,8 @@ export class Paddle {
 
     move(x, y) {
         this.mesh.position.set(x, y);
+        // this.glowBlack.material.uniforms.viewVector.value = this.threeRoot.camera.position.clone().sub(this.mesh.position).normalize();
+        // this.glowRed.material.uniforms.viewVector.value = this.threeRoot.camera.position.clone().sub(this.mesh.position).normalize();
     }
 
     addToScene(scene) {

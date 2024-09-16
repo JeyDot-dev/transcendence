@@ -31,7 +31,7 @@ class Paddle:
         self.updateCallBack = updateCallBack
         self.backspin = False
         self.topspin = False
-        self.sidespin = False
+        self.sidespin = True
 
     def move(self, delta_time):
         self.y += self.speed * self.velocity * delta_time
@@ -135,12 +135,21 @@ class Ball:
 
         # Logique du sidespin
         if paddle.sidespin:
-            impact_factor = 0.6  # Facteur d'influence du sidespin
+            impact_factor = 0.6
             self.vel_y += paddle.velocity * impact_factor
 
             speed_influence = 1 + abs(paddle.velocity) * 0.17
             self.vel_x *= speed_influence
             self.vel_y *= speed_influence
+        else:
+            # Logique du OG Pong
+            paddle_center_y = paddle.y
+            distance_from_center = self.y - paddle_center_y
+            max_distance = paddle.height / 2
+
+            normalized_distance = distance_from_center / max_distance
+
+            self.vel_y = normalized_distance
 
         if self.vel_x > 0:
             self.x = paddle_bounds['right'] + self.size / 2 + 1
@@ -156,7 +165,7 @@ class Ball:
             self.vel_x = min(self.vel_x * 1.2, MAX_SPEED)
 
         if paddle.backspin:
-            self.vel_y /= 3
+            self.vel_y *= 0.8
             self.vel_x *= 0.8
 
     def wall_collision(self, score):
@@ -304,7 +313,7 @@ class Game:
         if len(self.players) < self.nb_max_players:
             self.players.append(player)
             paddle_x = 100 if side == 0 else self.width - 100
-            paddle = Paddle(paddle_x, player.skin, player.id, self.width, self.height, self.updateCallBack)
+            paddle = Paddle(paddle_x, player.skin, player.id, self.width, self.height, self.updateCallBack, self.allowSidespin)
             self.paddles.append(paddle)
         else:
             raise ValueError("Le jeu est complet")
