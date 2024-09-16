@@ -62,6 +62,7 @@ class Ball:
         self.x = arenaWidth / 2
         self.y = arenaHeight / 2
         self.speed = 400
+        self.maxSpeed = 2000
         self.initialSpeed = self.speed
         self.vel_x = -1
         self.vel_y = 0
