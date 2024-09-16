@@ -20,10 +20,17 @@ class Paddle:
         self.speed = 800
         self.velocity = 0
         self.bounce = 1
-        self.keys = {"up": 0, "down": 0}
+        self.keys_pressed = {
+            "up": False,
+            "down": False,
+            "backspin": False,
+            "topspin": False
+        }
         self.side = 0 if x <= arenaWidth / 2 else 1  # 0 = gauche, 1 = droite
         self.user_id = userId
         self.updateCallBack = updateCallBack
+        self.backspin = False
+        self.topspin = False
 
     def move(self, delta_time):
         self.y += self.speed * self.velocity * delta_time
@@ -198,11 +205,25 @@ class Ball:
         self.y += self.speed * self.vel_y * delta_time
 
 class Game:
-    def __init__(self, id, players, nb_max_players=100, width=1280, height=720, updateCallBack=None, type='localGame', maxTimer=120, maxScore=5):
+    def __init__(
+        self, 
+        id, 
+        players, 
+        nb_max_players=100, 
+        width=1280, 
+        height=720, 
+        updateCallBack=None, 
+        type='localGame', 
+        timer=0, 
+        maxScore=3, 
+        topspin=False, 
+        backspin=False, 
+        sidespin=False
+    ):
         self.id = id
         self.type = type
         self.timer = 0
-        self.maxTimer = maxTimer
+        self.maxTimer = timer
         self.score = [0, 0]
         self.maxScore = maxScore
         self.running = False
@@ -217,6 +238,9 @@ class Game:
         self.players = players
         self.paddles = []
         self.ball = Ball((255, 255, 255), width, height, updateCallBack)
+        self.allowTopspin = topspin
+        self.allowBackspin = backspin
+        self.allowSidespin = sidespin
 
     async def countdown_before_start(self):
         """Envoie un décompte de 3 secondes avant le début de la partie."""
