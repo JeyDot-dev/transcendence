@@ -37,6 +37,7 @@ function displayUserList(users) {
 
 
 let searchTimeout;
+
 function searchUserInput() {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {

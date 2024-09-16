@@ -16,120 +16,128 @@
 <!-- {% include "searchBar.html" %} -->
 <div class="vertical-container pt-5" id="profile_container">
 
-    <label for="profile_pic" id="profile_pic_label">
-        <div id="pp-div">
-            <img src="{% static user.profile_pic.url %}" alt="Profile Picture" id="pp">
-            <div class="img-overlay"></div>
-        </div>
-    </label>
-    <form id="profilePictureForm" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="hidden" name="username" value="{{ user.username }}">
-        <input type="file" name="profile_pic" id="profile_pic" accept="image/*" required>
-        <button class="btn" type="button" onclick="submitProfilePicture()">Update Profile Picture</button>
-    </form>
+	<label for="profile_pic" id="profile_pic_label">
+		<div id="pp-div">
+			<img src="{% static user.profile_pic.url %}" alt="Profile Picture" id="pp">
+			<div class="img-overlay"></div>
+		</div>
+	</label>
+	<form id="profilePictureForm" enctype="multipart/form-data">
+		{% csrf_token %}
+		<input type="hidden" name="username" value="{{ user.username }}">
+		<input type="file" name="profile_pic" id="profile_pic" accept="image/*" required>
+		<button class="btn" type="button" onclick="submitProfilePicture()">Update Profile Picture</button>
+	</form>
 
-    <h3 class="mt-2">{{ user.username }}</h3>
-    <div class="form-floating" id="floatingStatus" placeholder="change status">
-        <textarea type="" spellcheck="false" class="form-control focus-ring fw-light fst-italic px-0 py-0" id="new_status" placeholder="edit your status" required>{{ user.status }}</textarea>
-    </div>
-    <button style="min-width: 100px;" class="btn" id="submit_status" onclick="changeUserValue('new_status', document.getElementById('new_status').value, '{{ user.username }}')">Update status message</button>
+	<h3 class="mt-2">{{ user.username }}</h3>
+	<div class="form-floating" id="floatingStatus" placeholder="change status">
+		<textarea type="" spellcheck="false" class="form-control focus-ring fw-light fst-italic px-0 py-0" id="new_status" placeholder="edit your status" maxlength="142" minlength="3" required>{{ user.status }}</textarea>
+	</div>
+	<button style="min-width: 100px;" class="btn" id="submit_status" onclick="changeUserValue('new_status', document.getElementById('new_status').value, '{{ user.username }}')">Update status message</button>
 </div>
 
 <div class="container text-center">
-    <div class="row mb-4 ps-5-lg" id="histoFriend" style="">
-        <ul class="list-group mx-auto col-lg me-auto-lg mt-4" id="gameStatsContainer" style="max-width: 400px; max-height: 46vh; min-height: 46vh;">
-            <li class="list-group-item list-title">
-                <h4>Played games: {{ user.total_games }}  Won: {{ user.total_victories }} </h4>
-                <h5>last ten games</h5>
-            </li>
-            {% for game in game_history %}
-            <li class="list-group-item 
-            {% if game.winner.user == user %} 
-                text-success
-            {% else %}
-                text-danger
-            {% endif %}">{{ game }} {{game.points1}}|{{game.points2}} {{ game.date|date:"d.m.y H:i" }}</li>
-            {% empty %}
-            <li>Play games to show history.</li>
-            {% endfor %}
-        </ul>
-        <ul class="list-group mx-auto col-lg ms-auto-lg me-5-lg mt-4" id="friendList" style="max-width: 400px; max-height: 46vh; min-height: 46vh;">
-            <li class="list-group-item list-title">
-                <div class="container">
-                    <input autocomplete="off" class="form-control col" id="add_friend" placeholder="User to befriend" required></input>
-                    <button class="btn col" onclick="changeUserValue('add_friend', document.getElementById('add_friend').value, '{{ user.username }}')">request</button>
-                </div>
-            </li>
-            <li class="list-group-item list-title">
-                <h4>Friendlist </h4>
-            <div class="mx-auto" id="separator"></div>
-            </li>
-            {% for friend in user.friends.all %}
-            <li class="list-group-item">{{ friend.username }}</li>
-            {% endfor %}
-            <li class="list-group-item list-title">
-                <h4 class="mt-5">Friend requests </h4>
-            <div class="mx-auto" id="separator"></div>
-            </li>
-            {% for friend in user.friends_requests.all %}
-            <li class="list-group-item">{{ friend.username }}</li>
-            {% endfor %}
-        </ul>
-    </div>
+	<div class="row mb-4 ps-5-lg" id="histoFriend" style="">
+		<ul class="list-group mx-auto col-lg me-auto-lg mt-4" id="gameStatsContainer" style="max-width: 400px; max-height: 46vh; min-height: 46vh;">
+			<li class="list-group-item list-title">
+				<h4>Played games: {{ user.total_games }}  Won: {{ user.total_victories }} </h4>
+				<h5>last ten games</h5>
+			</li>
+			{% for game in game_history %}
+			<li class="list-group-item 
+			{% if game.winner.user == user %} 
+				text-success
+			{% else %}
+				text-danger
+			{% endif %}">{{ game }} {{game.points1}}|{{game.points2}} {{ game.date|date:"d.m.y H:i" }}</li>
+			{% empty %}
+			<li>Play games to show history.</li>
+			{% endfor %}
+		</ul>
+		<ul class="list-group mx-auto col-lg ms-auto-lg me-5-lg mt-4" id="friendList" style="max-width: 400px; max-height: 46vh; min-height: 46vh;">
+			<li class="list-group-item list-title">
+				<div class="container">
+					<input autocomplete="off" class="form-control col" id="add_friend" placeholder="User to befriend" required></input>
+					<button class="btn col" onclick="changeUserValue('add_friend', document.getElementById('add_friend').value, '{{ user.username }}')">request</button>
+				</div>
+			</li>
+			<li class="list-group-item list-title">
+				<h4>Friendlist </h4>
+			<div class="mx-auto" id="separator"></div>
+			</li>
+			{% for friend in user.friends.all %}
+				<li class="list-group-item">
+					<a href="/userManager/profile/{{ friend.username }}" style="text-decoration: none;">
+						{% if friend.is_online %}
+							<span class="badge bg-success">online</span>
+						{% else %}
+							<span class="badge bg-danger">offline</span>
+						{% endif %}
+						{{ friend.username }}
+					</a>
+						<button class="btn" onclick="changeUserValue('remove_friend', '{{ friend.username }}', '{{ user.username }}')">
+							<span class="badge bg-danger">Remove</span>
+						</button>
+				</li>
+			{% endfor %}
+			<li class="list-group-item list-title">
+				<h4 class="mt-5">Friend requests </h4>
+			<div class="mx-auto" id="separator"></div>
+			</li>
+			{% for friend_req in user.friends_requests.all %}
+				<li class="list-group-item">
+					<button class="btn" onclick="changeUserValue('accept_friend_request', '{{ friend_req.username }}', '{{ user.username }}')">
+						<span class="badge bg-success">Accept</span>
+					</button>
+					<a href="/userManager/profile/{{ friend_req.username }}" style="text-decoration: none;">
+						{{ friend_req.username }}
+					</a>
+					<button class="btn" onclick="changeUserValue('deny_friend_request', '{{ friend_req.username }}', '{{ user.username }}')">
+						<span class="badge bg-danger">Decline</span>
+					</button>
+				</li>
+			{% endfor %}
+		</ul>
+	</div>
 </div>
 
 <div class="container" id="modifyProfileContainer">
-    <ul class="list-group list-group-horizontal-sm">
-        <li class="list-group-item flex-fill">
-            <div class="form-floating" id="floatingUsername" placeholder="change username">
-                <input autocomplete="off" type="" class="form-control" id="new_username" placeholder="change username" required>
-                <label for="new_username">change username</label>
-            </div>
-        </li>
-        <li class="list-group-item flex-fill">
-            <button class="btn" onclick="changeUserValue('new_username', document.getElementById('new_username').value, '{{ user.username }}')">Confirm</button>
-        </li>
-    </ul>
-    <ul class="list-group list-group-horizontal-sm">
-        <li class="list-group-item flex-fill">
-            <div class="form-floating" id="floatingEmail" placeholder="change email">
-                <input type="email" class="form-control" id="new_email" placeholder="change email" required>
-                <label for="new_email"> {{ user.email }}</label>
-            </div>
-        </li>
-        <li class="list-group-item flex-fill">
-            <button class="btn" onclick="changeUserValue('new_email', document.getElementById('new_email').value, '{{ user.username }}')">Confirm</button>
-        </li>
-    </ul>
-    <form id="changePasswordForm">
-        <input type="hidden" name="username" value={{ user.username }}>
-        <ul class="list-group list-group-horizontal-sm">
-            {% csrf_token %}
-            <li class="list-group-item flex-fill">
-                <div class="form-floating" id="floatingNewPassword" placeholder="New password">
-                    <input type="password" class="form-control" id="new_password_input" name="new_password" placeholder="New password" required>
-                    <label for="new_password_input">New password</label>
-                </div>
-            </li>
-            <li class="list-group-item flex-fill">
-                <div class="form-floating" id="floatingConfirmPassword" placeholder="Retype new password">
-                    <input type="password" class="form-control" name="new_password_confirm" placeholder="Retype new password" id="new_password_to_send" required>
-                    <label for="new_password_to_send">Retype new password</label>
-                </div>
-            </li>
-        </ul>
-        <ul class="list-group list-group-horizontal-sm">
-            <li class="list-group-item flex-fill">
-                <div class="form-floating" id="floatingOldPassword" placeholder="Old password">
-                    <input type="password" class="form-control" id="old_password_input" name="old_password" placeholder="Current password" required>
-                    <label for="old_password_input">Current password</label>
-                </div>
-            </li>
-            <li class="list-group-item flex-fill">
-                <button class="btn" onclick="changeUserValue('new_password', document.getElementById('new_password_to_send').value, '{{ user.username }}')">Confirm</button>
-        </ul>
-    </form>
+	<ul class="list-group list-group-horizontal-sm">
+		<li class="list-group-item flex-fill">
+			<div class="form-floating" id="floatingUsername" placeholder="change username">
+				<input autocomplete="off" type="" class="form-control" id="new_username" placeholder="change username" required>
+				<label for="new_username">change username</label>
+			</div>
+		</li>
+		<li class="list-group-item flex-fill">
+			<button class="btn" onclick="changeUserValue('new_username', document.getElementById('new_username').value, '{{ user.username }}')">update username</button>
+		</li>
+	</ul>
+	<ul class="list-group list-group-horizontal-sm">
+		<li class="list-group-item flex-fill">
+			<div class="form-floating" id="floatingEmail" placeholder="change email">
+				<input type="email" class="form-control" id="new_email" placeholder="change email" required>
+				<label for="new_email"> {{ user.email }}</label>
+			</div>
+		</li>
+		<li class="list-group-item flex-fill">
+			<button class="btn" onclick="changeUserValue('new_email', document.getElementById('new_email').value, '{{ user.username }}')">Update email</button>
+		</li>
+	</ul>
+	<form id="changePasswordForm">
+		<input type="hidden" name="username" value={{ user.username }}>
+		<ul class="list-group list-group-horizontal-sm">
+			{% csrf_token %}
+			<li class="list-group-item flex-fill">
+				<div class="form-floating" id="floatingNewPassword" placeholder="New password">
+					<input type="password" class="form-control" id="new_password_input" name="new_password" placeholder="New password" required>
+					<label for="new_password_input">New password</label>
+				</div>
+			</li>
+			<li class="list-group-item flex-fill">
+				<button class="btn" onclick="changeUserValue('new_password', document.getElementById('new_password_to_send').value, '{{ user.username }}')">Update password</button>
+		</ul>
+	</form>
 </div>
 {% else %}
 <h1>Something went wrong</h1>
