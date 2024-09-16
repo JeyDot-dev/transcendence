@@ -41,6 +41,7 @@ export class Game {
         this.initBall(gameData.ball);
         this.initPaddles(gameData.players);
         this.initPlayerName(gameData.playerNames);
+        this.initGameOptions(gameData.options);
 
         this.initPhysics(gameData);
         this.threeRoot.addAnimatedObject(this);
@@ -177,6 +178,11 @@ export class Game {
             }
         );
     }
+    initGameOptions(options) {
+        this.topsin = options.topsin;
+        this.backsin = options.backsin;
+        this.sidespin = options.sidespin;
+    }
     initBackToMainMenu() {
         this.backToMainMenu = new BackToMainMenu(this.threeRoot, this.socketManager, this, 'game');
         this.backToMainMenu.addToScene(this.scene);
@@ -199,10 +205,10 @@ export class Game {
         if (!this.pressedKeys[key]) {
             this.pressedKeys[key] = true;
 
-            if (['w', 's'].includes(key)) {
+            if (['w', 's', 'a', 'd'].includes(key)) {
                 this.socketManager.sendMessage({ type: 'keydown', key: key, who: 0 });
             }
-            if (['arrowup', 'arrowdown'].includes(key)) {
+            if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
                 this.socketManager.sendMessage({ type: 'keydown', key: key, who: 1 });
             }
         }
@@ -223,10 +229,10 @@ export class Game {
         if (this.pressedKeys[key]) {
             delete this.pressedKeys[key];
 
-            if (['w', 's'].includes(key)) {
+            if (['w', 's', 'a', 'd'].includes(key)) {
                 this.socketManager.sendMessage({ type: 'keyup', key: key, who: 0 });
             }
-            if (['arrowup', 'arrowdown'].includes(key)) {
+            if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
                 event.preventDefault(); // Empêche le comportement par défaut (scrolling)
                 this.socketManager.sendMessage({ type: 'keyup', key: key, who: 1 });
             }
@@ -287,6 +293,7 @@ export class Game {
     }
 
     wsMessageManager(data) {
+        console.log(data);
         switch (data.type) {
             case 'scoreChange0':
                 this.p1Text.updateText(data.score[0].toString(), this.gameGroup);
@@ -319,6 +326,17 @@ export class Game {
                 if (data.ball) {
                     this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);
                 }
+                break;
+            case 'spinChange':
+                const paddle = this.paddles[data.paddle];
+                if (data.glow === 'black') {
+                    paddle.showBlackGlow();
+                } else if (data.glow === 'red') {
+                    paddle.showRedGlow();
+                } else {
+                    paddle.hideBothGlow();
+                }
+                break;
             default:
                 break;
         }

@@ -9,7 +9,7 @@ document.addEventListener('loadView', function (event) {
     threeRoot.initCanvas();
     if (!isRunning) {
         const socketManager = new SocketManager(threeRoot);
-        let menu = new Menu(threeRoot, socketManager);
+        let menu = new Menu(threeRoot, socketManager, window.userAuthenticated);
         socketManager.setLastMenu(menu);
         menu.show();
     }
