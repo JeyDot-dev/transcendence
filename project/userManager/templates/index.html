@@ -31,7 +31,7 @@
 
     <h3 class="mt-2">{{ user.username }}</h3>
     <div class="form-floating" id="floatingStatus" placeholder="change status">
-        <textarea type="" spellcheck="false" class="form-control focus-ring fw-light fst-italic px-0 py-0" id="new_status" placeholder="edit your status" required>{{ user.status }}</textarea>
+        <textarea type="" spellcheck="false" class="form-control focus-ring fw-light fst-italic px-0 py-0" id="new_status" placeholder="edit your status" maxlength="142" minlength="3" required>{{ user.status }}</textarea>
     </div>
     <button style="min-width: 100px;" class="btn" id="submit_status" onclick="changeUserValue('new_status', document.getElementById('new_status').value, '{{ user.username }}')">Update status message</button>
 </div>
@@ -66,14 +66,33 @@
             <div class="mx-auto" id="separator"></div>
             </li>
             {% for friend in user.friends.all %}
-            <li class="list-group-item">{{ friend.username }}</li>
+            	<li class="list-group-item">
+					<a href="/userManager/profile/{{ friend.username }}" style="text-decoration: none;">
+						{% if friend.is_online %}
+							<span class="badge bg-success">online</span>
+						{% else %}
+							<span class="badge bg-danger">offline</span>
+						{% endif %}
+						{{ friend.username }}
+					</a>
+				</li>
             {% endfor %}
             <li class="list-group-item list-title">
                 <h4 class="mt-5">Friend requests </h4>
             <div class="mx-auto" id="separator"></div>
             </li>
-            {% for friend in user.friends_requestss.all %}
-            <li class="list-group-item">{{ friend.username }}</li>
+            {% for friend_req in user.friends_requests.all %}
+				<li class="list-group-item">
+					<button class="btn" onclick="changeUserValue('add_friend', '{{ friend_req.username }}', '{{ user.username }}')">
+						<span class="badge bg-success">Accept</span>
+					</button>
+					<a href="/userManager/profile/{{ friend_req.username }}" style="text-decoration: none;">
+						{{ friend_req.username }}
+					</a>
+					<button class="btn" onclick="changeUserValue('deny_friend_request', '{{ friend_req.username }}', '{{ user.username }}')">
+						<span class="badge bg-danger">Decline</span>
+					</button>
+				</li>
             {% endfor %}
         </ul>
     </div>
@@ -93,7 +112,7 @@
             </div>
         </li>
         <li class="list-group-item flex-fill">
-            <button class="btn" onclick="changeUserValue('new_username', document.getElementById('new_username').value, '{{ user.username }}')">Confirm</button>
+            <button class="btn" onclick="changeUserValue('new_username', document.getElementById('new_username').value, '{{ user.username }}')">update username</button>
         </li>
     </ul>
     <ul class="list-group list-group-horizontal-sm">
@@ -104,7 +123,7 @@
             </div>
         </li>
         <li class="list-group-item flex-fill">
-            <button class="btn" onclick="changeUserValue('new_email', document.getElementById('new_email').value, '{{ user.username }}')">Confirm</button>
+            <button class="btn" onclick="changeUserValue('new_email', document.getElementById('new_email').value, '{{ user.username }}')">Update email</button>
         </li>
     </ul>
     <form id="changePasswordForm">
@@ -118,21 +137,7 @@
                 </div>
             </li>
             <li class="list-group-item flex-fill">
-                <div class="form-floating" id="floatingConfirmPassword" placeholder="Retype new password">
-                    <input type="password" class="form-control" name="new_password_confirm" placeholder="Retype new password" id="new_password_to_send" required>
-                    <label for="new_password_to_send">Retype new password</label>
-                </div>
-            </li>
-        </ul>
-        <ul class="list-group list-group-horizontal-sm">
-            <li class="list-group-item flex-fill">
-                <div class="form-floating" id="floatingOldPassword" placeholder="Old password">
-                    <input type="password" class="form-control" id="old_password_input" name="old_password" placeholder="Current password" required>
-                    <label for="old_password_input">Current password</label>
-                </div>
-            </li>
-            <li class="list-group-item flex-fill">
-                <button class="btn" onclick="changeUserValue('new_password', document.getElementById('new_password_to_send').value, '{{ user.username }}')">Confirm</button>
+                <button class="btn" onclick="changeUserValue('new_password', document.getElementById('new_password_to_send').value, '{{ user.username }}')">Update password</button>
         </ul>
     </form>
 </div>

@@ -61,12 +61,19 @@ def logout_view(request):
 def signup(request):
 	serializer = UserSerializer(data=request.data)
 	if serializer.is_valid():
-		user = serializer.save()
-		if len(request.data["username"]) < 2:
+		if len(request.data["username"]) < 3:
 			return Response(
 				{"message": "Username must be at least 3 characters long"},
 				status=status.HTTP_400_BAD_REQUEST,
 			)
+		if not check_characters(request.data['password'], 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_!@#$%^&*()'):
+			return Response({'message': 'Invalid characters in password'}, status=status.HTTP_400_BAD_REQUEST)
+		if len(request.data['password']) < 8:
+			return Response({'message': 'Password must be at least 8 characters long'}, status=status.HTTP_400_BAD_REQUEST)
+		if not contains_special_characters(request.data['password'], '!@#_-'):
+			return Response({'message': 'Password must contain at least one of the following characters: !@#_-'}, status=status.HTTP_400_BAD_REQUEST)
+
+		user = serializer.save()
 		user.set_password(request.data["password"])
 		user.save()
 		token = Token.objects.create(user=user)
@@ -140,7 +147,6 @@ def change_profile_pic(request):
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 def change_value(request, field):
-	logger.info(f"Changing {field} for user {request.user.username}")
 	user = get_object_or_404(UserInfos, username=request.data.get("username"))
 	if not user:
 		return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -153,14 +159,18 @@ def change_value(request, field):
 		elif field == "new_email":
 			user.set_email(request.data["new_value"])
 		elif field == "new_password":
-			if not user.check_password(request.data['old_value']):
-				return Response({'message': 'Old password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
-			if not check_characters(str=request.data['new_value'], 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_!@#$%^&*()'):
+			if user.username != request.user.username:
+				return Response({'message': 'You can only change your own password'}, status=status.HTTP_400_BAD_REQUEST)
+			if not check_characters(request.data['new_value'], 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_!@#$%^&*()'):
 				return Response({'message': 'Invalid characters in password'}, status=status.HTTP_400_BAD_REQUEST)
-			request.user.set_password(request.data['new_value'])
+			if len(request.data['new_value']) < 8:
+				return Response({'message': 'Password must be at least 8 characters long'}, status=status.HTTP_400_BAD_REQUEST)
+			if not contains_special_characters(request.data['new_value'], '!@#_-'):
+				return Response({'message': 'Password must contain at least one of the following characters: !@#_-'}, status=status.HTTP_400_BAD_REQUEST)
+			user.set_password(request.data['new_value'])
 			user.save()
 		elif field == "new_status":
-			if not check_characters( request.data['new_value'], 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_!@#$%^&*()'):
+			if not check_characters(request.data['new_value'], 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789éàèöäü_!@#$%^&*() '):
 				return Response({'message': 'Invalid characters in status'}, status=status.HTTP_400_BAD_REQUEST)
 			user.set_status(request.data["new_value"])
 		elif field == "set_online":
@@ -176,10 +186,11 @@ def change_value(request, field):
 		elif field == "set_skin":
 			user.set_skin(request.data["new_value"])
 		elif field == "add_friend":
-			try:
-				user.add_friend(request.data["new_value"])
-			except:
-				return Response({"message": "Friend not found"}, status=status.HTTP_404_NOT_FOUND)
+			user.add_friend(request.data["new_value"])
+		elif field == "remove_friend":
+			user.remove_friend(request.data["new_value"])
+		elif field == "deny_friend_request":
+			user.deny_friend_request(request.data["new_value"])
 		else:
 			return Response({"message": "Field not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -243,5 +254,8 @@ def profile(request, username):
 	user = get_object_or_404(UserInfos, username=username)
 	return render(request, "profile.html", {"user": user})
 
-def check_characters(str, allowed_characters):
+def check_characters(str, allowed_characters): # Check if a string contains only allowed characters returns True if it does, False otherwise
 	return all(char in allowed_characters for char in str)
+
+def contains_special_characters(password, special_characters): # Check if a string contains at least one special character
+    return any(char in special_characters for char in password)
