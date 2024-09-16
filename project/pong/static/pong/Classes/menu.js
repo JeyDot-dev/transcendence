@@ -72,6 +72,7 @@ export class Menu {
         // this.scene.add(this.directionalLight.target);
         this.menuGroup.add(this.directionalLight);
         this.menuGroup.add(this.directionalLight.target);
+        this.matchmakingAnimation = new MatchmakingAnimation(this.threeRoot, this.socketManager, this);
 
         // Ajouter le menu à `threeRoot`
         this.scene.add(this.menuGroup);
@@ -191,6 +192,8 @@ export class Menu {
         });
         this.matchmakingMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 180), () => {
             console.log("Clicked On: Matchmaking");
+            this.hideText();
+            this.matchmakingAnimation.show();
             this.socketManager.setType('matchmaking');
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
@@ -659,5 +662,87 @@ export class BackToMainMenu {
         }
         // this.socketManager.lastMenu.tweenCameraToItem();
         // this.toDestroy.destroy();
+    }
+}
+
+class MatchmakingAnimation {
+    constructor(threeRoot, socketManager, menu) {
+        this.threeRoot = threeRoot;
+        this.group = new THREE.Group();
+        this.rotationTween = null;
+        this.escListenerBound = this.handleEscape.bind(this);
+        this.menu = menu;
+        this.socketManager = socketManager;
+        
+        this.createMatchmakingText();        
+    }
+    createMatchmakingText() {
+        const fontLoader = new FontLoader();
+        fontLoader.load(
+            './static/assets/LEMON_MILK_Regular.json',
+            (font) => {
+                this.backText = new Text3d(
+                    this.threeRoot.camera,
+                    this.threeRoot.scene,
+                    font,
+                    100,   // Font size
+                    25,   // Depth
+                    0x9600ff,   // Color
+                    'Matchmaking',  // Text content
+                    1.02,  // Glow size
+                    new THREE.Vector3(0, 0, 0)
+                );
+                this.backText.addToGroup(this.group);
+                this.group.position.set(0 , 0, 180);
+                this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                this.directionalLight.position.set(500, -500, 1000);
+                this.directionalLight.castShadow = true;
+                // this.scene.add(this.directionalLight);
+                // this.scene.add(this.directionalLight.target);
+                this.group.add(this.directionalLight);
+                this.group.add(this.directionalLight.target);
+                this.group.visible = false;
+                this.threeRoot.scene.add(this.group);
+            },
+            undefined,
+            (error) => {
+                console.error('Error loading font:', error);
+            }
+        );
+    }
+    show() {
+        this.group.visible = true;
+        document.addEventListener('keydown', this.escListenerBound, false);
+        this.startRotation();
+    }
+    hide() {
+        this.group.visible = false;
+        document.removeEventListener('keydown', this.escListenerBound, false);
+        this.socketManager.close();
+        this.socketManager.type = null;
+        this.stopRotation();
+    }
+    handleEscape(event) {
+        if (event.key === 'Escape') {
+            this.menu.show();
+            this.hide();
+        }
+    }
+    startRotation() {
+        const targetRotation = { x: this.group.rotation.x + Math.PI * 2 };
+
+        this.rotationTween = new TWEEN.Tween(this.group.rotation)
+            .to(targetRotation, 2000)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .onUpdate(() => {
+                this.group.rotation.x = this.group.rotation.x % (Math.PI * 2);
+            })
+            .repeat(Infinity)
+            .start();
+    }
+    stopRotation() {
+        if (this.rotationTween) {
+            this.rotationTween.stop();
+        }
     }
 }

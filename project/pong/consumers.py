@@ -10,13 +10,16 @@ games_pool = {}
 # logger = logging.getLogger(__name__)
 physics_lock = asyncio.Lock()
 
-class LocalPongConsumer(AsyncWebsocketConsumer):
+class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         from database.models import Game as GameDB, Player as PlayerDB
         from .game_objects import Game, Player
 
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         self.group_name = f"game_{self.game_id}"
+        self.game_type = self.scope['url_route']['kwargs']['type']
+
+        logger.info(f"Game Type: {self.game_type}, Game ID: {self.game_id}")
 
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
@@ -38,16 +41,17 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
                     # Récupérer les joueurs depuis la base de données
                     player1 = await sync_to_async(lambda: GameDB.player1)()
                     player2 = await sync_to_async(lambda: GameDB.player2)()
-
+                    logger.info(f"Player 1: {player1.name}, ID: {player1.id}")
+                    logger.info(f"Player 2: {player2.name}, ID: {player2.id}")
                     # Créer une nouvelle instance de game avec les joueurs de la base de données
                     self.game = Game(
                         self.game_id, [], 2, 1280, 720, self.notifyEvent, "dbGame"
                     )
                     self.game.addPlayer(
-                        Player(id=player1.id, skin="skin1", name=player1.name), 0
+                        Player(id=1, skin="skin1", name=player1.name), 0
                     )
                     self.game.addPlayer(
-                        Player(id=player2.id, skin="skin2", name=player2.name), 1
+                        Player(id=2, skin="skin2", name=player2.name), 1
                     )
                 else:
                     logger.info(
@@ -124,18 +128,49 @@ class LocalPongConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
+        game_type = self.scope["url_route"]["kwargs"].get("type", "local")
 
-        if text_data_json["key"] in ["w", "s", "space"]:
-            who = 0  # Joueur 1 (gauche)
-        elif text_data_json["key"] in ["arrowup", "arrowdown"]:
-            who = 1  # Joueur 2 (droite)
-        else:
-            return
+        logger.info(f"Received message: {text_data_json}, Game Type: {game_type}")
 
-        if text_data_json["type"] == "keydown" or text_data_json["type"] == "keyup":
-            await handle_key(
-                self.game, text_data_json["type"], text_data_json["key"], who
-            )
+        if game_type == "local":
+            if text_data_json["key"] in ["w", "s", "space"]:
+                who = 0
+            elif text_data_json["key"] in ["arrowup", "arrowdown"]:
+                who = 1
+            else:
+                logger.warning(f"Invalid key pressed: {text_data_json['key']}")
+                return
+
+            if text_data_json["type"] == "keydown" or text_data_json["type"] == "keyup":
+                logger.info(f"Handling local game key press: {text_data_json['key']} for player {who}")
+                await handle_key(self.game, text_data_json["type"], text_data_json["key"], who)
+
+        elif game_type == "remote":
+            user = self.scope["user"]
+            logger.info(f"Remote game: Checking user {user.id} for game {self.game_id}")
+            logger.info(f"Remote game: Checking user {user.id} for players.id {self.game.players[0]} and {self.game.players[0]} ------------------")
+
+            # Vérification des joueurs dans le jeu
+            if len(self.game.players) < 2:
+                logger.error(f"Players not set correctly: {self.game.players}")
+                return
+
+            # Déterminer qui contrôle le paddle en fonction de l'ID utilisateur
+            if user.id == self.game.players[0].id:
+                who = 0
+                logger.info(f"User {user.id} controls paddle 0")
+            elif user.id == self.game.players[1].id:
+                who = 1
+                logger.info(f"User {user.id} controls paddle 1")
+            else:
+                logger.warning(f"User {user.id} does not control any paddle in this game")
+                return
+
+            if text_data_json["key"] in ["w", "s", "arrowup", "arrowdown"]:
+                logger.info(f"Handling remote game key press: {text_data_json['key']} for player {who}")
+                await handle_key(self.game, text_data_json["type"], text_data_json["key"], who)
+
+
 
     async def game_update(self):
         while self.game.running:

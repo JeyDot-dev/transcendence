@@ -28,7 +28,7 @@ export class SocketManager {
         } else if (this.type === 'customGame') {
             return `ws://${window.location.host}/ws/pong/local/${this.gameId}/`;
         } else if (this.type === 'remote') {
-            return `ws://${window.location.host}/ws/pong/${this.gameId}/`;
+            return `ws://${window.location.host}/ws/pong/remote/${this.gameId}/`;
         } else if (this.type === 'matchmaking') {
             return `ws://${window.location.host}/ws/pong/matchmaking/`;
         } else {
@@ -164,6 +164,15 @@ export class SocketManager {
         this.setTypeAndGameID('customGame', customGameId);
         // this.connect();
     }
+    connectRemoteGame(customGameId) {
+        console.log('Connnecting to custom game id: ', customGameId);
+        this.customGameId = customGameId;
+        // this.setType('customGame');
+        // // this.type = 'customGame';
+        // this.setGameId(this.customGameId);
+        this.setTypeAndGameID('remote', customGameId);
+        // this.connect();
+    }
 
     generateWebSocketId() {
     const timestamp = Date.now().toString(36);
@@ -215,7 +224,8 @@ export class SocketManager {
                 this.lastMenu.hide();
                 this.close();
                 console.log('FrontEnd connect custom game id: ', data.game_ws_id);
-                this.connectCustomGame(data.game_ws_id);
+                this.lastMenu.matchmakingAnimation.hide();
+                this.connectRemoteGame(data.game_ws_id);
                 break;
             default:
                 break;
