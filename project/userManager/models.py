@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_email, ValidationError
 from database.models import Game
 
-
 class UserInfos(AbstractUser):
     profile_pic = models.ImageField(
         upload_to="profile_pics/",
@@ -56,7 +55,7 @@ class UserInfos(AbstractUser):
 				"total_victories": self.total_victories,
 				"skin": self.skin
 			}
-    
+
     def get_last_tournament_id(self):
         return self.last_tournament_id
 
@@ -70,7 +69,6 @@ class UserInfos(AbstractUser):
             self.email = email
             self.save()
         except ValidationError:
-            # Gérer l'erreur de validation ici
             raise ValueError("L'email fourni n'est pas valide.")
 
     def set_skin(self, skin: str):
@@ -153,7 +151,7 @@ class MatchResults(models.Model):
 	def set_tournament_id(self, tournament_id: str):
 		self.tournament_id = tournament_id
 		self.save()
-    
+
 	def set_score(self, score_left: int, score_right: int):
 		self.score_left = score_left
 		self.score_right = score_right

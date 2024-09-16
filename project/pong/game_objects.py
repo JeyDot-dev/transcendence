@@ -4,12 +4,10 @@ import random
 import time
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
-from asgiref.sync import sync_to_async  # Pour utiliser Django ORM dans un environnement asynchrone
-from database.models import Game as GameDB  # Importer le modèle de la base de données
+from asgiref.sync import sync_to_async
+from database.models import Game as GameDB
 from userManager.models import UserInfos
 from pong.logger import logger
-
-# logger2 = logging.getLogger(__name__)
 
 class Paddle:
     def __init__(self, x, color, userId, arenaWidth, arenaHeight, updateCallBack=None):
@@ -80,7 +78,7 @@ class Ball:
         }
 
     def add_speed(self, speed):
-        self.speed = min(self.speed + speed, 20)  # Limite la vitesse maximale à 20
+        self.speed = min(self.speed + speed, 20)
 
     def reset(self):
         self.x = self.arenaWidth / 2
@@ -88,14 +86,6 @@ class Ball:
         self.speed = self.initialSpeed
         self.vel_x = -1 if random.choice([True, False]) else 1
         self.vel_y = 0
-        # if self.updateCallBack:
-        #     asyncio.create_task(self.updateCallBack({
-        #         'type': 'ballMove',
-        #         'ball': {
-        #             'x': self.x,
-        #             'y': self.y
-        #         }
-        #     }))
 
     def predict_collision(self, paddle):
         future_x = self.x + self.vel_x * self.speed
@@ -132,19 +122,15 @@ class Ball:
         )
 
     def _handle_collision(self, paddle, paddle_bounds):
-        # Inverser la direction horizontale de la balle
         self.vel_x = -self.vel_x
 
-        # Calcul de l'influence de la vélocité du paddle sur la balle
         impact_factor = 0.6  # Facteur d'influence, ajustable
         self.vel_y += paddle.velocity * impact_factor
 
-        # Ajuster la vitesse totale de la balle en fonction de la vélocité du paddle
         speed_influence = 1 + abs(paddle.velocity) * 0.17
         self.vel_x *= speed_influence
         self.vel_y *= speed_influence
 
-        # Repositionner la balle pour qu'elle soit juste à l'extérieur du paddle
         if self.vel_x > 0:
             self.x = paddle_bounds['right'] + self.size / 2 + 1
         else:
@@ -210,14 +196,6 @@ class Ball:
                     break
         self.x += self.speed * self.vel_x * delta_time
         self.y += self.speed * self.vel_y * delta_time
-        # if self.updateCallBack:
-        #     asyncio.create_task(self.updateCallBack({
-        #         'type': 'ballMove',
-        #         'ball': {
-        #             'x': self.x,
-        #             'y': self.y
-        #         }
-        #     }))
 
 class Game:
     def __init__(self, id, players, nb_max_players=100, width=1280, height=720, updateCallBack=None, type='localGame'):
@@ -239,7 +217,6 @@ class Game:
         self.players = players
         self.paddles = []
         self.ball = Ball((255, 255, 255), width, height, updateCallBack)
-        logger.info("Backend Game Constructor")
 
     async def countdown_before_start(self):
         """Envoie un décompte de 3 secondes avant le début de la partie."""
@@ -253,7 +230,7 @@ class Game:
                 })
             countdown -= 1
             await asyncio.sleep(1)
-        
+
         if self.updateCallBack:
             await self.updateCallBack({
                 'type': 'countdown',
@@ -331,7 +308,7 @@ class Game:
 
     async def start_timer(self):
         while self.running:
-            if self.isPaused:  # Si en pause, attendre
+            if self.isPaused:
                 await asyncio.sleep(0.1)
                 continue
 
@@ -392,7 +369,6 @@ class Game:
             game_db.points1 = self.score[0]
             game_db.points2 = self.score[1]
 
-            # MAYBE: increment looses ?
             winner = self.winner
             loser = self.loser
 
@@ -400,16 +376,6 @@ class Game:
 
             await sync_to_async(game_db.save)()
             logger.info(f"Scores saved to database for game {self.id}: {self.score[0]} - {self.score[1]}")
-
-            # tournament = game_db.tournament
-            # if tournament:
-            #     unplayed_games = await sync_to_async(tournament.get_unplayed_games)()
-            #     if not unplayed_games.exists():
-            #         # If no unplayed games exist, create the next pool of games or finalize the tournament
-            #         if len(tournament.players.all()) > 1:
-            #             await sync_to_async(tournament.make_games)()  # Create new pool of games
-            #         else:
-            #             await sync_to_async(tournament.finalize_tournament)()  # Finalize the tournament
 
         except GameDB.DoesNotExist:
             logger.error(f"Game with ID {self.id} not found in the database.")

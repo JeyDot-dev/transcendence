@@ -1,7 +1,6 @@
 const btn = document.querySelector("#addPlayerBtn");
 
 btn.addEventListener("click", function () {
-    console.log("clicked");
     var formCount = document.querySelectorAll('#player-formset .form-group').length;
     var newForm = document.querySelector('#player-formset .form-group').cloneNode(true);
     var formRegex = RegExp('form-(\\d+)-', 'g');

@@ -16,7 +16,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         self.group_name = f"game_{self.game_id}"
 
-        # Joindre le groupe correspondant au game_id
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
         if self.game_id not in local_games:
@@ -31,7 +30,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.game.running = True
             local_games[self.game_id] = {
                 "game": self.game,
-                "connections": 1,  # Initialiser à 1 car c'est la première connexion
+                "connections": 1,
             }
             self.log_game_state("New Game param")
         else:
@@ -44,17 +43,11 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        # Envoyer l'état initial ou mis à jour du jeu
         await self.send(
             text_data=json.dumps(
                 {"type": "init", "game": await build_game_state(self.game)}
             )
         )
-
-        # Démarrer les boucles de jeu si elles ne sont pas déjà en cours
-        # if not hasattr(self, 'physics_task') or self.physics_task.done():
-        #     logger.info(f"Starting the game loops for game {self.game_id}")
-
         self.gameUpdate = asyncio.create_task(self.game_update())
 
     def log_game_state(self, context):
@@ -83,16 +76,15 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
 
     async def gameEvent(self, event):
-        # Envoyer l'événement reçu à ce client spécifique
         await self.send(text_data=json.dumps(event["event"]))
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
 
         if text_data_json["key"] in ["w", "s"]:
-            who = 0  # Joueur 1 (gauche)
+            who = 0
         elif text_data_json["key"] in ["arrowup", "arrowdown"]:
-            who = 1  # Joueur 2 (droite)
+            who = 1
         else:
             return
 
@@ -109,23 +101,19 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         logger.info(f"Client disconnected from game {self.game_id}")
 
-        # Retirer le client du groupe
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
         if self.game_id in local_games:
             local_games[self.game_id]["connections"] -= 1
 
-            # Attendre un délai pour permettre aux clients de se reconnecter
             await asyncio.sleep(10)
 
-            # Vérifier s'il reste des connexions après le délai
         if (
             self.game_id in local_games
             and local_games[self.game_id]["connections"] <= 0
         ):
             logger.info(f"No more connections for game {self.game_id}. Cleaning up.")
 
-            # Annuler la tâche de physique si elle est en cours d'exécution
             if hasattr(self, "physics_task") and not self.physics_task.done():
                 self.physics_task.cancel()
                 try:
@@ -148,7 +136,6 @@ async def handle_key(game, types, key, who):
     elif key in ["s", "arrowdown"]:
         action = "down"
     else:
-        # TODO: Implementer deux side sur le paddle et une touche pour switch
         return
 
     if types == "keydown":
@@ -159,15 +146,6 @@ async def handle_key(game, types, key, who):
     elif types == "keyup":
         if action in ["up", "down"]:
             game.paddles[who].velocity = 0
-
-    # Mettez à jour l'état de la touche dans le dictionnaire de clés
-    # game.paddles[who].keys[action] = 1 if types == "keydown" else 0
-
-    # Vous pouvez ajouter des logs pour le débogage si nécessaire
-    # logger.debug(f"Paddle update - Player: {who}, Action: {action}, Type: {types}, New Velocity: {game.paddles[who].velocity}")
-    # logger.debug(f"New Paddle0 Position: x={game.paddles[0].x} y={game.paddles[0].y}")
-    # logger.debug(f"New Paddle1 Position: x={game.paddles[1].x} y={game.paddles[1].y}")
-
 
 async def build_game_state(game):
     return {
@@ -195,7 +173,6 @@ async def build_game_state(game):
         },
         "score": game.score,
     }
-
 
 async def update_game_state(game):
     return {

@@ -53,7 +53,7 @@ echo "Waiting for Elasticsearch availability"
 until curl -s --cacert config/certs/ca/ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 30; done
 
 echo "Creating local repo for archiving"
-until curl -v -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/certs/ca/ca.crt "https://es01:9200/_snapshot/local_archive" \
+until curl -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/certs/ca/ca.crt "https://es01:9200/_snapshot/local_archive" \
     -H "Content-Type: application/json" \
     -d '
     {
@@ -65,12 +65,12 @@ until curl -v -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/ce
 }'; do sleep 10; done
 
 echo "Creating lifecycle policy"
-until curl -v -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/certs/ca/ca.crt "https://es01:9200/_ilm/policy/logstash-policy" \
+until curl -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/certs/ca/ca.crt "https://es01:9200/_ilm/policy/logstash-policy" \
     -H "Content-Type: application/json" \
     -d @/usr/share/elasticsearch/config/ilm_policy.json; do sleep 10; done
 
 echo "Setting snapshot policy"
-until curl -v -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/certs/ca/ca.crt "https://es01:9200/_slm/policy/snapshot-policy" \
+until curl -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/certs/ca/ca.crt "https://es01:9200/_slm/policy/snapshot-policy" \
     -H "Content-Type: application/json" \
     -d '{
   "schedule": "0 /15 * * * ?",
@@ -89,7 +89,7 @@ until curl -v -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/ce
 }'; do sleep 10; done
 
 echo "Creating template"
-until curl -v -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/certs/ca/ca.crt "https://es01:9200/_index_template/logstash-template" \
+until curl -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/certs/ca/ca.crt "https://es01:9200/_index_template/logstash-template" \
     -H "Content-Type: application/json" \
     -d '{
     "index_patterns": ["logstash-*"],
@@ -103,7 +103,7 @@ until curl -v -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/ce
 }'; do sleep 10; done
 
 echo "Setting better lifecycle polling rate"
-until curl -v -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/certs/ca/ca.crt "https://es01:9200/_cluster/settings" \
+until curl -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -X PUT --cacert config/certs/ca/ca.crt "https://es01:9200/_cluster/settings" \
     -H "Content-Type: application/json" \
     -d '
     {

@@ -19,15 +19,6 @@ from PIL import Image
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
-import logging
-
-logger = logging.getLogger(__name__)
-
-# ==========================
-#         AUTH VIEWS
-# ==========================
-
-
 @api_view(["POST"])
 def login_view(request):
     user = get_object_or_404(UserInfos, username=request.data["username"])
@@ -39,10 +30,8 @@ def login_view(request):
             {"message": "Login successful", "token": token.key, "user": user.to_dict()},
             status=status.HTTP_200_OK,
         )
-
     request.user.set_online(False)
     return Response({"message": "Login failed"}, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(["POST"])
 def logout_view(request):
@@ -52,9 +41,7 @@ def logout_view(request):
         pass
 
     logout(request)
-
     return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
-
 
 @api_view(["POST"])
 def signup(request):
@@ -78,19 +65,11 @@ def signup(request):
     )
     return Response({"message": error_messages}, status=status.HTTP_400_BAD_REQUEST)
 
-
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 def test_token(request):
     return Response({"message": "Token is valid"})
-
-
-# ==========================
-#         USER VIEWS
-# ==========================
-
-# ALL USER RELATED VIEWS LIKE PROFILE, FRIENDS, ETC. GO HERE
 
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
@@ -126,7 +105,6 @@ def change_profile_pic(request):
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 def change_value(request, field):
-    logger.info(f"Changing {field} for user {request.user.username}")
     user = get_object_or_404(UserInfos, username=request.data.get("username"))
     if not user:
         return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -179,14 +157,6 @@ def get_user_list(request):
         users = UserInfos.objects.all()
     users_list = [user.to_dict_public() for user in users]
     return Response({"users": users_list}, status=status.HTTP_200_OK)
-
-
-# ==========================
-#         HTML VIEWS
-# ==========================
-
-# ALL HTML VIEWS GO HERE
-
 
 def index(request):
     user = request.user
