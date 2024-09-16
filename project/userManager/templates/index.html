@@ -75,6 +75,9 @@
 						{% endif %}
 						{{ friend.username }}
 					</a>
+						<button class="btn" onclick="changeUserValue('remove_friend', '{{ friend.username }}', '{{ user.username }}')">
+							<span class="badge bg-danger">Remove</span>
+						</button>
 				</li>
 			{% endfor %}
 			<li class="list-group-item list-title">
@@ -83,7 +86,7 @@
 			</li>
 			{% for friend_req in user.friends_requests.all %}
 				<li class="list-group-item">
-					<button class="btn" onclick="changeUserValue('add_friend', '{{ friend_req.username }}', '{{ user.username }}')">
+					<button class="btn" onclick="changeUserValue('accept_friend_request', '{{ friend_req.username }}', '{{ user.username }}')">
 						<span class="badge bg-success">Accept</span>
 					</button>
 					<a href="/userManager/profile/{{ friend_req.username }}" style="text-decoration: none;">

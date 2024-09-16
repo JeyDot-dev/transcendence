@@ -66,11 +66,11 @@ def signup(request):
 			return Response({'message': 'Password must contain at least one of the following characters: !@#_-'}, status=status.HTTP_400_BAD_REQUEST)
 
 		user = serializer.save()
-        if len(request.data["username"]) < 2:
-            return Response(
-                {"message": "Username must be at least 3 characters long"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+		if len(request.data["username"]) < 2:
+			return Response(
+				{"message": "Username must be at least 3 characters long"},
+				status=status.HTTP_400_BAD_REQUEST,
+			)
 		user.set_password(request.data["password"])
 		user.save()
 		token = Token.objects.create(user=user)
@@ -133,13 +133,13 @@ def change_profile_pic(request):
 		new_filename = str(uuid.uuid4()) + file_extension
 
 	request.FILES["profile_pic"].name = new_filename
-    file_extension = os.path.splitext(request.FILES["profile_pic"].name)[1]
-    new_filename = str(uuid.uuid4()) + file_extension
+	file_extension = os.path.splitext(request.FILES["profile_pic"].name)[1]
+	new_filename = str(uuid.uuid4()) + file_extension
 
-    while os.path.exists(os.path.join(settings.MEDIA_ROOT, new_filename)):
-        new_filename = str(uuid.uuid4()) + file_extension
+	while os.path.exists(os.path.join(settings.MEDIA_ROOT, new_filename)):
+		new_filename = str(uuid.uuid4()) + file_extension
 
-    request.FILES["profile_pic"].name = new_filename
+	request.FILES["profile_pic"].name = new_filename
 	user.profile_pic = request.FILES["profile_pic"]
 	user.save()
 	return Response(
@@ -190,16 +190,17 @@ def change_value(request, field):
 			user.set_skin(request.data["new_value"])
 		elif field == "add_friend":
 			user.add_friend(request.data["new_value"])
-		elif field == "remove_friend":
-			user.remove_friend(request.data["new_value"])
+		elif field == "accept_friend_request":
+			user.accept_friend_request(request.data["new_value"])
 		elif field == "deny_friend_request":
 			user.deny_friend_request(request.data["new_value"])
+		elif field == "remove_friend":
+			user.remove_friend(request.data["new_value"])
 		else:
 			return Response({"message": "Field not found"}, status=status.HTTP_404_NOT_FOUND)
 
 		return Response({"message": field + " changed successfully"}, status=status.HTTP_200_OK)
 	except Exception as e:
-		logger.error(e)
 		return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
@@ -261,4 +262,4 @@ def check_characters(str, allowed_characters): # Check if a string contains only
 	return all(char in allowed_characters for char in str)
 
 def contains_special_characters(password, special_characters): # Check if a string contains at least one special character
-    return any(char in special_characters for char in password)
+	return any(char in special_characters for char in password)
