@@ -18,18 +18,12 @@ from PIL import Image
 import os
 import uuid
 from django.conf import settings
+import os
+import uuid
+from django.conf import settings
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
-
-import logging
-
-logger = logging.getLogger(__name__)
-
-# ==========================
-#		 AUTH VIEWS
-# ==========================
-
 
 @api_view(["POST"])
 def login_view(request):
@@ -42,10 +36,8 @@ def login_view(request):
 			{"message": "Login successful", "token": token.key, "user": user.to_dict()},
 			status=status.HTTP_200_OK,
 		)
-
 	request.user.set_online(False)
 	return Response({"message": "Login failed"}, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(["POST"])
 def logout_view(request):
@@ -74,6 +66,11 @@ def signup(request):
 			return Response({'message': 'Password must contain at least one of the following characters: !@#_-'}, status=status.HTTP_400_BAD_REQUEST)
 
 		user = serializer.save()
+        if len(request.data["username"]) < 2:
+            return Response(
+                {"message": "Username must be at least 3 characters long"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 		user.set_password(request.data["password"])
 		user.save()
 		token = Token.objects.create(user=user)
@@ -90,7 +87,6 @@ def signup(request):
 		[f"{field}: {error[0]}" for field, error in serializer.errors.items()]
 	)
 	return Response({"message": error_messages}, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -137,6 +133,13 @@ def change_profile_pic(request):
 		new_filename = str(uuid.uuid4()) + file_extension
 
 	request.FILES["profile_pic"].name = new_filename
+    file_extension = os.path.splitext(request.FILES["profile_pic"].name)[1]
+    new_filename = str(uuid.uuid4()) + file_extension
+
+    while os.path.exists(os.path.join(settings.MEDIA_ROOT, new_filename)):
+        new_filename = str(uuid.uuid4()) + file_extension
+
+    request.FILES["profile_pic"].name = new_filename
 	user.profile_pic = request.FILES["profile_pic"]
 	user.save()
 	return Response(

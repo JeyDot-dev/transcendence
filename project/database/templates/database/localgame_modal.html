@@ -1,7 +1,5 @@
 {% load static %}
 
-<script type="module" src="{% static 'generatePlayers.js' %}"></script>
-
 <div class="modal fade" id="modalNewGame" tabindex="-1" aria-labelledby="loginModalPage" aria-hidden="true" style="color: #000">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -14,7 +12,11 @@
                     <form id="newGameForm" method="post">
                         {% csrf_token %}
                         <label for="player1_name">Joueur 1</label>
-                        {{ formGame.player1_name }}
+                        <input type="text" id="player1_name" name="player1_name"
+                            {% if user.is_authenticated %}
+                                value="{{ user.username }}"
+                            {% endif %}
+                        >
                         <br>
                         <label for="player2_name">Joueur 2</label>
                         {{ formGame.player2_name }}

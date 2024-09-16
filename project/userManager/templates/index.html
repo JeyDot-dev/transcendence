@@ -45,13 +45,13 @@
 			</li>
 			{% for game in game_history %}
 			<li class="list-group-item 
-			{% if game.winner.name == user.username %} 
+			{% if game.winner.user == user %} 
 				text-success
 			{% else %}
 				text-danger
 			{% endif %}">{{ game }} {{game.points1}}|{{game.points2}} {{ game.date|date:"d.m.y H:i" }}</li>
 			{% empty %}
-			<li>PLay games to show history.</li>
+			<li>Play games to show history.</li>
 			{% endfor %}
 		</ul>
 		<ul class="list-group mx-auto col-lg ms-auto-lg me-5-lg mt-4" id="friendList" style="max-width: 400px; max-height: 46vh; min-height: 46vh;">
@@ -97,11 +97,6 @@
 		</ul>
 	</div>
 </div>
-<!-- <p>Paddle color: <span style="background-color: {{ user.skin }};">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p> -->
-<!-- <p>Grade: {{ user.grade }}</p> -->
-<!-- <p>Is online: {{ user.is_online }}</p> -->
-<!-- <p>Is playing: {{ user.is_playing }}</p> -->
-
 
 <div class="container" id="modifyProfileContainer">
 	<ul class="list-group list-group-horizontal-sm">
@@ -145,6 +140,14 @@
 <h1>Something went wrong</h1>
 {% endif %}
 
-
+<!-- <script> -->
+<!-- document.querySelector('input[type="file"]').addEventListener('change', function() { -->
+<!--     const file = this.files[0]; -->
+<!--     if (file.size > 10 * 1024 * 1024) { // 5MB -->
+<!--         alert("Le fichier est trop volumineux !"); -->
+<!--         this.value = ''; // Réinitialiser l'input -->
+<!--     } -->
+<!-- }); -->
+<!-- </script> -->
 {% include "accountCreation.html" %}
 {% include "accountLogin.html" %}

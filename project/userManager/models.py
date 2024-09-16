@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_email, ValidationError
-from database.models import Game
+from django.db import models
 
 class UserInfos(AbstractUser):
 	profile_pic = models.ImageField(
@@ -21,7 +21,7 @@ class UserInfos(AbstractUser):
 	is_3d = models.BooleanField(default=False)
 	friends = models.ManyToManyField("self", blank=True)
 	friends_requests = models.ManyToManyField("self", blank=True)
-	match_history = models.ManyToManyField(Game, blank=True)
+	match_history = models.ManyToManyField('database.Game', blank=True)
 
 	REQUIRED_FIELDS = ["email", "password"]
 
@@ -55,31 +55,41 @@ class UserInfos(AbstractUser):
 				"total_victories": self.total_victories,
 				"skin": self.skin
 			}
-	
-	def get_last_tournament_id(self):
-		return self.last_tournament_id
+
+    def get_last_tournament_id(self):
+        return self.last_tournament_id
 
 	def set_username(self, username: str):
+        if len(username) < 3 or len(username) > 100:
+            raise ValueError("Le nom d'utilisateur doit faire entre 3 et 100 caractères.")
+        if not username.isalnum():
+            raise ValueError("Le nom d'utilisateur ne doit contenir que des caractères alphanumériques.")
 		if len(username) < 3 or len(username) > 100:
 			raise ValueError("Le nom d'utilisateur doit faire entre 3 et 100 caractères.")
 		self.username = username
 		self.save()
 
-	def set_email(self, email: str):
-		try:
-			validate_email(email)
-			self.email = email
-			self.save()
-		except ValidationError:
-			raise ValueError("L'email fourni n'est pas valide.")
+    def set_email(self, email: str):
+        try:
+            validate_email(email)
+            self.email = email
+            self.save()
+        except ValidationError:
+            raise ValueError("L'email fourni n'est pas valide.")
 
 	def set_skin(self, skin: str):
+        if not re.match(r'^#[a-fA-F0-9]{6}$', skin):
+            raise ValueError("Le skin doit être un code couleur hexadécimal.")
 		if not re.match(r'^#[a-fA-F0-9]{6}$', skin):
 			raise ValueError("Le skin doit être un code couleur hexadécimal.")
 		self.skin = skin
 		self.save()
 
 	def set_status(self, status: str):
+        if len(status) < 3 or len(status) > 100:
+            raise ValueError("Le statut doit faire entre 3 et 100 caractères.")
+        if not status.isalnum():
+            raise ValueError("Le statut ne doit contenir que des caractères alphanumériques.")
 		if len(status) < 3 or len(status) > 142:
 			raise ValueError("Le statut doit faire entre 3 et 142 caractères.")
 		self.status = status
@@ -92,6 +102,8 @@ class UserInfos(AbstractUser):
 		self.save()
 
 	def set_total_games(self, total_games: int):
+        if total_games < 0:
+            raise ValueError("Le nombre total de jeux ne peut pas être négatif.")
 		if total_games < 0:
 			raise ValueError("Le nombre total de jeux ne peut pas être négatif.")
 		self.total_games = total_games

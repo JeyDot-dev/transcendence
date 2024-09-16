@@ -1,14 +1,11 @@
-// import * as THREE from "../threejs/Three.js";
-// import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
 import { THREE } from '../three.module.js';
-
 
 export class Explosion {
     constructor(scene, particleCount = 100, particleSize = 0.1, duration = 2) {
         this.scene = scene;
         this.particleCount = particleCount;
         this.particleSize = particleSize;
-        this.duration = duration; // Durée pendant laquelle l'explosion reste active
+        this.duration = duration;
         this.clock = new THREE.Clock();
         this.initParticles();
         this.active = false;
@@ -55,7 +52,6 @@ export class Explosion {
 
         this.particleSystem.geometry.attributes.position.needsUpdate = true;
 
-        // Attendre un petit délai pour la prochaine mise à jour pour simuler une boucle d'animation asynchrone
         await this.sleep(16); // Approx. 60fps
     }
 
@@ -81,7 +77,6 @@ export class Explosion {
 
         this.scene.add(this.particleSystem);
 
-        // Boucle d'animation asynchrone
         const startTime = this.clock.getElapsedTime();
         while (this.clock.getElapsedTime() - startTime < this.duration) {
             await this.update();

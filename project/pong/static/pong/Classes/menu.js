@@ -2,10 +2,10 @@ import { THREE } from '../three.module.js';
 import { FontLoader } from '../FontLoader.js';
 import { Text3d } from './text3d.js';
 import { BouncingBallInCube } from './background.js';
-import { SocketManager } from './SocketManager.js';
 import { TournamentMenu } from './Tournament.js';
 import { Shop } from './Shop.js'
 import { ModalManager } from './ModalManager.js'
+import { TWEEN } from '../three.module.js';
 
 export class Menu {
     constructor(threeRoot, socketManager) {
@@ -46,14 +46,11 @@ export class Menu {
             new THREE.Color(0x00ff83)
         ];
 
-        // Charger les polices et initialiser les objets du menu
         this.fontLoader.load(
             './static/assets/LEMON_MILK_Regular.json',
             (font) => {
                 this.font = font;
-                console.log('Init MenuItem');
                 this.createMenuItems();
-                console.log('Init Background');
                 this.background = new BouncingBallInCube(2500, 19, threeRoot, this.menuGroup);
                 threeRoot.addAnimatedObject(this.background);
             },
@@ -63,22 +60,17 @@ export class Menu {
             }
         );
 
-        // Ajout des sources de lumière
         this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         this.directionalLight.position.set(500, -500, 1000);
         this.directionalLight.castShadow = true;
-        // this.scene.add(this.directionalLight);
-        // this.scene.add(this.directionalLight.target);
         this.menuGroup.add(this.directionalLight);
         this.menuGroup.add(this.directionalLight.target);
+        this.matchmakingAnimation = new MatchmakingAnimation(this.threeRoot, this.socketManager, this);
 
-        // Ajouter le menu à `threeRoot`
         this.scene.add(this.menuGroup);
         threeRoot.addAnimatedObject(this);
 
-        // Activer l'écoute des événements de clavier
         this.show();
-        // window.addEventListener('keydown', this.onKeyDownBound, false);
         if (this.isMobile()) {
             this.mouseControlEnabled = false;
         }
@@ -93,48 +85,13 @@ export class Menu {
             lookAt: { x: 0, y: 0, z: 0 }
         }, 2000);
     }
-    // MOBILE
     isMobile() {
         return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
 
-    // ModalListener = async (modalNewTournament) => {
-    //     document.getElementById('submitTournamentForm').addEventListener('click', async (event) => {
-    //         event.preventDefault();
-    //         try {
-    //             let form = document.getElementById('newTournamentForm');
-    //             let formData = new FormData(form);
-
-    //             let jsonObject = {};
-    //             for (const [key, value] of formData.entries()) {
-    //                 jsonObject[key] = value;
-    //             }
-    //             const response = await sendJSON('/database/newTournament', jsonObject);
-    //             console.log("---> request: ", jsonObject);
-    //             console.log('response is ' + response);
-    //             const obj = JSON.parse(response);
-    //             if (obj.status.localeCompare('success') == 0) {
-    //                 modalNewTournament.hide();
-    //                 this.formSubmittedSuccessfully = true;
-    //                 this.newLocalTournament(obj.t_id);
-    //             }
-    //             else if (obj.status.localeCompare('failure') == 0) {
-    //                 const newDiv = document.createElement('div');
-    //                 newDiv.textContent = 'All usernames must be different';
-    //                 newDiv.style.color = "red";
-    //                 const label = document.querySelector('#top');
-    //                 label.insertAdjacentElement('afterend', newDiv);
-    //             }
-    //         } catch (error) {
-    //             console.error('Error fetching JSON: ', error);
-    //         }
-    //     });
-    // }
-    // Gestion de la soumission pour le tournoi
     async handleTournamentSubmit(event) {
         let form = document.getElementById('newTournamentForm');
         let formData = new FormData(form);
-        console.log('formData: ', formData);
 
         let jsonObject = {};
         for (const [key, value] of formData.entries()) {
@@ -142,7 +99,6 @@ export class Menu {
         }
 
         const response = await sendJSON('/database/newTournament', jsonObject);
-        console.log("Response: ", response);
 
         const obj = JSON.parse(response);
         if (obj.status.localeCompare('success') == 0) {
@@ -180,7 +136,6 @@ export class Menu {
         let form = document.getElementById('newOptionsForm');
         let farmData = new FormData(form);
     }
-    // TODO: hauteur du canvas 
     createMenuItems() {
         this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
             this.formSubmittedSuccessfully = false;
@@ -190,31 +145,22 @@ export class Menu {
         });
         this.matchmakingMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 180), () => {
             console.log("Clicked On: Matchmaking");
+            this.hideText();
+            this.matchmakingAnimation.show();
+            this.socketManager.setType('matchmaking');
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
             this.formSubmittedSuccessfully = false;
             console.log("Clicked On: Local Tournament");
             this.disableEventListener();
             this.modalManager.openModal('modalNewTournament', this.handleTournamentSubmit.bind(this), this);
-            // const myModal = new bootstrap.Modal(document.getElementById('modalNewTournament'));
-            // myModal.show();
-            // this.hideText()
-            // this.ModalListener(myModal);
-            // const myModalEl = document.getElementById('modalNewTournament')
-            // myModalEl.addEventListener('hidden.bs.modal', event => {
-            //     if (this.formSubmittedSuccessfully === false) {
-            //         this.show();
-            //     }
-            // });
         });
         this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
-            console.log("Clicked On: Tournament");
         });
         this.shopMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Shop', this.colorPalette[4], new THREE.Vector3(0, 0, -440), () => {
             this.newShop();
         });
         this.optionsMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[5], new THREE.Vector3(0, 0, -640), () => {
-            console.log("Clicked On: Options");
 
         });
 
@@ -229,12 +175,6 @@ export class Menu {
     }
 
     show() {
-        console.log('Menu Show');
-        // Activer les écouteurs d'événements
-        // window.addEventListener('mousemove', this.onMouseMove, false);
-        // window.addEventListener('click', this.onMouseClick, false);
-
-        // Rendre les éléments du menu visibles
         this.menuItems.forEach(item => {
             item.textMesh.visible = true;
             item.textGlowTextMesh.visible = true;
@@ -251,17 +191,13 @@ export class Menu {
     }
 
     hide() {
-        console.log('Menu Hide');
-        // Désactiver les écouteurs d'événements
         this.disableEventListener();
 
-        // Masquer les éléments du menu
         this.menuItems.forEach(item => {
             item.textMesh.visible = false;
             item.textGlowTextMesh.visible = false;
             item.removePaddles();
         });
-        // Masquer le background
         if (this.background) {
             this.background.hide();
         }
@@ -270,11 +206,8 @@ export class Menu {
         }
     }
     hideText() {
-        console.log('Menu Text');
-        // Désactiver les écouteurs d'événements
         this.disableEventListener();
 
-        // Masquer les éléments du menu
         this.menuItems.forEach(item => {
             item.textMesh.visible = false;
             item.textGlowTextMesh.visible = false;
@@ -296,12 +229,10 @@ export class Menu {
     }
 
     onMouseMove(event) {
-        // if (!this.mouseControlEnabled) return;  // Désactiver le mouvement de la caméra si la souris est désactivée
 
         this.mouse.x = ((event.clientX - this.canvasBounds.left) / this.canvasBounds.width) * 2 - 1;
         this.mouse.y = -((event.clientY - this.canvasBounds.top) / this.canvasBounds.height) * 2 + 1;
 
-        // CAMERA
         const maxRotationX = Math.PI / 4;
         const maxRotationY = Math.PI / 4;
         const targetRotationX = this.mouse.x * maxRotationX;
@@ -309,35 +240,11 @@ export class Menu {
 
         if (this.mouseControlEnabled) {
             this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-            this.camera.rotateY(-targetRotationX); // Appliquer la rotation autour de l'axe Y
+            this.camera.rotateY(-targetRotationX);
             this.camera.rotateX(targetRotationY);
         }
 
-        // RAYCASTER
         this.raycaster.setFromCamera(this.mouse, this.camera);
-        let intersects = [];
-        this.menuItems.forEach(item => {
-            item.updateBoundingBox(); // Assurez-vous que la bounding box est mise à jour
-            const intersection = this.raycaster.ray.intersectBox(item.boundingBox, new THREE.Vector3());
-            if (intersection) {
-                intersects.push(item);
-            }
-        });
-
-        // Ajouter les paddles aux éléments survolés
-        this.menuItems.forEach(item => item.removePaddles());
-        if (intersects.length > 0) {
-            const selectedItem = intersects[0];
-            selectedItem.addPaddles();
-        }
-    }
-
-    onMouseClick(event) {
-        // this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        // this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-
         let intersects = [];
         this.menuItems.forEach(item => {
             item.updateBoundingBox();
@@ -346,26 +253,49 @@ export class Menu {
                 intersects.push(item);
             }
         });
-
+        
+        // Ajouter les paddles aux éléments survolés
+        this.menuItems.forEach(item => item.removePaddles());
         if (intersects.length > 0) {
             const selectedItem = intersects[0];
-            selectedItem.onClick(); // Appel de la fonction onClick associée à l'item cliqué
+            selectedItem.addPaddles();
         }
     }
-
+    
+    onMouseClick(event) {
+        // this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        // this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        
+        let intersects = [];
+        this.menuItems.forEach(item => {
+            item.updateBoundingBox();
+            const intersection = this.raycaster.ray.intersectBox(item.boundingBox, new THREE.Vector3());
+            if (intersection) {
+                intersects.push(item);
+            }
+        });
+        
+        if (intersects.length > 0) {
+            const selectedItem = intersects[0];
+            selectedItem.onClick();
+        }
+    }
+    
     onKeyDown(event) {
         // event.preventDefault(); // Empêche le comportement par défaut (scrolling)
         // if (event.key === 'c') {
-        //     this.mouseControlEnabled = !this.mouseControlEnabled;  // Basculer l'état du mouvement de la caméra
-        // }
-        // if (event.key === 'h') {
-        //     if (this.showMenuEnabled) {
-        //         this.hide();
-        //     } else {
-        //         this.show();
-        //     }
-        //     this.showMenuEnabled = !this.showMenuEnabled;  // Basculer l'état de l'affichage du menu
-        // }
+            //     this.mouseControlEnabled = !this.mouseControlEnabled;  // Basculer l'état du mouvement de la caméra
+            // }
+            // if (event.key === 'h') {
+                //     if (this.showMenuEnabled) {
+                    //         this.hide();
+                    //     } else {
+                        //         this.show();
+                        //     }
+                        //     this.showMenuEnabled = !this.showMenuEnabled;  // Basculer l'état de l'affichage du menu
+                        // }
         if (event.key === 'ArrowDown') {
             event.preventDefault();
             this.navigateMenu(1);
@@ -377,10 +307,11 @@ export class Menu {
         }
     }
     navigateMenu(direction) {
-        this.menuItems[this.currentSelectedIndex].removePaddles();
-
+        // this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        this.menuItems.forEach(item => item.removePaddles());
+        
         this.currentSelectedIndex = (this.currentSelectedIndex + direction + this.menuItems.length) % this.menuItems.length;
-
+        
         this.menuItems[this.currentSelectedIndex].addPaddles();
     }
     selectCurrentItem() {
@@ -388,19 +319,15 @@ export class Menu {
         currentItem.onClick();
     }
     render() {
-        this.renderer.render(this.scene, this.camera);
+        // this.renderer.render(this.scene, this.camera);
     }
 
     newLocalGame(customGameId) {
-        console.log("Clicked On: Local");
         this.socketManager.connectCustomGame(customGameId);
-        // this.socketManager.setGameId(666);
-        // this.socketManager.setType('local');
         this.hide();
     }
 
     newLocalTournament(t_id) {
-        console.log("Yo la miff, ", this.tournamentLocal);
         if (this.tournamentLocal !== undefined) {
             this.tournamentLocal.destroy();
         }
@@ -423,7 +350,6 @@ export class Menu {
             position: { x: 0, y: -1000, z: 0 },
             lookAt: { x: 0, y: 0, z: 0 }
         }, 2000);
-        // this.threeRoot.anim
         if (!this.shop) {
             this.shop = new Shop(this.threeRoot, this.socketManager);
         } else {
@@ -432,7 +358,6 @@ export class Menu {
         this.shop.tweenCameraToItem();
     }
     returnToMenu() {
-        // this.socketManager
         this.show();
     }
 }
@@ -452,13 +377,10 @@ class MenuItem {
     }
 
     createText(text, color) {
-        // TDODO:
         this.text3d = new Text3d(this.camera, this.scene, this.font, 100, 25, color, text, 1.02, this.position, new THREE.Vector3(Math.PI / 2, 0, 0));
         this.text3d.addToGroup(this.groupRef);
         this.textMesh = this.text3d.mesh;
         this.textGlowTextMesh = this.text3d.glowTextMesh;
-
-        // Centrer le texte après création
         this.text3d.setPosition(this.position);
     }
 
@@ -508,19 +430,13 @@ class MenuItem {
             transparent: true
         });
 
-        // Créer le paddle gauche
         const leftPaddle = new THREE.Mesh(paddleGeometry, shaderMaterial);
         leftPaddle.position.set(this.boundingBox.min.x - 50, this.position.y - 80, this.position.z + paddleSize.z / 2);
-        // this.scene.add(leftPaddle);
         this.groupRef.add(leftPaddle);
 
-
-        // Créer le paddle droit
         const rightPaddle = new THREE.Mesh(paddleGeometry, shaderMaterial);
         rightPaddle.position.set(this.boundingBox.max.x + 50, this.position.y - 80, this.position.z + paddleSize.z / 2);
-        // this.scene.add(rightPaddle);
         this.groupRef.add(rightPaddle);
-
         this.paddles.push(leftPaddle, rightPaddle);
     }
 
@@ -538,7 +454,7 @@ export class BackToMainMenu {
         this.isVisible = false;
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
-        this.onMouseClickBound = this.onMouseClick.bind(this); // Créer une seule référence liée ici
+        this.onMouseClickBound = this.onMouseClick.bind(this);
         this.handleEscapeBound = this.handleEscape.bind(this);
         this.toDestroy = toDestroy;
         this.type = type;
@@ -546,7 +462,7 @@ export class BackToMainMenu {
 
         this.createBackToMenuText();
 
-        this.setVisibility(false);  // Initially hidden
+        this.setVisibility(false);
     }
     initListener() {
         document.addEventListener('keydown', this.handleEscapeBound, false);
@@ -574,11 +490,11 @@ export class BackToMainMenu {
                     this.threeRoot.camera,
                     this.threeRoot.scene,
                     font,
-                    35,   // Font size
-                    15,   // Depth
-                    0xff00c1,   // Color
-                    'Back to Menu ?',  // Text content
-                    1.01,  // Glow size
+                    35,
+                    15,
+                    0xff00c1,
+                    'Back to Menu ?',
+                    1.01,
                     position
                 );
                 this.createBoundingBox();
@@ -596,7 +512,7 @@ export class BackToMainMenu {
     }
 
     updateBoundingBox() {
-        this.boundingBox.setFromObject(this.backText.mesh); // Recalculer la bounding box si nécessaire
+        this.boundingBox.setFromObject(this.backText.mesh);
     }
     addToScene(scene) {
         scene.add(this.group);
@@ -608,7 +524,6 @@ export class BackToMainMenu {
     }
 
     toggleVisibility() {
-        console.log('Open Back to menu');
         this.setVisibility(!this.isVisible);
         if (this.isVisible && this.backText) {
             this.backText.alignTextWithCamera();
@@ -619,12 +534,10 @@ export class BackToMainMenu {
     }
     disableClicks() {
         document.removeEventListener('click', this.onMouseClickBound, false);
-        console.log('Clicks are disabled.');
     }
 
     enableClicks() {
         document.addEventListener('click', this.onMouseClickBound, false);
-        console.log('Clicks are enabled.');
     }
     onMouseClick(event) {
         const canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
@@ -640,12 +553,7 @@ export class BackToMainMenu {
         }
     }
     handleBackToMenuClick() {
-        console.log('Clicked on Back to main menu');
-        // this.socketManager.lastMenu.show();
-        // this.socketManager.lastMenu.show();
-        // this.socketManager.lastMenu.show();
         this.destroyListener();
-        // this.toggleVisibility();
         this.setVisibility(false);
         if (this.type == 'game') {
             this.socketManager.clearGame();
@@ -654,7 +562,87 @@ export class BackToMainMenu {
             this.toDestroy.destroy();
             this.menuToGoBack.show();
         }
-        // this.socketManager.lastMenu.tweenCameraToItem();
-        // this.toDestroy.destroy();
+    }
+}
+
+class MatchmakingAnimation {
+    constructor(threeRoot, socketManager, menu) {
+        this.threeRoot = threeRoot;
+        this.group = new THREE.Group();
+        this.rotationTween = null;
+        this.escListenerBound = this.handleEscape.bind(this);
+        this.menu = menu;
+        this.socketManager = socketManager;
+        
+        this.createMatchmakingText();        
+    }
+    createMatchmakingText() {
+        const fontLoader = new FontLoader();
+        fontLoader.load(
+            './static/assets/LEMON_MILK_Regular.json',
+            (font) => {
+                this.backText = new Text3d(
+                    this.threeRoot.camera,
+                    this.threeRoot.scene,
+                    font,
+                    100,   // Font size
+                    25,   // Depth
+                    0x9600ff,   // Color
+                    'Matchmaking',  // Text content
+                    1.02,  // Glow size
+                    new THREE.Vector3(0, 0, 0)
+                );
+                this.backText.addToGroup(this.group);
+                this.group.position.set(0 , 0, 180);
+                this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                this.directionalLight.position.set(500, -500, 1000);
+                this.directionalLight.castShadow = true;
+                // this.scene.add(this.directionalLight);
+                // this.scene.add(this.directionalLight.target);
+                this.group.add(this.directionalLight);
+                this.group.add(this.directionalLight.target);
+                this.group.visible = false;
+                this.threeRoot.scene.add(this.group);
+            },
+            undefined,
+            (error) => {
+                console.error('Error loading font:', error);
+            }
+        );
+    }
+    show() {
+        this.group.visible = true;
+        document.addEventListener('keydown', this.escListenerBound, false);
+        this.startRotation();
+    }
+    hide() {
+        this.group.visible = false;
+        document.removeEventListener('keydown', this.escListenerBound, false);
+        this.socketManager.close();
+        this.socketManager.type = null;
+        this.stopRotation();
+    }
+    handleEscape(event) {
+        if (event.key === 'Escape') {
+            this.menu.show();
+            this.hide();
+        }
+    }
+    startRotation() {
+        const targetRotation = { x: this.group.rotation.x + Math.PI * 2 };
+
+        this.rotationTween = new TWEEN.Tween(this.group.rotation)
+            .to(targetRotation, 2000)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .onUpdate(() => {
+                this.group.rotation.x = this.group.rotation.x % (Math.PI * 2);
+            })
+            .repeat(Infinity)
+            .start();
+    }
+    stopRotation() {
+        if (this.rotationTween) {
+            this.rotationTween.stop();
+        }
     }
 }

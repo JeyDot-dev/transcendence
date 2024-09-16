@@ -6,8 +6,7 @@ function removeBackdrop() {
     }
 }
 
-function resetBody()
-{
+function resetBody() {
     document.body.classList.remove("modal-open");
     document.body.removeAttribute("style");
     removeBackdrop();
@@ -35,9 +34,9 @@ function checkInput(data, to_check, to_alert = null) {
     }
     else if (data.message != to_check) {
         alert(data.message);
-    }else {
+    } else {
         if (to_alert) {
-        	alert(data.message);
+            	alert(data.message);
         }
         navigateTo("userManager");
         resetBody();
@@ -45,24 +44,22 @@ function checkInput(data, to_check, to_alert = null) {
 }
 
 function login(formData) {
-	const url = 'api/userManager/login/';
-	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-	console.log(csrftoken);
+    const url = 'api/userManager/login/';
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-	fetch(url, {
-		method: 'POST',
-		body: JSON.stringify({
-			username: formData.get('login_username'),
-			password: formData.get('login_password')
-		}),
-		headers: {
-			'Content-Type': 'application/json',
-			'X-CSRFToken': csrftoken
-		}
-	})
-	.then(response => response.json())
+    fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+            username: formData.get('login_username'),
+            password: formData.get('login_password')
+        }),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        }
+    })
+        .then(response => response.json())
         .then(data => {
-            console.log(data);
             if (!data.token) {
                 errorInModal(data, "loginSpan", "Invalid login credentials");
             } else {
@@ -104,45 +101,43 @@ function createAccount(formData) {
 }
 
 function testToken(token) {
-	const url = 'api/userManager/test_token/';
+    const url = 'api/userManager/test_token/';
 
-	fetch(url, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Token ${token}`
-		}
-	})
-	.then(response => response.json())
-	.then(data => {
-		if (data.error) {
-			alert(data.error);
-		} else {
-			alert('Token is valid');
-		}
-	})
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${token}`
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert('Token is valid');
+            }
+        })
 }
 
 function logout() {
-	const url = 'api/userManager/logout/';
-	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-	console.log(csrftoken);
+    const url = 'api/userManager/logout/';
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-	fetch(url, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-CSRFToken': csrftoken
-		}
-	})
-	.then(response => response.json())
-	.then(data => {
-        checkInput(data, "Logout successful", false);
-        localStorage.removeItem('user');
-        document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        // navigateTo("/");
-        updateNav();
-	})
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            checkInput(data, "Logout successful", false);
+            localStorage.removeItem('user');
+            document.cookie = 'logintoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            updateNav();
+        })
 }
 
 window.addEventListener('beforeunload', function () {
@@ -156,7 +151,6 @@ window.addEventListener('load', function () {
 function changeUserValue(url_key, value, username) {
     const url = `api/userManager/change_value/${url_key}/`;
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    console.log(csrftoken);
 
     fetch(url, {
         method: "POST",
@@ -211,26 +205,16 @@ function uploadProfilePicture(formData) {
             'X-CSRFToken': csrftoken
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            alert(data.message);
-            navigateTo("userManager");
-        } else {
-            alert('An error occurred');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred during profile picture upload');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                navigateTo("userManager");
+            } else {
+                alert('An error occurred');
+            }
+        })
+        .catch(error => {
+            alert('An error occurred during profile picture upload');
+        });
 }
-
-// document.getElementById('profilePictureForm').addEventListener('submit', function(e) {
-// 	e.preventDefault();
-// 	console.log('submitting');
-// 	var form = document.getElementById('profilePictureForm');
-// 	var formData = new FormData(form);
-//
-// 	uploadProfilePicture(formData);
-// });
