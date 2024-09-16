@@ -41,11 +41,11 @@ def newGame(request):
             if not form.is_valid:
                 for field, message in form.errors.items():
                     if message:
-                        return JsonResponse({'status': 'failure', 'reason': field + message[0]})
+                        return JsonResponse({'status': 'failure', 'reason': field + ": " + message[0]})
             if not Sform.is_valid():
                 for field, message in Sform.errors.items():
                     if message:
-                        return JsonResponse({'status': 'failure', 'reason': field + message[0]})
+                        return JsonResponse({'status': 'failure', 'reason': field + ": " + message[0]})
     else:
         raise Http404()
         
