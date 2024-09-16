@@ -16,6 +16,11 @@
                             <label id="top" for="id_tournament_title">Tournament Title</label>
                             {{ form.tournament_title }}
                         </div>
+                        <div>
+                            <form method="post" action="">
+                                {{ formSettings.as_p }}
+                            </form>
+                        </div>
                         <div id="formsetContainer">
                             {{ formset.management_form }}  
                         </div>
