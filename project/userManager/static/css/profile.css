@@ -18,12 +18,10 @@ main textarea, label, {
 }
 .form-control{
     background-color: rgba(0, 0, 0, 0.5);
-    /* border-color: lightblue; */
 }
 #modifyProfileContainer .form-control:focus {
     color: black;
     background-color: rgba(255, 255, 255, 0.9);
-    /* background-color: rgba(50, 30, 30, 0.2);; */
 }
 #modifyProfileContainer label {
     color: white;
@@ -108,7 +106,6 @@ main textarea, label, {
     width: 10vw;
 }
 #modifyProfileContainer{
-    /* width: 50vw; */
 }
 #modifyProfileContainer .list-group{
 
@@ -139,10 +136,6 @@ main textarea, label, {
 #new_status:hover {
     border: dotted;
     border-color: darkorchid;
-/* #new_status:focus { */
-/*     border: none; */
-/*     highlight: none; */
-/* } */
 main ul, main input, .list-group, .list-group-item, .form-control, textarea {
     background-color: rgba(0, 0, 0, 0.5);
 }
