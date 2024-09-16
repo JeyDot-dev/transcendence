@@ -152,7 +152,7 @@ export class Menu {
         });
         this.matchmakingMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 180), () => {
             console.log("Clicked On: Matchmaking");
-            if (!this.user_auth){
+            if (!(this.user_auth)){
                 navigateTo('userManager');
             }
             else{
