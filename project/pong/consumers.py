@@ -144,24 +144,18 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await handle_key(self.game, text_data_json["type"], text_data_json["key"], who)
 
         elif game_type == "remote":
-            user = self.scope["user"]
-            logger.info(f"Remote game: Checking user {user.id} for game {self.game_id}")
-            logger.info(f"Remote game: Checking user {user.id} for players.id {self.game.players[0]} and {self.game.players[0]} ------------------")
+            user_name = self.scope["user"].username
 
-            # Vérification des joueurs dans le jeu
-            if len(self.game.players) < 2:
-                logger.error(f"Players not set correctly: {self.game.players}")
-                return
+            logger.info(f"Remote game: Checking user {user_name} for game {self.game_id}")
 
-            # Déterminer qui contrôle le paddle en fonction de l'ID utilisateur
-            if user.id == self.game.players[0].id:
+            if user_name == self.game.players[0].name:
                 who = 0
-                logger.info(f"User {user.id} controls paddle 0")
-            elif user.id == self.game.players[1].id:
+                logger.info(f"User {user_name} controls paddle 0")
+            elif user_name == self.game.players[1].name:
                 who = 1
-                logger.info(f"User {user.id} controls paddle 1")
+                logger.info(f"User {user_name} controls paddle 1")
             else:
-                logger.warning(f"User {user.id} does not control any paddle in this game")
+                logger.warning(f"User {user_name} does not control any paddle in this game")
                 return
 
             if text_data_json["key"] in ["w", "s", "arrowup", "arrowdown"]:
