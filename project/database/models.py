@@ -28,9 +28,9 @@ class Player(models.Model):
 class Tournament(models.Model):
     name = models.CharField(max_length=100, default = "Tournament")
     players = models.ManyToManyField(Player, blank=True)
-    winner = models.IntegerField(default=1)
+    winner = models.IntegerField(blank=True)
     round_number = models.IntegerField(default=1)
-    timer = models.IntegerField(default=120)
+    timer = models.IntegerField(default=180)
     score = models.IntegerField(default=5)
     faster = models.BooleanField(default=False)
     slower = models.BooleanField(default=False)
@@ -52,7 +52,7 @@ class Tournament(models.Model):
         else:"""
         #since is_winner doesn't change if you don't play, the player left out will automaticly rise
         while len(winners) >= 2:
-            game = self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number)
+            game = self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number, timer=self.timer, score=self.score, faster=self.faster, slower=self.slower)
         if user.is_authenticated:
             user.match_history.add(game)
         self.round_number = models.F('round_number') + 1
@@ -97,7 +97,7 @@ class Game(models.Model):
     pool = models.IntegerField(default=1)
     is_played = models.BooleanField(default=False)
     date = models.DateTimeField(default=datetime.now, blank=True)
-    timer = models.IntegerField(default=120)
+    timer = models.IntegerField(default=180)
     score = models.IntegerField(default=5)
     faster = models.BooleanField(default=False)
     slower = models.BooleanField(default=False)

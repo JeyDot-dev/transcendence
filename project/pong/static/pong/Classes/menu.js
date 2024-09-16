@@ -175,6 +175,11 @@ export class Menu {
             this.formSubmittedSuccessfully = true;
             this.newLocalGame(obj.game_ws_id);
         }
+        else if (obj.status.localeCompare('failure') == 0) {
+            const newDiv = document.getElementById('form_error');
+            newDiv.innerHTML = obj.reason;
+            newDiv.style.color = "red";
+        }
     }
     async handleOptionsSubmit(event) {
         let form = document.getElementById('newOptionsForm');
