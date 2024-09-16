@@ -8,35 +8,27 @@ export class BouncingBallInCube {
         this.camera = threeRoot.camera;
         this.groupRef = group;
 
-        this.ballVelocity = new THREE.Vector3(15, 14, 13); // Vitesse initiale
+        this.ballVelocity = new THREE.Vector3(15, 14, 13);
         this.gridSegmentsList = [];
-        this.pointsSet = new Set(); // Pour éviter les doublons de points
-        this.segmentSet = new Set(); // Pour éviter les doublons de segments
-        this.isPaused = false; // État de pause
+        this.pointsSet = new Set();
+        this.segmentSet = new Set();
+        this.isPaused = false;
         this.createCubeWithGrid();
         this.createBall();
 
-        // // Ajouter un écouteur d'événements pour la touche espace
-        // window.addEventListener('keydown', (event) => {
-        //     if (event.code === 'Space') {
-        //         this.togglePause();
-        //     }
-        // });
-        
         this.addToGroup(group);
     }
 
     createCubeWithGrid() {
         const halfSize = this.size / 2;
-        const step = this.size / (this.division + 1); // Taille d'une division sur une face
+        const step = this.size / (this.division + 1);
 
-        // Créer les grilles sur chaque face du cube
-        this.createGridOnFace(new THREE.Vector3(0, 0, halfSize), new THREE.Euler(0, 0, 0), step); // Face avant
-        this.createGridOnFace(new THREE.Vector3(0, 0, -halfSize), new THREE.Euler(0, Math.PI, 0), step); // Face arrière
-        this.createGridOnFace(new THREE.Vector3(0, halfSize, 0), new THREE.Euler(-Math.PI / 2, 0, 0), step); // Face haut
-        this.createGridOnFace(new THREE.Vector3(0, -halfSize, 0), new THREE.Euler(Math.PI / 2, 0, 0), step); // Face bas
-        this.createGridOnFace(new THREE.Vector3(halfSize, 0, 0), new THREE.Euler(0, Math.PI / 2, 0), step); // Face droite
-        this.createGridOnFace(new THREE.Vector3(-halfSize, 0, 0), new THREE.Euler(0, -Math.PI / 2, 0), step); // Face gauche
+        this.createGridOnFace(new THREE.Vector3(0, 0, halfSize), new THREE.Euler(0, 0, 0), step);
+        this.createGridOnFace(new THREE.Vector3(0, 0, -halfSize), new THREE.Euler(0, Math.PI, 0), step);
+        this.createGridOnFace(new THREE.Vector3(0, halfSize, 0), new THREE.Euler(-Math.PI / 2, 0, 0), step);
+        this.createGridOnFace(new THREE.Vector3(0, -halfSize, 0), new THREE.Euler(Math.PI / 2, 0, 0), step);
+        this.createGridOnFace(new THREE.Vector3(halfSize, 0, 0), new THREE.Euler(0, Math.PI / 2, 0), step);
+        this.createGridOnFace(new THREE.Vector3(-halfSize, 0, 0), new THREE.Euler(0, -Math.PI / 2, 0), step);
     }
 
     createGridOnFace(position, rotation, step) {
@@ -63,13 +55,12 @@ export class BouncingBallInCube {
     createGridSegment(start, end, position, rotation) {
         const transformedStart = start.clone().applyEuler(rotation).add(position);
         const transformedEnd = end.clone().applyEuler(rotation).add(position);
-    
+
         const segmentKey = `${transformedStart.x},${transformedStart.y},${transformedStart.z}-${transformedEnd.x},${transformedEnd.y},${transformedEnd.z}`;
         const reverseSegmentKey = `${transformedEnd.x},${transformedEnd.y},${transformedEnd.z}-${transformedStart.x},${transformedStart.y},${transformedStart.z}`;
-    
+
         this.segmentSet.add(segmentKey);
 
-        // PALETE
         const colorPalette = [
             new THREE.Color(0xff00c1),
             new THREE.Color(0x9600ff),
@@ -110,31 +101,25 @@ export class BouncingBallInCube {
             blending: THREE.AdditiveBlending,
             transparent: true
         });
-    
+
         const lineGeometry = new THREE.BufferGeometry().setFromPoints([transformedStart, transformedEnd]);
         const lineSegment = new THREE.Line(lineGeometry, lineMaterial);
-    
-        // this.scene.add(lineSegment);
+
         this.gridSegmentsList.push(lineSegment);
     }
 
     createIntersectionPoint(localPosition, facePosition, faceRotation) {
         const transformedPosition = localPosition.clone().applyEuler(faceRotation).add(facePosition);
         const key = `${transformedPosition.x},${transformedPosition.y},${transformedPosition.z}`;
-    
-        // Si le point existe déjà, ne rien faire
+
         if (this.pointsSet.has(key)) return;
-    
-        // Créer le point s'il n'existe pas
+
         const pointGeometry = new THREE.SphereGeometry(4, 16, 16);
         const pointMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const point = new THREE.Mesh(pointGeometry, pointMaterial);
-    
+
         point.position.copy(transformedPosition);
-    
-        // this.scene.add(point);
-    
-        // Remplacer le stockage par l'objet Three.js lui-même
+
         this.pointsSet.add(point);
     }
 
@@ -144,7 +129,6 @@ export class BouncingBallInCube {
         const ballMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
         this.ball = new THREE.Mesh(ballGeometry, ballMaterial);
         this.ball.position.set(0, 0, 0);
-        // this.scene.add(this.ball);
         this.ballRadius = ballRadius;
     }
 
@@ -218,7 +202,6 @@ export class BouncingBallInCube {
     }
 
     addToGroup(group) {
-        // this.scene.add(this.ball);
         group.add(this.ball);
         this.pointsSet.forEach(point => {
             group.add(point);
@@ -226,8 +209,5 @@ export class BouncingBallInCube {
         this.gridSegmentsList.forEach(segment => {
             group.add(segment);
         });
-        // this.scene.add(point);
-        // this.scene.add(lineSegment);
-
     }
 }

@@ -1,12 +1,9 @@
-// import * as THREE from '../threejs/Three.js';
-// import * as THREE from 'https://cdn.skypack.dev/three@0.132.2/build/three.module.js';
 import { THREE } from '../three.module.js';
 import { Paddle } from './paddle.js';
 import { Arena } from './arena.js';
 import { Puck } from './puck.js';
 import { FontLoader } from '../FontLoader.js';
 import { Text3d } from './text3d.js';
-import { TournamentMenu } from './Tournament.js';
 import { BackToMainMenu } from './menu.js';
 
 export class Game {
@@ -17,7 +14,6 @@ export class Game {
         this.renderer = threeRoot.renderer;
         this.composer = threeRoot.composer;
         this.socketManager = socketManager;
-        console.log('gameData: ', gameData);
         this.playerId = 0;
         this.pressedKeys = [];
         this.paddles = [];
@@ -39,27 +35,17 @@ export class Game {
         this.p1Text = null;
         this.p2Text = null;
 
-        console.log("Init Arena:", gameData.width, gameData.height);
         this.initArena(gameData.width, gameData.height);
-        console.log("Init Lightning");
         this.initLighting();
-        console.log("Init Text");
         this.initText(gameData.score, gameData.timer);
-        console.log("Init Ball");
         this.initBall(gameData.ball);
-        console.log("Init Paddles: ", gameData.players);
         this.initPaddles(gameData.players);
-        console.log("Init Player Name: ", gameData.playerNames);
         this.initPlayerName(gameData.playerNames);
 
-        console.log('Init Physics');
         this.initPhysics(gameData);
         this.threeRoot.addAnimatedObject(this);
-        console.log('Init Back to main menu');
         this.initBackToMainMenu();
-        console.log("Init Input Handling");
         this.initInputHandling();
-        console.log("End of Game constructor")
         this.scene.add(this.gameGroup);
         this.tweenCameraToItem();
     }
@@ -86,25 +72,23 @@ export class Game {
     initLighting() {
         const ambientLight = new THREE.AmbientLight(this.colorPalette, 0.1);
 
-        // Light 1
         const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.6);
         directionalLight1.position.set(-400, 0, 800);
         directionalLight1.castShadow = true;
         const targetObject1 = new THREE.Object3D();
         targetObject1.position.set(400, 0, 0);
         directionalLight1.target = targetObject1;
-        directionalLight1.target.updateMatrixWorld();     
+        directionalLight1.target.updateMatrixWorld();
         this.gameGroup.add(directionalLight1);
         this.gameGroup.add(targetObject1);
 
-        // Light 2
         const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
         directionalLight2.position.set(400, 0, 800);
         directionalLight2.castShadow = true;
         const targetObject2 = new THREE.Object3D();
         targetObject2.position.set(-400, 0, 0);
         directionalLight2.target = targetObject2;
-        directionalLight2.target.updateMatrixWorld();     
+        directionalLight2.target.updateMatrixWorld();
 
         this.gameGroup.add(directionalLight2);
         this.gameGroup.add(targetObject2);
@@ -138,7 +122,7 @@ export class Game {
                 this.p1Text.addToGroup(this.gameGroup);
                 this.p2Text.addToGroup(this.gameGroup);
             },
-            undefined, // onProgress callback (optional)
+            undefined,
             (error) => {
                 console.error('An error occurred loading the font:', error);
             }
@@ -146,7 +130,6 @@ export class Game {
     }
 
     initBall(ball_param) {
-        console.log("Ball Param: ", ball_param);
         this.ball = new Puck(
             ball_param.size,
             ball_param.size,
@@ -157,14 +140,10 @@ export class Game {
             this.camera
         );
         this.ball.addToGroup(this.gameGroup);
-        console.log('Ball Param init ball: ', ball_param);
-
     }
 
     initPaddles(playersParam) {
-        console.log("----Paddles Params of type: ", typeof playersParam);
         playersParam.forEach(element => {
-            console.log("Player:", element);
             const newPaddle = new Paddle(
                 element.width,
                 element.height,
@@ -176,7 +155,6 @@ export class Game {
             newPaddle.addToGroup(this.gameGroup);
             this.paddles.push(newPaddle);
         });
-
     }
 
     initPlayerName(playerNames) {
@@ -192,10 +170,8 @@ export class Game {
                 );
                 this.p1NameText.addToGroup(this.gameGroup);
                 this.p2NameText.addToGroup(this.gameGroup);
-                // this.p1NameText.alignTextWithCamera();
-                // this.p2NameText.alignTextWithCamera();
             },
-            undefined, // onProgress callback (optional)
+            undefined,
             (error) => {
                 console.error('An error occurred loading the font:', error);
             }
@@ -214,27 +190,23 @@ export class Game {
         const key = event.key.toLowerCase();
 
         if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'space'].includes(event.key.toLowerCase())) {
-            event.preventDefault(); // Empêche le comportement par défaut (scrolling)
+            event.preventDefault();
         }
         if (event.code === 'Space') {
-            console.log('keydown: space');
             this.socketManager.sendMessage({ type: 'keydown', key: 'space', who: 0 });
             return;
         }
         if (!this.pressedKeys[key]) {
-            this.pressedKeys[key] = true; 
-            
+            this.pressedKeys[key] = true;
+
             if (['w', 's'].includes(key)) {
-                console.log('keydown: w s');
                 this.socketManager.sendMessage({ type: 'keydown', key: key, who: 0 });
             }
             if (['arrowup', 'arrowdown'].includes(key)) {
-                console.log('keydown: arrow');
                 this.socketManager.sendMessage({ type: 'keydown', key: key, who: 1 });
             }
         }
         if (['k'].includes(key)) {
-            console.log('Close WebSocket with key K');
             this.socketManager.reconnect();
         }
     }
@@ -245,7 +217,6 @@ export class Game {
             event.preventDefault();
         }
         if (event.code === 'Space') {
-            console.log('keyup: space');
             this.socketManager.sendMessage({ type: 'keyup', key: 'space', who: 0 });
             return;
         }
@@ -253,11 +224,9 @@ export class Game {
             delete this.pressedKeys[key];
 
             if (['w', 's'].includes(key)) {
-                console.log('keyup: w s');
                 this.socketManager.sendMessage({ type: 'keyup', key: key, who: 0 });
             }
             if (['arrowup', 'arrowdown'].includes(key)) {
-                console.log('keyup: arrow');
                 event.preventDefault(); // Empêche le comportement par défaut (scrolling)
                 this.socketManager.sendMessage({ type: 'keyup', key: key, who: 1 });
             }
@@ -272,22 +241,20 @@ export class Game {
     }
     initPhysics(gameData) {
         this.ballPosition = new THREE.Vector3(gameData.ball.x - this.offSet.x, -gameData.ball.y + this.offSet.y, 0);
-        this.velocityDelta = new THREE.Vector3(0, 0, 0); 
+        this.velocityDelta = new THREE.Vector3(0, 0, 0);
         this.ballVelocity = new THREE.Vector2(gameData.ball.vel_x, -gameData.ball.vel_y);  // inverse Y car y est inversé dans THREE.js
         this.ballSpeed = gameData.ball.speed;
         const fixedDeltaTime = 1.0 / 60;
         this.accumulator = 0.0;
         this.lastPhysicsTime = performance.now();
-    
-        // Interval for physics
+
         this.physics = setInterval(() => {
             const currentTime = performance.now();
             const deltaTime = (currentTime - this.lastPhysicsTime) / 1000;
             this.lastPhysicsTime = currentTime;
-    
-            // Accumulate the time passed
+
             this.accumulator += deltaTime;
-    
+
             while (this.accumulator >= fixedDeltaTime) {
                 this.updatePhysics(fixedDeltaTime);
                 this.accumulator -= fixedDeltaTime;
@@ -299,10 +266,10 @@ export class Game {
             if (!this.ballPosition) {
                 this.ballPosition = this.cube.position.clone();
             }
-        
+
             this.velocityDelta.set(this.ballVelocity.x, this.ballVelocity.y, 0);
             this.velocityDelta.multiplyScalar(this.ballSpeed * fixedDeltaTime);
-        
+
             this.ballPosition.add(this.velocityDelta);
         }
     }
@@ -311,19 +278,15 @@ export class Game {
         this.physics = null;
     }
     updateGame(game) {
-        console.log('Update Game(Reconnection)', game.players);
         this.ball.move(game.ball.x - this.offSet.x, -game.ball.y + this.offSet.y);
-        // console.log(game.score);
         game.players.forEach(element => {
             this.paddles[element.id].move(element.position[0] - this.offSet.x, -element.position[1] + this.offSet.y);
         });
-        // this.timeText.updateText('0s');
         this.p1Text.updateText(game.score[0].toString(), this.gameGroup);
         this.p2Text.updateText(game.score[1].toString(), this.gameGroup);
     }
 
     wsMessageManager(data) {
-        // console.log('wsMessageManager: ', data);
         switch (data.type) {
             case 'scoreChange0':
                 this.p1Text.updateText(data.score[0].toString(), this.gameGroup);
@@ -336,8 +299,6 @@ export class Game {
                 this.timeText.updateText(data.timer.toString(), this.gameGroup);
                 break;
             case 'ballMove':
-                // DEPRECATED
-                // -y Car dans three js y est orienter differement
                 this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);
                 break;
             case 'refreshBallData':
@@ -347,7 +308,6 @@ export class Game {
                 this.ballSpeed = data.ball.speed;
                 break;
             case 'paddleMove':
-                // -y Car dans three js y est orienter differement
                 this.paddles[data.paddle.side].move(data.paddle.x - this.offSet.x, -data.paddle.y + this.offSet.y)
                 break;
             case 'countdown':
@@ -359,15 +319,12 @@ export class Game {
                 if (data.ball) {
                     this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);
                 }
-                console.log('Game state Pause: ', this.isPaused);
             default:
                 break;
         }
         if (data.type != 'ballMove') {
-            // console.log(data);
         }
         if (data.type == 'scoreChange0' || data.type == 'scoreChange') {
-            console.log('New score Front end: ', data.score);
         }
     }
 
@@ -393,7 +350,6 @@ export class Game {
     }
 
     gameIsPlayed() {
-        // TODO: Gerer le retour au menu si dans un init ou dans un udpate game.isPlayed = true
     }
 
     destroy() {
@@ -411,17 +367,17 @@ export class Game {
             });
             this.scene.remove(this.gameGroup);
         }
-    
+
         document.removeEventListener('keydown', this.handleKeyDownBound, false);
         document.removeEventListener('keyup', this.handleKeyUpBound, false);
-    
+
         const leftControls = document.getElementById('mobile-controls-left');
         const rightControls = document.getElementById('mobile-controls-right');
         if (leftControls) leftControls.remove();
         if (rightControls) rightControls.remove();
-        
+
         if (this.socketManager) {
-            this.socketManager.close(); // Ferme le socket si nécessaire
+            this.socketManager.close();
         }
         if (this.backToMainMenu) {
             this.backToMainMenu.destroyListener();
@@ -430,28 +386,23 @@ export class Game {
         this.stopPhysics();
     }
     show() {
-        console.log('Showing the game');
-    
         this.gameGroup.visible = true;
-    
+
         document.addEventListener('keydown', this.handleKeyDownBound, false);
         document.addEventListener('keyup', this.handleKeyUpBound, false);
-    
+
         this.initPhysics();
         this.threeRoot.addAnimatedObject(this);
     }
     hide() {
-        console.log('Hiding the game');
-    
         this.gameGroup.visible = false;
-    
+
         document.removeEventListener('keydown', this.handleKeyDownBound);
         document.removeEventListener('keyup', this.handleKeyUpBound);
-    
+
         this.stopPhysics();
         this.threeRoot.removeAnimatedObject(this);
     }
-    // TODO: Mobile
     isMobile() {
         return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
@@ -459,11 +410,11 @@ export class Game {
     isScreenTooNarrow() {
         return window.innerWidth < 576; // Par exemple, 576px correspond au point de rupture "small" dans Bootstrap
     }
-    
+
     toggleMobileControlsVisibility() {
         const leftControls = document.getElementById('mobile-controls-left');
         const rightControls = document.getElementById('mobile-controls-right');
-    
+
         if (this.isScreenTooNarrow()) {
             if (leftControls) leftControls.style.display = 'none';
             if (rightControls) rightControls.style.display = 'none';
@@ -474,7 +425,6 @@ export class Game {
     }
 
     addMobileControls() {
-        // Crée dynamiquement les boutons pour monter et descendre
         const leftControls = document.createElement('div');
         leftControls.id = 'mobile-controls-left';
         leftControls.innerHTML = `
@@ -487,7 +437,7 @@ export class Game {
                 </button>
             </div>
         `;
-        
+
         const rightControls = document.createElement('div');
         rightControls.id = 'mobile-controls-right';
         rightControls.innerHTML = `
@@ -500,11 +450,10 @@ export class Game {
                 </button>
             </div>
         `;
-        
+
         document.body.appendChild(leftControls);
         document.body.appendChild(rightControls);
-        
-        // Ajoute les styles pour positionner les boutons
+
         const style = document.createElement('style');
         style.innerHTML = `
             #mobile-controls-left, #mobile-controls-right {
@@ -536,39 +485,32 @@ export class Game {
             }
         `;
         document.head.appendChild(style);
-        
-        // Vérification initiale de la visibilité des boutons
+
         this.toggleMobileControlsVisibility();
 
-        // Écoute les changements de taille d'écran et ajuste les boutons
         window.addEventListener('resize', () => {
             this.toggleMobileControlsVisibility();
         });
-        
-        // Gestion des événements tactiles
+
         this.handleMobileControls();
     }
-    
-    
-    
+
     handleMobileControls() {
         const handleTouchStart = (key, who) => {
             this.socketManager.sendMessage({ type: 'keydown', key: key, who: who });
         };
-    
+
         const handleTouchEnd = (key, who) => {
             this.socketManager.sendMessage({ type: 'keyup', key: key, who: who });
         };
-    
-        // Ajoute les événements aux boutons
+
         document.getElementById('btn-up-left').addEventListener('touchstart', () => handleTouchStart('w', 0));
         document.getElementById('btn-down-left').addEventListener('touchstart', () => handleTouchStart('s', 0));
         document.getElementById('btn-up-right').addEventListener('touchstart', () => handleTouchStart('arrowup', 1));
         document.getElementById('btn-down-right').addEventListener('touchstart', () => handleTouchStart('arrowdown', 1));
-    
         document.getElementById('btn-up-left').addEventListener('touchend', () => handleTouchEnd('w', 0));
         document.getElementById('btn-down-left').addEventListener('touchend', () => handleTouchEnd('s', 0));
         document.getElementById('btn-up-right').addEventListener('touchend', () => handleTouchEnd('arrowup', 1));
         document.getElementById('btn-down-right').addEventListener('touchend', () => handleTouchEnd('arrowdown', 1));
-    }    
+    }
 }

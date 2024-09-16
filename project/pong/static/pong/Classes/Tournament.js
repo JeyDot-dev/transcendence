@@ -1,10 +1,8 @@
 import { THREE } from '../three.module.js';
-import { TWEEN } from '../three.module.js';
 import { FontLoader } from '../FontLoader.js';
 import { Text3d } from './text3d.js';
 import { Arena } from './arena.js';
 import { BackToMainMenu } from './menu.js';
-// import { SkeletonHelper } from '../threejs/Three.js';
 
 export class TournamentMenu {
     constructor(threeRoot, background, socketManager, t_id, mainMenu) {
@@ -17,7 +15,7 @@ export class TournamentMenu {
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
         this.clickableGroup = new THREE.Group();
-        this.onMouseClickBound = this.onMouseClick.bind(this); // Créer une seule référence liée ici
+        this.onMouseClickBound = this.onMouseClick.bind(this);
 
         this.mainMenu = mainMenu;
         this.backToMainMenu = new BackToMainMenu(threeRoot, socketManager, this, 'tournament', mainMenu);
@@ -34,49 +32,25 @@ export class TournamentMenu {
         this.directionalLight1.target.position.set(-300, 0, 0);
         this.directionalLight2.position.set(750, -500, 200);
 
-        // const directionalLightHelper1 = new THREE.DirectionalLightHelper(this.directionalLight1);
-        // const directionalLightHelper2 = new THREE.DirectionalLightHelper(this.directionalLight2);
-        // this.directionalLight.castShadow = true;
         this.threeRoot.scene.add(this.directionalLight1);
         this.threeRoot.scene.add(this.directionalLight2);
-        // this.threeRoot.scene.add(directionalLightHelper1);
-        // this.threeRoot.scene.add(directionalLightHelper2);
-
-        // this.threeRoot
     }
 
     async initialize() {
         await this.createTournament();
-        // await this.getnextPool();
     }
 
     initializeTournamentPool(tournamentGames) {
-        console.log('Lower Previous Group Called');
         this.lowerPreviousPools();
-        
-        console.log('Lower Previous New Tournament Pool');
+
         const newPool = new TournamentPool(this.threeRoot, tournamentGames, this.tournamentId, this.totalWidth, this);
         this.totalWidth -= this.totalWidth / 3;
 
-        console.log('Lower Previous Push Called');
         this.tournamentPools.push(newPool);
     }
     lowerPreviousPools() {
         this.tournamentPools.forEach(pool => {
-            console.log('Lower Previous Group: ', pool);
             pool.tournamentPoolGroup.position.z -= 250;
-            // new TWEEN.Tween(pool.tournamentPoolGroup.position)
-            //     .to({ z: -250 }, 1000)
-            //     .easing(TWEEN.Easing.Quadratic.Out)
-            //     .start();
-            // pool.tournamentPoolGroup.children.forEach(gameGroup => {
-            //     const targetY = gameGroup.position.y - 200;
-                
-            //     new TWEEN.Tween(gameGroup.position)
-            //         .to({ y: targetY }, 1000)
-            //         .easing(TWEEN.Easing.Quadratic.Out)
-            //         .start();
-            // });
         });
     }
     hide() {
@@ -89,7 +63,6 @@ export class TournamentMenu {
         this.directionalLight1.visible = false;
         this.directionalLight2.visible = false;
         this.disableClicks();
-        console.log('All tournament objects are hidden, and clicks are disabled.');
     }
 
     show() {
@@ -102,17 +75,14 @@ export class TournamentMenu {
         this.directionalLight1.visible = true;
         this.directionalLight2.visible = true;
         this.enableClicks();
-        console.log('All tournament objects are visible, and clicks are enabled.');
     }
 
     disableClicks() {
         document.removeEventListener('click', this.onMouseClickBound, false);
-        console.log('Clicks are disabled.');
     }
 
     enableClicks() {
         document.addEventListener('click', this.onMouseClickBound, false);
-        console.log('Clicks are enabled.');
     }
     onMouseClick(event) {
         const canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
@@ -141,10 +111,8 @@ export class TournamentMenu {
     async handleGameWinner(game) {
         try {
             const response = await fetchJSON(`/database/game_winner/${game.gameId}/`);
-    
             if (response.winner) {
                 game.setWinner(response.winner);
-                console.log(`Winner of game ${game.gameId}: ${response.winner}`);
             } else {
                 console.error(`Erreur de récupération du gagnant pour le jeu ${game.gameId}: ${response.message}`);
             }
@@ -154,7 +122,6 @@ export class TournamentMenu {
     }
 
     async playGame(game) {
-        console.log('Jouer le jeu avec les joueurs: ', game.playerNameOne, game.playerNameTwo, game.gameId);
         this.clickableGroup.remove(game.clickableZone);
         this.clickableGroup.visible = false;
         this.disableClicks();
@@ -165,43 +132,28 @@ export class TournamentMenu {
             position: { x: game.clickableZone.position.x, y: -300, z: 100 },
             lookAt: { x: game.clickableZone.position.x, y: 0, z: 0 }
         }, 2000);
-        
         this.hide();
         game.isPlayed = true;
-        
         this.socketManager.connectCustomGame(game.gameId);
         await this.socketManager.waitForGameEnd();
         await this.handleGameWinner(game);
         this.clickableGroup.visible = true;
         this.enableClicks();
 
-        console.log(`La partie avec les joueurs ${game.playerNameOne} et ${game.playerNameTwo} est terminée.`);
-        // this.show();
-
-
-        // this.clickableGroup.visible = false;
-        // this.socketManager.connectLocalGame();
-
         this.checkPoolCompletion();
     }
-
     checkPoolCompletion() {
         const currentPool = this.tournamentPools[this.tournamentPools.length - 1];
         let allGamesPlayed = true;
-
         currentPool.gamesMap.forEach((game) => {
             if (!game.isPlayed) {
                 allGamesPlayed = false;
             }
         });
-
         if (currentPool.gamesMap.size === 1 && allGamesPlayed) {
-           console.log('current pool games map: ', currentPool.gamesMap);
-           console.log('La dernière partie est jouée. Fin du tournoi.');
-           const lastGame = currentPool.gamesMap.values().next().value;
-           console.log('Last Game: ', lastGame);
-           this.endTournament(lastGame);
-           return;
+            const lastGame = currentPool.gamesMap.values().next().value;
+            this.endTournament(lastGame);
+            return;
         }
 
         // if (currentPool.gamesMap.size === 0 && allGamesPlayed) {
@@ -214,7 +166,6 @@ export class TournamentMenu {
         // }
 
         if (allGamesPlayed) {
-            console.log('Toutes les parties de la pool actuelle sont jouées. Chargement de la prochaine pool...');
             this.getNextPool();
         }
     }
@@ -231,32 +182,20 @@ export class TournamentMenu {
         try {
             const url = '/database/nextPool/' + this.tournamentId;
             const response = await fetchJSON(url);
-            console.log('Tournament ID: ', this.tournamentId);
-            console.log("Tournament: ", response);
             this.totalWidth = response.games.length * 200;
-            console.log('Tournament sze: ', response.games.length);
             this.initializeTournamentPool(response.games);
             this.enableClicks();
         } catch (error) {
             console.error('Error getting tournament:', error);
         }
     }
-    // async sendGameResult(winner, loser, gameId) {
-    //     const response = await sendJSON(`/game_result/${gameId}/`, {
-    //         body: JSON.stringify({ winner, loser })
-    //     });
-    //     return response;
-    // }
     async getNextPool() {
         try {
-                console.log('Tournament Id to testnextPool front: ', this.tournamentId);
-                const data = {
-                    tournamentId: this.tournamentId
-                }
-                const response = await fetchJSON("/database/nextPool/" + this.tournamentId);
-                // // const parsedResponse = JSON.parse(response);
-                console.log('getnextPool: ', response);
-                this.initializeTournamentPool(response.games);
+            const data = {
+                tournamentId: this.tournamentId
+            }
+            const response = await fetchJSON("/database/nextPool/" + this.tournamentId);
+            this.initializeTournamentPool(response.games);
         } catch (error) {
             console.error('Error sending JSON: ', error);
         }
@@ -271,8 +210,6 @@ export class TournamentMenu {
         }, 2000);
     }
     destroy() {
-        console.log('Destroying TournamentMenu...');
-    
         this.tournamentPools.forEach(pool => {
             pool.tournamentPoolGroup.children.forEach(child => {
                 if (child.geometry) child.geometry.dispose();
@@ -288,21 +225,15 @@ export class TournamentMenu {
             this.threeRoot.scene.remove(pool.tournamentPoolGroup);
         });
         this.tournamentPools = [];
-    
         this.clickableGroup.children.forEach(child => {
             this.clickableGroup.remove(child);
         });
         this.threeRoot.scene.remove(this.clickableGroup);
-    
         this.threeRoot.scene.remove(this.directionalLight1);
         this.threeRoot.scene.remove(this.directionalLight2);
-    
         this.disableClicks();
-    
-        console.log('TournamentMenu successfully destroyed.');
     }
 }
-
 class TournamentPool {
     constructor(threeRoot, tournamentGames, tournamentId, totalWidth, tournamentMenu) {
         this.tournamentMenu = tournamentMenu;
@@ -311,32 +242,25 @@ class TournamentPool {
         this.gamesMap = new Map();
         this.tournamentId = tournamentId;
         this.poolWidth = totalWidth;
-        // this.mouse = new THREE.Vector2();
-        // this.raycaster = new THREE.Raycaster();
-        // this.clickableGroup = new THREE.Group();
 
         tournamentGames.forEach((game, index) => {
             const { players, game_ws_id } = game;
             this.initializeGame(players, game_ws_id, index, tournamentGames.length);
-            console.log('initialize: ', players, game_ws_id);
         });
 
         this.threeRoot.scene.add(this.tournamentPoolGroup);
         this.threeRoot.scene.add(this.tournamentMenu.clickableGroup);
 
-        // document.addEventListener('click', this.onMouseClick.bind(this), false);
     }
 
     initializeGame(playerPair, gameId, index, totalGames) {
         let spacing, startX;
         if (totalGames === 1) {
-            // Center the game if there's only one game left
             spacing = 0;
-            startX = 0; // Centered at 0
+            startX = 0;
         } else {
-            // Normal case with multiple games
             spacing = this.poolWidth / (totalGames - 1);
-            startX = -(this.poolWidth / 2); // Start at the leftmost position
+            startX = -(this.poolWidth / 2);
         }
 
         const fontLoader = new FontLoader();
@@ -351,14 +275,10 @@ class TournamentPool {
                 game.clickableZone.position.x = startX + index * spacing;
 
                 this.tournamentPoolGroup.add(game.tournamentGameGroup);
-                
                 this.tournamentMenu.clickableGroup.add(game.clickableZone);
 
                 const key = `${playerNameOne}-${playerNameTwo}`;
                 this.gamesMap.set(key, game);
-                console.log('Game position in scene: ', game.clickableZone.position);
-                // console.log('Light position in scene: ', spotLight.position);
-                // console.log('Target Object position: ', targetObject.position);
             }
         );
     }
@@ -392,14 +312,13 @@ class TournamentGame {
         ];
         this.tournamentGameGroup = new THREE.Group();
         this.arena = new Arena(150, 5, 85, this.colorPalette[3], this.colorPalette[0], 5, 5, 0x4900ff);
-        // this.arena.group.translateY(0);
-        this.arena.group.rotation.x = Math.PI / 2; // Rotation de 90° autour de l'axe Y
+        this.arena.group.rotation.x = Math.PI / 2;
         const zoneGeometry = new THREE.PlaneGeometry(180, 120);
-        const zoneMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0xdddddd, 
-            side: THREE.DoubleSide, 
-            transparent: true, 
-            opacity: 0.0 // Opacité a regler
+        const zoneMaterial = new THREE.MeshBasicMaterial({
+            color: 0xdddddd,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.0
         });
 
         this.clickableZone = new THREE.Mesh(zoneGeometry, zoneMaterial);
@@ -465,7 +384,7 @@ class TournamentGame {
         this.p2Text.setPosition(this.p2TextPosition);
     }
     calculateScale(playerName) {
-        const maxLength = 5; // Largeur max des pseudo
+        const maxLength = 5;
         if (playerName.length > maxLength) {
             return maxLength / playerName.length;
         }
@@ -480,7 +399,6 @@ class TournamentWinner {
     constructor(threeRoot, winnerName) {
         this.threeRoot = threeRoot;
         this.textGroup = new THREE.Group();
-        // this.socketManager = socketManager;
         this.fontLoader = new FontLoader();
 
         this.fontLoader.load(

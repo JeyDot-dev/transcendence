@@ -15,7 +15,6 @@ export class SocketManager {
         this.threeRoot = threeRoot;
         this.gameEndPromiseResolve = null;
         this.lastMenu = null;
-        // this.menu_object = null;
         this.my_id = -1;
 
         this.onMessageCallback = onMessageCallback || this.defaultOnMessageCallback.bind(this);
@@ -42,17 +41,13 @@ export class SocketManager {
             return;
         }
         this.ws = new WebSocket(this.getWebSocketUrl());
-
         this.ws.onopen = () => {
-            console.log("Connexion WebSocket ouverte");
             this.onOpenCallback();
         };
-
         this.ws.onmessage = (e) => {
             const data = JSON.parse(e.data);
             this.onMessageCallback(data);
         };
-
         this.ws.onclose = () => {
             this.reconnectTimeout = setTimeout(() => {
                 console.log("Connexion WebSocket fermée, reconnexion...", this.gameId, this.customGameId);
@@ -144,19 +139,14 @@ export class SocketManager {
 
     connectLocalGame() {
         this.localGameId = getCookie('localGameId');
-        console.log('Get LocalGameId cookie: ', this.localGameId);
         if (!this.localGameId) {
             this.localGameId = this.generateWebSocketId();
             setCookie('localGameId', this.localGameId, 30);
-            console.log('No cookie for localGameId, new cookie: ', getCookie('localGameId'));
         }
-        // this.gameId = this.localGameId;
         this.setType('local');
         this.setGameId(this.localGameId);
-        // this.connect();
     }
     connectCustomGame(customGameId) {
-        console.log('Connnecting to custom game id: ', customGameId);
         this.customGameId = customGameId;
         // this.setType('customGame');
         // // this.type = 'customGame';
@@ -175,9 +165,9 @@ export class SocketManager {
     }
 
     generateWebSocketId() {
-    const timestamp = Date.now().toString(36);
-    const randomNum = Math.random().toString(36).substring(2, 10);
-    return `${timestamp}-${randomNum}`;
+        const timestamp = Date.now().toString(36);
+        const randomNum = Math.random().toString(36).substring(2, 10);
+        return `${timestamp}-${randomNum}`;
     }
 
     defaultOnMessageCallback(data) {
@@ -188,12 +178,10 @@ export class SocketManager {
         console.log(data);
         let gameData = data.game ? data.game : data;
         if (gameData.type == "initGame" && !this.gameInitilized) {
-            console.log("Initialisation du jeu", gameData);
             this.game = new Game(this.threeRoot, gameData, this);
             this.my_id = gameData.id;
             this.gameInitilized = true;
         } else if (gameData.type == "initGame" && this.gameInitilized) {
-            console.log("Update in Front End");
             this.game.updateGame(gameData);
         } else if (gameData.type == "clearGameId" && this.gameInitilized) {
             this.close();
@@ -246,15 +234,12 @@ export class SocketManager {
         }
     }
     goToLastMenu() {
-        console.log('Go to Last Menu', this.lastMenu);
         if (this.lastMenu) {
             this.lastMenu.show();
             this.lastMenu.tweenCameraToItem();
         }
     }
-    // Implémentation par défaut pour le onOpenCallback
     defaultOnOpenCallback() {
-        console.log("WebSocket connection opened (default handler)");
     }
 
     setOnMessageCallback(callbackRoutine) {

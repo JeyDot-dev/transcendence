@@ -1,7 +1,6 @@
 from django.db import models
 import random
 
-# Create your models here.
 class GameDB(models.Model):
 	id = models.CharField(max_length=200, primary_key=True)
 	players_username = models.JSONField(default=list)
@@ -104,7 +103,3 @@ class TournamentDB(models.Model):
 	def start(self):
 		self.started = True
 		self.save()
-
-
-
-	

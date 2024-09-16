@@ -79,7 +79,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        # Envoyer l'état initial ou mis à jour du jeu
         await self.send(
             text_data=json.dumps(
                 {"type": "init", "game": await build_game_state(self.game)}
@@ -123,7 +122,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
 
     async def gameEvent(self, event):
-        # Envoyer l'événement reçu à ce client spécifique
         await self.send(text_data=json.dumps(event["event"]))
 
     async def receive(self, text_data=None, bytes_data=None):
@@ -180,20 +178,17 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         logger.info(f"Client disconnected from game {self.game_id}")
 
-        # Retirer le client du groupe
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
         if self.game_id in games_pool:
             games_pool[self.game_id]["connections"] -= 1
 
-            # Attendre un délai pour permettre aux clients de se reconnecter
             await asyncio.sleep(10)
 
             # Vérifier s'il reste des connexions après le délai
         if self.game_id in games_pool and games_pool[self.game_id]["connections"] <= 0:
             logger.info(f"No more connections for game {self.game_id}. Cleaning up.")
 
-            # Annuler la tâche de physique si elle est en cours d'exécution
             if hasattr(self, "physics_task") and not self.physics_task.done():
                 self.physics_task.cancel()
                 try:
@@ -285,7 +280,6 @@ async def build_game_state(game):
         "isPlayed": game.isPlayed,
         "isPaused": game.isPaused,
     }
-
 
 async def update_game_state(game):
     return {

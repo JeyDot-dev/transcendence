@@ -9,7 +9,7 @@ from database.models import Game as GameDB, Player as PlayerDB
 
 games_pool = {}
 
-class MatchmakingPongConsumer(AsyncWebsocketConsumer):
+class LocalPongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         from .game_objects import Game, Player
 
@@ -19,27 +19,39 @@ class MatchmakingPongConsumer(AsyncWebsocketConsumer):
         # Ajouter le joueur à un groupe de websockets
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
-        # Vérifier si le jeu est déjà en mémoire
         if self.game_id in games_pool:
             logger.info(f"Connecting to an existing game instance for game {self.game_id}")
             games_pool[self.game_id]["connections"] += 1
             self.game = games_pool[self.game_id]["game"]
             self.log_game_state("Existing Game param")
         else:
-            # Essayer de récupérer la game depuis la base de données (matchmaking)
             GameDB = await sync_to_async(self.get_game_from_db)(self.game_id)
 
             if GameDB is not None:
                 logger.info(f"Game found in the database for game {self.game_id}")
-                # Récupérer les joueurs depuis la base de données
                 player1 = await sync_to_async(lambda: GameDB.player1)()
                 player2 = await sync_to_async(lambda: GameDB.player2)()
 
+                self.game = Game(
+                    self.game_id, [], 2, 1280, 720, self.notifyEvent, "dbGame"
+                )
+                self.game.addPlayer(
+                    Player(id=player1.id, skin="skin1", name=player1.name), 0
+                )
+                self.game.addPlayer(
+                    Player(id=player2.id, skin="skin2", name=player2.name), 1
+                )
                 # Créer une nouvelle instance de jeu avec les joueurs de la base de données
                 self.game = Game(self.game_id, [], 2, 1280, 720, self.notifyEvent, "dbGame")
                 self.game.addPlayer(Player(id=player1.id, skin="skin1", name=player1.name), 0)
                 self.game.addPlayer(Player(id=player2.id, skin="skin2", name=player2.name), 1)
             else:
+                logger.info(
+                    f"No game in the database, creating a new local game instance for game {self.game_id}"
+                )
+                self.game = Game(
+                    self.game_id, [], 2, 1280, 720, self.notifyEvent, "localGame"
+                )
                 logger.info(f"No game in the database, creating a new matchmaking game instance for game {self.game_id}")
                 # Créer un nouveau jeu pour le matchmaking si aucun jeu DB n'existe
                 self.game = Game(self.game_id, [], 2, 1280, 720, self.notifyEvent, "matchmakingGame")
@@ -48,6 +60,8 @@ class MatchmakingPongConsumer(AsyncWebsocketConsumer):
                 self.game.addPlayer(player1, 0)  # Joueur 1 (gauche)
                 self.game.addPlayer(player2, 1)  # Joueur 2 (droite)
 
+            self.physics_task = asyncio.create_task(self.game.physics_loop())
+            self.game.running = True
             # Démarrer la physique du jeu
             if not hasattr(self, "physics_task") or self.physics_task.done():
                 self.physics_task = asyncio.create_task(self.game.physics_loop())
@@ -56,12 +70,17 @@ class MatchmakingPongConsumer(AsyncWebsocketConsumer):
             # Ajouter le jeu au pool de jeux actifs
             games_pool[self.game_id] = {
                 "game": self.game,
-                "connections": 1,  # Premier client connecté
+                "connections": 1,
             }
 
         # Accepter la connexion WebSocket
         await self.accept()
 
+        await self.send(
+            text_data=json.dumps(
+                {"type": "init", "game": await build_game_state(self.game)}
+            )
+        )
         # Envoyer l'état initial ou mis à jour du jeu
         await self.send(text_data=json.dumps({"type": "init", "game": await build_game_state(self.game)}))
 
@@ -103,9 +122,9 @@ class MatchmakingPongConsumer(AsyncWebsocketConsumer):
 
         # Identifier quel joueur a envoyé l'input
         if text_data_json["key"] in ["w", "s", "space"]:
-            who = 0  # Joueur 1 (gauche)
+            who = 0
         elif text_data_json["key"] in ["arrowup", "arrowdown"]:
-            who = 1  # Joueur 2 (droite)
+            who = 1
         else:
             return
 
@@ -130,13 +149,22 @@ class MatchmakingPongConsumer(AsyncWebsocketConsumer):
         if self.game_id in games_pool:
             games_pool[self.game_id]["connections"] -= 1
 
-            # Attendre un délai pour permettre aux clients de se reconnecter
             await asyncio.sleep(10)
 
+        if self.game_id in games_pool and games_pool[self.game_id]["connections"] <= 0:
+            logger.info(f"No more connections for game {self.game_id}. Cleaning up.")
             # Nettoyer si aucun joueur n'est connecté
             if games_pool[self.game_id]["connections"] <= 0:
                 logger.info(f"No more connections for game {self.game_id}. Cleaning up.")
 
+            if hasattr(self, "physics_task") and not self.physics_task.done():
+                self.physics_task.cancel()
+                try:
+                    await self.physics_task
+                except asyncio.CancelledError:
+                    logger.info(
+                        f"Physics task for game {self.game_id} has been cancelled."
+                    )
                 # Annuler la tâche de physique si elle est toujours en cours
                 if hasattr(self, "physics_task") and not self.physics_task.done():
                     self.physics_task.cancel()
@@ -186,6 +214,9 @@ async def handle_key(game, types, key, who):
     elif paddle.keys_pressed["down"] and not paddle.keys_pressed["up"]:
         paddle.velocity = 1  # Descendre
     else:
+        paddle.velocity = (
+            0
+        )
         paddle.velocity = 0  # Aucun mouvement si les deux touches sont relâchées ou pressées
 
 async def build_game_state(game):
