@@ -198,13 +198,27 @@ class Ball:
         self.y += self.speed * self.vel_y * delta_time
 
 class Game:
-    def __init__(self, id, players, nb_max_players=100, width=1280, height=720, updateCallBack=None, type='localGame'):
+    def __init__(
+        self, 
+        id, 
+        players, 
+        nb_max_players=100, 
+        width=1280, 
+        height=720, 
+        updateCallBack=None, 
+        type='localGame', 
+        timer=0, 
+        maxScore=3, 
+        topspin=False, 
+        backspin=False, 
+        sidespin=False
+    ):
         self.id = id
         self.type = type
         self.timer = 0
-        self.maxTimer = 180
+        self.maxTimer = timer
         self.score = [0, 0]
-        self.maxScore = 3
+        self.maxScore = maxScore
         self.running = False
         self.isPlayed = False
         self.isPaused = True
@@ -217,6 +231,9 @@ class Game:
         self.players = players
         self.paddles = []
         self.ball = Ball((255, 255, 255), width, height, updateCallBack)
+        self.allowTopspin = topspin
+        self.allowBackspin = backspin
+        self.allowSidespin = sidespin
 
     async def countdown_before_start(self):
         """Envoie un décompte de 3 secondes avant le début de la partie."""
