@@ -18,8 +18,7 @@ services:
       daphne:
         condition: service_started
     ports:
-      - 80:80
-      - 443:443
+      - 8443:443
     volumes:
       - ../project/static_production:/static
       - ${PWD}/containers/scripts/nginx.sh:/nginx.sh

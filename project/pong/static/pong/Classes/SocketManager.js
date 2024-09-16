@@ -23,13 +23,13 @@ export class SocketManager {
 
     getWebSocketUrl() {
         if (this.type === 'local') {
-            return `ws://${window.location.host}/ws/pong/local/${this.gameId}/`;
+            return `wss://${window.location.host}/ws/pong/local/${this.gameId}/`;
         } else if (this.type === 'customGame') {
-            return `ws://${window.location.host}/ws/pong/local/${this.gameId}/`;
+            return `wss://${window.location.host}/ws/pong/local/${this.gameId}/`;
         } else if (this.type === 'remote') {
-            return `ws://${window.location.host}/ws/pong/remote/${this.gameId}/`;
+            return `wss://${window.location.host}/ws/pong/remote/${this.gameId}/`;
         } else if (this.type === 'matchmaking') {
-            return `ws://${window.location.host}/ws/pong/matchmaking/`;
+            return `wss://${window.location.host}/ws/pong/matchmaking/`;
         } else {
             throw new Error('Type de connexion inconnu');
         }
