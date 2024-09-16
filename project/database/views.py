@@ -39,15 +39,13 @@ def newGame(request):
             return JsonResponse({'status': 'success', 'game_ws_id': game.game_ws_id})
         elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             if not form.is_valid:
-                for form_errors in form.errors:
-                    if form_errors:
-                        first_field = next(iter(form_errors))
-                        return JsonResponse({'status': 'failure', 'reason': form_errors[first_field]})
+                for field, message in form.errors.items():
+                    if message:
+                        return JsonResponse({'status': 'failure', 'reason': field + message[0]})
             if not Sform.is_valid():
-                all_errors = []
-                for field_errors in Sform.errors.values():
-                    all_errors.extend(field_errors)
-                return JsonResponse({'status': 'failure', 'reason': all_errors[0]})           
+                for field, message in Sform.errors.items():
+                    if message:
+                        return JsonResponse({'status': 'failure', 'reason': field + message[0]})
     else:
         raise Http404()
         
