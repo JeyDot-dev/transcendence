@@ -11,7 +11,7 @@ export class Paddle {
         this.mesh.position.set(x, y, width / 2);
 
         // Create glow meshes
-        this.glowBlack = this.createGlowMesh(new THREE.Color(0x000000)); // Black glow
+        this.glowBlack = this.createGlowMesh(new THREE.Color(0x00ffff)); // Blue glow
         this.glowRed = this.createGlowMesh(new THREE.Color(0xff0000));  // Red glow
 
         this.glowBlack.visible = false; // Initially hide both

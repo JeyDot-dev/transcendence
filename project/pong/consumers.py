@@ -145,7 +145,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             if text_data_json["type"] == "keydown" or text_data_json["type"] == "keyup":
                 logger.info(f"Handling local game key press: {text_data_json['key']} for player {who}")
-                await handle_key(self.game, text_data_json["type"], text_data_json["key"], who)
+                await handle_key(self.game, text_data_json["type"], text_data_json["key"], who, self)
 
         elif game_type == "remote":
             user_name = self.scope["user"].username
@@ -164,7 +164,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             if text_data_json["key"] in ["w", "s", "arrowup", "arrowdown", "a", "d", "arrowleft", "arrowright"]:
                 logger.info(f"Handling remote game key press: {text_data_json['key']} for player {who}")
-                await handle_key(self.game, text_data_json["type"], text_data_json["key"], who)
+                await handle_key(self.game, text_data_json["type"], text_data_json["key"], who, self)
 
 
 
@@ -200,7 +200,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             logger.info(f"Current games_pool state after cleanup: {games_pool}")
 
 
-async def handle_key(game, types, key, who):
+async def handle_key(game, types, key, who, consumer):
     if types not in ["keydown", "keyup"]:
         return
 
@@ -261,7 +261,7 @@ async def handle_key(game, types, key, who):
                 paddle.backspin = True
                 paddle.topspin = False
                 spin_changed = True
-                await game.notifyEvent({
+                await consumer.notifyEvent({
                     'type': 'spinChange',
                     'paddle': who,
                     'glow': 'black'
@@ -271,7 +271,7 @@ async def handle_key(game, types, key, who):
                 paddle.topspin = True
                 paddle.backspin = False
                 spin_changed = True
-                await game.notifyEvent({
+                await consumer.notifyEvent({
                     'type': 'spinChange',
                     'paddle': who,
                     'glow': 'red'
@@ -281,7 +281,7 @@ async def handle_key(game, types, key, who):
                 paddle.backspin = False
                 paddle.topspin = False
                 spin_changed = True
-                await game.notifyEvent({
+                await consumer.notifyEvent({
                     'type': 'spinChange',
                     'paddle': who,
                     'glow': 'none'

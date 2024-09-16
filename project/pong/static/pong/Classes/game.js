@@ -293,6 +293,7 @@ export class Game {
     }
 
     wsMessageManager(data) {
+        console.log(data);
         switch (data.type) {
             case 'scoreChange0':
                 this.p1Text.updateText(data.score[0].toString(), this.gameGroup);
@@ -325,6 +326,7 @@ export class Game {
                 if (data.ball) {
                     this.ball.move(data.ball.x - this.offSet.x, -data.ball.y + this.offSet.y);
                 }
+                break;
             case 'spinChange':
                 const paddle = this.paddles[data.paddle];
                 if (data.glow === 'black') {

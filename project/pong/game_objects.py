@@ -20,10 +20,17 @@ class Paddle:
         self.speed = 800
         self.velocity = 0
         self.bounce = 1
-        self.keys = {"up": 0, "down": 0}
+        self.keys_pressed = {
+            "up": False,
+            "down": False,
+            "backspin": False,
+            "topspin": False
+        }
         self.side = 0 if x <= arenaWidth / 2 else 1  # 0 = gauche, 1 = droite
         self.user_id = userId
         self.updateCallBack = updateCallBack
+        self.backspin = False
+        self.topspin = False
 
     def move(self, delta_time):
         self.y += self.speed * self.velocity * delta_time
