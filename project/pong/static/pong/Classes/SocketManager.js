@@ -7,9 +7,11 @@ export class SocketManager {
         this.localGameId = null;
         this.matchMakingGameId = null;
         this.customGameId = null;
-        this.type = null;  // 'local' ou 'remote'
+        this.type = null;  // 'local' ou 'remote' ou 'customGame' ou 'matchmaking'
         this.game = null;
         this.gameInitilized = false;
+        this.tryToReconnect = false;
+        this.reconnectTimeout = null; // Garde une référence du timeout de reconnexion
         this.threeRoot = threeRoot;
         this.gameEndPromiseResolve = null;
         this.lastMenu = null;
@@ -25,15 +27,17 @@ export class SocketManager {
         } else if (this.type === 'customGame') {
             return `ws://${window.location.host}/ws/pong/local/${this.gameId}/`;
         } else if (this.type === 'remote') {
-            return `ws://${window.location.host}/ws/pong/${this.gameId}/`;
+            return `ws://${window.location.host}/ws/pong/remote/${this.gameId}/`;
+        } else if (this.type === 'matchmaking') {
+            return `ws://${window.location.host}/ws/pong/matchmaking/`;
         } else {
             throw new Error('Type de connexion inconnu');
         }
     }
 
     connect() {
-        if (!this.gameId || !this.type) {
-            console.warn("Le type de connexion et l'ID du jeu doivent être définis avant la connexion.");
+        if (this.type !== 'matchmaking' && !this.gameId) {
+            console.warn("Le type de connexion ou l'ID du jeu doivent être définis avant la connexion.");
             return;
         }
         this.ws = new WebSocket(this.getWebSocketUrl());
@@ -45,7 +49,14 @@ export class SocketManager {
             this.onMessageCallback(data);
         };
         this.ws.onclose = () => {
-            setTimeout(() => this.connect(), 1000);
+            this.reconnectTimeout = setTimeout(() => {
+                console.log("Connexion WebSocket fermée, reconnexion...", this.gameId, this.customGameId);
+                console.log(this.reconnectTimeout);
+                // Si le WebSocket a changé avant la reconnexion, on ne fait rien
+                if (this.ws === null || this.ws.readyState === WebSocket.CLOSED) {
+                    this.connect();
+                }
+            }, 3000);
         };
     }
 
@@ -58,16 +69,41 @@ export class SocketManager {
     }
 
     close() {
+        if (this.reconnectTimeout) {
+            console.log('Clear Timout');
+            clearTimeout(this.reconnectTimeout);
+        }
         if (this.ws) {
             this.ws.close();
         }
+        this.ws = null;
     }
 
     setType(type) {
         if (this.type !== type) {
+            if (type == 'matchmaking') {
+                this.setOnMessageCallback(this.matchmakingOnMessageCallBack);
+            } else {
+                this.setOnMessageCallback(this.gameOnMessageCallback);
+            }
             this.type = type;
             this.reconnect();
         }
+    }
+    setTypeAndGameID(type, gameId) {
+        if (this.type !== type) {
+            if (type == 'matchmaking') {
+                this.setOnMessageCallback(this.matchmakingOnMessageCallBack);
+            } else {
+                this.setOnMessageCallback(this.gameOnMessageCallback);
+            }
+            if (this.gameId !== gameId) {
+                this.gameId = gameId;
+            }
+            this.type = type;
+            this.reconnect();
+        }
+
     }
 
     setGameId(gameId) {
@@ -112,8 +148,20 @@ export class SocketManager {
     }
     connectCustomGame(customGameId) {
         this.customGameId = customGameId;
-        this.setType('customGame');
-        this.setGameId(this.customGameId);
+        // this.setType('customGame');
+        // // this.type = 'customGame';
+        // this.setGameId(this.customGameId);
+        this.setTypeAndGameID('customGame', customGameId);
+        // this.connect();
+    }
+    connectRemoteGame(customGameId) {
+        console.log('Connnecting to custom game id: ', customGameId);
+        this.customGameId = customGameId;
+        // this.setType('customGame');
+        // // this.type = 'customGame';
+        // this.setGameId(this.customGameId);
+        this.setTypeAndGameID('remote', customGameId);
+        // this.connect();
     }
 
     generateWebSocketId() {
@@ -123,6 +171,11 @@ export class SocketManager {
     }
 
     defaultOnMessageCallback(data) {
+        console.log('WS DATA: ', data);
+    }
+    // Implémentation par défaut pour le onMessageCallback
+    gameOnMessageCallback(data) {
+        console.log(data);
         let gameData = data.game ? data.game : data;
         if (gameData.type == "initGame" && !this.gameInitilized) {
             this.game = new Game(this.threeRoot, gameData, this);
@@ -131,6 +184,7 @@ export class SocketManager {
         } else if (gameData.type == "initGame" && this.gameInitilized) {
             this.game.updateGame(gameData);
         } else if (gameData.type == "clearGameId" && this.gameInitilized) {
+            this.close();
             this.gameId = null;
             if (gameData.gameType == 'localGame') {
                 deleteCookie('localGameId');
@@ -148,6 +202,21 @@ export class SocketManager {
             if (this.game) {
                 this.game.wsMessageManager(data);
             }
+        }
+    }
+    matchmakingOnMessageCallBack(data) {
+        console.log(data);
+        switch (data.type) {
+            case 'match_created':
+                console.log('FrontEnd connect custom game');
+                this.lastMenu.hide();
+                this.close();
+                console.log('FrontEnd connect custom game id: ', data.game_ws_id);
+                this.lastMenu.matchmakingAnimation.hide();
+                this.connectRemoteGame(data.game_ws_id);
+                break;
+            default:
+                break;
         }
     }
     clearGame() {

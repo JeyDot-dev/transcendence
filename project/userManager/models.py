@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_email, ValidationError
-from database.models import Game
+from django.db import models
 
 class UserInfos(AbstractUser):
     profile_pic = models.ImageField(
@@ -21,7 +21,7 @@ class UserInfos(AbstractUser):
     is_3d = models.BooleanField(default=False)
     friends = models.ManyToManyField("self", blank=True)
     friends_requests = models.ManyToManyField("self", blank=True)
-    match_history = models.ManyToManyField(Game, blank=True)
+    match_history = models.ManyToManyField('database.Game', blank=True)
 
     REQUIRED_FIELDS = ["email", "password"]
 
@@ -60,6 +60,10 @@ class UserInfos(AbstractUser):
         return self.last_tournament_id
 
     def set_username(self, username: str):
+        if len(username) < 3 or len(username) > 100:
+            raise ValueError("Le nom d'utilisateur doit faire entre 3 et 100 caractères.")
+        if not username.isalnum():
+            raise ValueError("Le nom d'utilisateur ne doit contenir que des caractères alphanumériques.")
         self.username = username
         self.save()
 
@@ -72,33 +76,79 @@ class UserInfos(AbstractUser):
             raise ValueError("L'email fourni n'est pas valide.")
 
     def set_skin(self, skin: str):
+        if not re.match(r'^#[a-fA-F0-9]{6}$', skin):
+            raise ValueError("Le skin doit être un code couleur hexadécimal.")
         self.skin = skin
         self.save()
 
     def set_status(self, status: str):
+        if len(status) < 3 or len(status) > 100:
+            raise ValueError("Le statut doit faire entre 3 et 100 caractères.")
+        if not status.isalnum():
+            raise ValueError("Le statut ne doit contenir que des caractères alphanumériques.")
         self.status = status
         self.save()
 
-    def set_online(self, is_online: bool):
-        self.is_online = is_online
-        self.save()
-
-    def set_playing(self, is_playing: bool):
-        self.is_playing = is_playing
-        self.save()
-
     def set_grade(self, grade: int):
+        if grade < 0:
+            raise ValueError("Le grade ne peut pas être négatif.")
         self.grade = grade
         self.save()
 
     def set_total_games(self, total_games: int):
+        if total_games < 0:
+            raise ValueError("Le nombre total de jeux ne peut pas être négatif.")
         self.total_games = total_games
         self.save()
 
     def set_total_victories(self, total_victories: int):
+        if total_victories < 0 or total_victories > self.total_games:
+            raise ValueError("Le nombre total de victoires ne peut pas être négatif ou supérieur au nombre total de jeux.")
         self.total_victories = total_victories
         self.save()
 
+
+    # def set_username(self, username: str):
+    #     self.username = username
+    #     self.save()
+    #
+    # def set_email(self, email: str):
+    #     try:
+    #         validate_email(email)
+    #         self.email = email
+    #         self.save()
+    #     except ValidationError:
+    #         # Gérer l'erreur de validation ici
+    #         raise ValueError("L'email fourni n'est pas valide.")
+    #
+    # def set_skin(self, skin: str):
+    #     self.skin = skin
+    #     self.save()
+    #
+    # def set_status(self, status: str):
+    #     self.status = status
+    #     self.save()
+
+    def set_online(self, is_online: bool):
+         self.is_online = is_online
+         self.save()
+    #
+    # def set_playing(self, is_playing: bool):
+    #     self.is_playing = is_playing
+    #     self.save()
+    #
+    # def set_grade(self, grade: int):
+    #     self.grade = grade
+    #     self.save()
+    #
+    # def set_total_games(self, total_games: int):
+    #     self.total_games = total_games
+    #     self.save()
+    #
+    # def set_total_victories(self, total_victories: int):
+    #     self.total_victories = total_victories
+    #     self.save()
+    #
     def set_last_tournament_id(self, last_tournament_id: str):
         self.last_tournament_id = last_tournament_id
         self.save()

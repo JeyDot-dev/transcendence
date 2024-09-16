@@ -1,6 +1,4 @@
 import { THREE } from '../three.module.js';
-import { EffectComposer } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/postprocessing/RenderPass.js';
 import { TWEEN } from '../three.module.js';
 
 export class THREERoot {
@@ -22,12 +20,23 @@ export class THREERoot {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(this.width, this.height);
         this.renderer.shadowMap.enabled = true;
-        this.composer = new EffectComposer(this.renderer);
+        // this.composer = new EffectComposer(this.renderer);
         this.container.appendChild(this.renderer.domElement);
-        this.renderTarget = new THREE.WebGLMultisampleRenderTarget(this.width, this.height, { format: THREE.RGBAFormat });
-        this.composer = new EffectComposer(this.renderer, this.renderTarget);
-        const renderPass = new RenderPass(this.scene, this.camera);
-        this.composer.addPass(renderPass);
+
+
+        // Initialize FPS counter
+        // this.stats = new Stats();
+        // this.stats.showPanel(0); // 0 = FPS, 1 = ms/frame, 2 = memory usage
+        // this.container.appendChild(this.stats.dom);
+
+        // Create a render target with MSAA for post-processing
+        // this.renderTarget = new THREE.WebGLMultisampleRenderTarget(this.width, this.height, { format: THREE.RGBAFormat });
+        
+        // Create the EffectComposer with the MSAA render target
+        // this.composer = new EffectComposer(this.renderer, this.renderTarget);
+        // const renderPass = new RenderPass(this.scene, this.camera);
+        // this.composer.addPass(renderPass);
+
         const spinner = document.getElementById("fidget-spinner");
         spinner.removeChild(spinner.firstChild);
         spinner.remove();
@@ -46,11 +55,12 @@ export class THREERoot {
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(width, height);
-        this.composer.setSize(width, height);
+        // this.composer.setSize(width, height);
     }
 
     render() {
-        this.composer.render();
+        // this.composer.render();
+        this.renderer.render(this.scene, this.camera);
     }
 
     animate() {
@@ -66,9 +76,9 @@ export class THREERoot {
             if (typeof obj.update === 'function') {
                 obj.update();
             }
-            if (typeof obj.render === 'function') {
-                obj.render();
-            }
+            // if (typeof obj.render === 'function') {
+            //     // obj.render();
+            // }
         });
 
         if (this.stats) {

@@ -47,19 +47,22 @@
         let formCount = document.querySelectorAll('#formsetContainer .form-group').length;
 
         const formsetContainer = document.getElementById('formsetContainer');
-        const numPlayersToAdd = parseInt(document.getElementById('num-players').value);  // Get the number of forms from input
-
-        for (let i = formCount; i < numPlayersToAdd; i++) {
-            const newFormHtml = `
-                <div class="form-group">
-                    <label for="id_form-${i}-name">Player Name:</label>
-                    <input type="text" name="form-${i}-name" class="form-control" id="id_form-${i}-name"
-                           ${isAuthenticated && i === 0 ? 'value="' + username + '"' : ''}>
-                    <div class="error-message" id="error-${i}-name" style="color: red;"></div>
-                </div>`;
-            formsetContainer.insertAdjacentHTML('beforeend', newFormHtml);
+        const numPlayersToReach = parseInt(document.getElementById('num-players').value);  // Get the number of forms from input
+        console.log(formCount);
+        console.log(numPlayersToReach);
+        if (formCount < numPlayersToReach){
+            for (let i = formCount; i < numPlayersToReach; i++) {
+                console.log(i);
+                const newFormHtml = `
+                    <div class="form-group">
+                        <label for="id_form-${i}-name">Player Name:</label>
+                        <input type="text" name="form-${i}-name" class="form-control" id="id_form-${i}-name"
+                               ${isAuthenticated && i === 0 ? 'value="' + username + '"' : ''}>
+                        <div class="error-message" id="error-${i}-name" style="color: red;"></div>
+                    </div>`;
+                formsetContainer.insertAdjacentHTML('beforeend', newFormHtml);
+            }
+            document.querySelector('input[name="form-TOTAL_FORMS"]').value = numPlayersToReach;
         }
-
-        document.querySelector('input[name="form-TOTAL_FORMS"]').value = numPlayersToAdd;
     });
 </script>
