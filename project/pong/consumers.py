@@ -46,9 +46,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 
                     timer = await sync_to_async(lambda: GameDB.timer)()
                     score = await sync_to_async(lambda: GameDB.score)()
-                    faster = await sync_to_async(lambda: GameDB.faster)()
-                    slower = await sync_to_async(lambda: GameDB.faster)()
-                    logger.info(f"Game {self.game_id}: Timer = {timer}, Score = {score}, Faster = {faster}, Slower = {slower}")
+                    top_spin = await sync_to_async(lambda: GameDB.top_spin)()
+                    back_spin = await sync_to_async(lambda: GameDB.top_spin)()
+                    logger.info(f"Game {self.game_id}: Timer = {timer}, Score = {score}, top_spin = {top_spin}, back_spin = {back_spin}")
                     # Créer une nouvelle instance de game avec les joueurs de la base de données
                     self.game = Game(
                         self.game_id, [], 2, 1280, 720, self.notifyEvent, "dbGame", timer, score,

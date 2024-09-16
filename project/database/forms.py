@@ -43,6 +43,7 @@ class tournamentIdForm(forms.Form):
     
 class GameSettingsForm(forms.Form):
     timer = forms.IntegerField(label='Timer', initial=120, max_value=600)
-    max_point = forms.IntegerField(label='Total Score', initial=5, max_value=50)
-    faster = forms.BooleanField(label='faster')
-    slower = forms.BooleanField(label='slower')
+    score = forms.IntegerField(label='Total Score', initial=5, max_value=10)
+    top_spin = forms.BooleanField(label='Top Spin')
+    back_spin = forms.BooleanField(label='Back Spin')
+    side_spin = forms.BooleanField(label='Side Spin')

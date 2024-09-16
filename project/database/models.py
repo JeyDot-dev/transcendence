@@ -27,8 +27,8 @@ class Tournament(models.Model):
     round_number = models.IntegerField(default=1)
     timer = models.IntegerField(default=180)
     score = models.IntegerField(default=5)
-    faster = models.BooleanField(default=False)
-    slower = models.BooleanField(default=False)
+    top_spin = models.BooleanField(default=False)
+    back_spin = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -46,7 +46,7 @@ class Tournament(models.Model):
             self.games.create(player1=winners[2], player2=winners[1], game_ws_id=generate_unique_id(), pool=self.round_number)
         else:"""
         while len(winners) >= 2:
-            game = self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number, timer=self.timer, score=self.score, faster=self.faster, slower=self.slower)
+            game = self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number, timer=self.timer, score=self.score, top_spin=self.top_spin, back_spin=self.back_spin, side_spin = self.side_spin)
         if user.is_authenticated:
             user.match_history.add(game)
         self.round_number = models.F('round_number') + 1
@@ -93,8 +93,8 @@ class Game(models.Model):
     date = models.DateTimeField(default=datetime.now, blank=True)
     timer = models.IntegerField(default=180)
     score = models.IntegerField(default=5)
-    faster = models.BooleanField(default=False)
-    slower = models.BooleanField(default=False)
+    top_spin = models.BooleanField(default=False)
+    back_spin = models.BooleanField(default=False)
 
     def __str__(self):
         return self.player1.name + " VS " + self.player2.name 

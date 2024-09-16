@@ -32,7 +32,7 @@ def newGame(request):
             game_ws_id = generate_unique_id()
             player1.save()
             player2.save()
-            game = Game.objects.create(player1=player1, player2=player2, game_ws_id=game_ws_id, timer=Sform.cleaned_data['timer'], score=Sform.cleaned_data['max_point'], faster=Sform.cleaned_data['faster'], slower=Sform.cleaned_data['slower'])
+            game = Game.objects.create(player1=player1, player2=player2, game_ws_id=game_ws_id, timer=Sform.cleaned_data['timer'], score=Sform.cleaned_data['score'], top_spin=Sform.cleaned_data['top_spin'], back_spin=Sform.cleaned_data['back_spin'], side_spin=Sform.cleaned_data['side_spin'])
             if request.user.is_authenticated:
                     user = request.user
                     user.match_history.add(game)
@@ -61,7 +61,7 @@ def newTournament(request):
         Sform = GameSettingsForm(request.POST)
         if Tform.is_valid() and formset.is_valid() and Sform.is_valid():
             logger.info(f"______Forms valid_______")
-            tournament = Tournament(name=Tform.cleaned_data['tournament_title'], timer=Sform.cleaned_data['timer'], score=Sform.cleaned_data['score'], faster=Sform.cleaned_data['faster'], slower=Sform.cleaned_data['slower'])
+            tournament = Tournament(name=Tform.cleaned_data['tournament_title'], timer=Sform.cleaned_data['timer'], score=Sform.cleaned_data['score'], top_spin=Sform.cleaned_data['top_spin'], back_spin=Sform.cleaned_data['back_spin'], side_spin=Sform.cleaned_data['side_spin'])
             tournament.save()
             for form in formset:
                 player_name = form.cleaned_data.get("name")
