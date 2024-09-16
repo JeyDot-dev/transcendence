@@ -94,10 +94,9 @@ def newTournament(request):
             elif not Tform.is_valid():
                 response = JsonResponse({'status': 'failure', 'reason': "Tournament title is required"})
             elif not Sform.is_valid*():
-                all_errors = []
-                for field_errors in Sform.errors.values():
-                    all_errors.extend(field_errors)
-                response = JsonResponse({'status': 'failure', 'reason': all_errors[0]})
+                for field, message in Sform.errors.items():
+                    if message:
+                        return JsonResponse({'status': 'failure', 'reason': field + ": " + message[0]})
             else:
                 response = JsonResponse({'status': 'failure', 'reason': "unknown error"})
             return response
