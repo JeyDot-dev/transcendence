@@ -10,7 +10,7 @@ from userManager.models import UserInfos
 from pong.logger import logger
 
 class Paddle:
-    def __init__(self, x, color, userId, arenaWidth, arenaHeight, updateCallBack=None):
+    def __init__(self, x, color, userId, arenaWidth, arenaHeight, updateCallBack=None, sidespin=False):
         self.keys_pressed = {'up': False, 'down': False}
         self.width = 20
         self.height = 200
@@ -31,6 +31,7 @@ class Paddle:
         self.updateCallBack = updateCallBack
         self.backspin = False
         self.topspin = False
+        self.sidespin = False
 
     def move(self, delta_time):
         self.y += self.speed * self.velocity * delta_time
@@ -130,45 +131,33 @@ class Ball:
         )
 
     def _handle_collision(self, paddle, paddle_bounds):
-        MAX_SPEED = 10  # Define the maximum allowed speed
-        self.vel_x = -self.vel_x  # Invert the horizontal velocity on collision
+        self.vel_x = -self.vel_x
 
-        # Sidespin logic
+        # Logique du sidespin
         if paddle.sidespin:
-            # Apply sidespin logic when sidespin is true
-            impact_factor = 0.6  # Factor for paddle velocity influence
+            impact_factor = 0.6  # Facteur d'influence du sidespin
             self.vel_y += paddle.velocity * impact_factor
 
             speed_influence = 1 + abs(paddle.velocity) * 0.17
             self.vel_x *= speed_influence
             self.vel_y *= speed_influence
-        else:
-            # Apply original Pong rebound logic when sidespin is false
-            paddle_center = (paddle_bounds['top'] + paddle_bounds['bottom']) / 2
-            distance_from_center = self.y - paddle_center  # Distance of the ball from paddle center
-            max_distance = (paddle_bounds['top'] - paddle_bounds['bottom']) / 2  # Max distance from center to edge
 
-            # Normalize the distance (-1 to 1)
-            normalized_distance = distance_from_center / max_distance
-
-            # Adjust vertical velocity based on where the ball hit the paddle (original Pong logic)
-            self.vel_y = normalized_distance * MAX_SPEED / 2  # The factor here adjusts the rebound angle
-
-        # Topspin logics
-        if paddle.topspin:
-            self.vel_y /= 3  # Reduce vertical velocity
-            self.vel_x = min(self.vel_x * 1.2, MAX_SPEED)  # Increase speed, capped to MAX_SPEED
-
-        # Backspin logic
-        if paddle.backspin:
-            self.vel_y /= 3  # Reduce vertical velocity
-            self.vel_x *= 0.8  # Reduce horizontal speed
-
-        # Ensure the ball's position is updated after the bounce
         if self.vel_x > 0:
             self.x = paddle_bounds['right'] + self.size / 2 + 1
         else:
             self.x = paddle_bounds['left'] - self.size / 2 - 1
+
+        MAX_SPEED = 10
+        self.vel_x = min(self.vel_x, MAX_SPEED)
+        self.vel_y = min(self.vel_y, MAX_SPEED)
+
+        if paddle.topspin:
+            self.vel_y /= 3
+            self.vel_x = min(self.vel_x * 1.2, MAX_SPEED)
+
+        if paddle.backspin:
+            self.vel_y /= 3
+            self.vel_x *= 0.8
 
     def wall_collision(self, score):
         if self.y - self.size / 2 <= 0:
