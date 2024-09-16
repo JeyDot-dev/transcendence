@@ -45,7 +45,7 @@
             </li>
             {% for game in game_history %}
             <li class="list-group-item 
-            {% if game.winner.name == user.username %} 
+            {% if game.winner.user == user %} 
                 text-success
             {% else %}
                 text-danger

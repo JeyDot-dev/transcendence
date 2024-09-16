@@ -120,6 +120,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         player2_instance, _ = Player.objects.get_or_create(user=player2, defaults={'name': player2.username})
 
         game = Game.objects.create(player1=player1_instance, player2=player2_instance, game_ws_id=game_ws_id)
+        self.user.match_history.add(game)
         logger.info(f"Game object created between {player1.username} and {player2.username} with game_ws_id={game_ws_id}.")
         return game
 
