@@ -32,24 +32,24 @@ def newGame(request):
             game_ws_id = generate_unique_id()
             player1.save()
             player2.save()
-            game = Game.objects.create(player1=player1, player2=player2, game_ws_id=game_ws_id, timer=Sform.cleaned_data['timer'], score=Sform.cleaned_data['score'], faster=Sform.cleaned_data['faster'], slower=Sform.cleaned_data['slower'])
+            game = Game.objects.create(player1=player1, player2=player2, game_ws_id=game_ws_id, timer=Sform.cleaned_data['timer'], score=Sform.cleaned_data['max_point'], faster=Sform.cleaned_data['faster'], slower=Sform.cleaned_data['slower'])
             if request.user.is_authenticated:
                     user = request.user
                     user.match_history.add(game)
             return JsonResponse({'status': 'success', 'game_ws_id': game.game_ws_id})
-        elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            if not form.is_valid:
-                for form_errors in form.errors:
-                    if form_errors:
-                        first_field = next(iter(form_errors))
-                        break
-                return JsonResponse({'status': 'failure', 'reason': form_errors[first_field]})
-            if not Sform.is_valid():
-                for form_errors in form.errors:
-                    if form_errors:
-                        first_field = next(iter(form_errors))
-                        break
-                return JsonResponse({'status': 'failure', 'reason': form_errors[first_field]})
+        # elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        #     if not form.is_valid:
+        #         for form_errors in form.errors:
+        #             if form_errors:
+        #                 first_field = next(iter(form_errors))
+        #                 break
+        #         return JsonResponse({'status': 'failure', 'reason': form_errors[first_field]})
+            # if not Sform.is_valid():
+            #     for form_errors in Sform.errors:
+            #         if form_errors:
+            #             first_field = next(iter(form_errors))
+            #             break
+            #     return JsonResponse({'status': 'failure', 'reason': form_errors[first_field]})
                 
     else:
         raise Http404()
@@ -98,14 +98,14 @@ def newTournament(request):
                 response = JsonResponse({'status': 'failure', 'reason': error_message})
             elif not Tform.is_valid():
                 response = JsonResponse({'status': 'failure', 'reason': "Tournament title is required"})
-            elif not Sform.is_valid():
-                for form_errors in Sform.errors:
-                    if form_errors:
-                        first_field = next(iter(form_errors))
-                        error_message = form_errors[first_field]
-                        break
-                response = JsonResponse({'status': 'failure', 'reason': error_message})
-            return response
+            # elif not Sform.is_valid():
+            #     for form_errors in Sform.errors:
+            #         if form_errors:
+            #             first_field = next(iter(form_errors))
+            #             error_message = form_errors[first_field]
+            #             break
+            #     response = JsonResponse({'status': 'failure', 'reason': error_message})
+            # return response
     else:
         raise Http404()
 

@@ -198,13 +198,13 @@ class Ball:
         self.y += self.speed * self.vel_y * delta_time
 
 class Game:
-    def __init__(self, id, players, nb_max_players=100, width=1280, height=720, updateCallBack=None, type='localGame'):
+    def __init__(self, id, players, nb_max_players=100, width=1280, height=720, updateCallBack=None, type='localGame', maxTimer=120, maxScore=5):
         self.id = id
         self.type = type
         self.timer = 0
-        self.maxTimer = 180
+        self.maxTimer = maxTimer
         self.score = [0, 0]
-        self.maxScore = 3
+        self.maxScore = maxScore
         self.running = False
         self.isPlayed = False
         self.isPaused = True
