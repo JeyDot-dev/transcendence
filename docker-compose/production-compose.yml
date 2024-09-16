@@ -2,57 +2,6 @@ name:     transcendence
 
 services:
   #********************************************************************************
-  es_setup:
-    container_name: es_setup
-    image: elasticsearch:8.14.3
-    volumes:
-      - certs_data:/usr/share/elasticsearch/config/certs
-      - ${PWD}/containers/scripts/setup_elk.sh:/setup_elk.sh
-      - ${PWD}/containers/elasticsearch/ilm_policy.json:/usr/share/elasticsearch/config/ilm_policy.json
-      - es_archive:/mnt/es_archive
-    networks:
-      - elk
-    user: "0"
-    command:  ["/setup_elk.sh"]
-    environment:
-      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
-      - ELASTIC_USER=${ELASTIC_USER}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    healthcheck:
-      test: ["CMD-SHELL", "[ -f config/certs/es01/es01.crt ]"]
-      interval: 1s
-      timeout: 5s
-      retries: 120
-  #********************************************************************************
-  logstash:
-    container_name: logstash
-    image: logstash:8.14.3
-    restart: always
-    user: root
-    depends_on:
-      es01:
-        condition: service_healthy
-      kibana:
-        condition: service_healthy
-    volumes:
-      - certs_data:/usr/share/logstash/certs
-      - logstash_data:/usr/share/logstash/data
-      - "../containers/logstash/:/usr/share/logstash/pipeline:ro"
-    environment:
-      - xpack.monitoring.enabled=false
-      - ELASTIC_USER=${ELASTIC_USER}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - ELASTIC_HOSTS=https://es01:9200
-    ports:
-      - 12201:12201/udp
-    networks:
-      - elk
-    healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://localhost:9600/_node/pipelines | grep -q '\"id\"'"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  #********************************************************************************
   nginx:
     container_name: nginx
     image: nginx:1.27.0
@@ -64,18 +13,13 @@ services:
       retries:      3
     command: ["/nginx.sh", "nginx", "-g", "daemon off;"]
     depends_on:
-      logstash:
-        condition: service_healthy
       gunicorn:
         condition: service_started
       daphne:
         condition: service_started
-      kibana:
-        condition: service_healthy
     ports:
       - 80:80
       - 443:443
-      - 447:447
     volumes:
       - ../project/static_production:/static
       - ${PWD}/containers/scripts/nginx.sh:/nginx.sh
@@ -83,40 +27,24 @@ services:
     networks:
         - backend
         - frontend
-        - elk
-    logging:
-      driver: gelf
-      options:
-        gelf-address: udp://localhost:12201
   #********************************************************************************
   redis:
     container_name: redis
     image:          redis:7.2.5
     restart:        always
-    depends_on:
-      logstash:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 1m30s
       timeout: 10s
       retries: 3
     networks:
-        - elk
         - backend
     # command: ["redis-server", "--loglevel", "debug"]
-    logging:
-      driver: gelf
-      options:
-        gelf-address: udp://localhost:12201
   #********************************************************************************
   db:
     container_name: postgres
     image:          postgres:16.3-bookworm
     restart:        always
-    depends_on:
-      logstash:
-        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U${DB_USER} -d${DB_NAME}"]
       start_period: 5s
@@ -130,12 +58,7 @@ services:
       POSTGRES_USER: ${DB_USER} 
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     networks:
-        - elk
         - backend
-    logging:
-      driver: gelf
-      options:
-        gelf-address: udp://localhost:12201
   #********************************************************************************
   daphne:
     container_name: daphne
@@ -144,8 +67,6 @@ services:
       context:        ../containers 
     restart:        always
     depends_on:
-      logstash:
-        condition: service_healthy
       db:
         condition: service_healthy
       redis:
@@ -153,7 +74,6 @@ services:
     volumes:
       - ../project:/project
     networks:
-        - elk
         - backend
         - frontend
     environment:
@@ -165,24 +85,17 @@ services:
       SUPER_USER:   ${SUPER_USER}
       SUPER_PASSWORD:   ${SUPER_PASSWORD}
       SUPER_MAIL:   ${SUPER_MAIL}
-    logging:
-      driver: gelf
-      options:
-        gelf-address: udp://localhost:12201
   #********************************************************************************
   gunicorn:
     container_name: gunicorn
     build:          ../containers/gunicorn
     restart:        always
     depends_on:
-      logstash:
-        condition: service_healthy
       db:
         condition: service_healthy
     volumes:
       - ../project:/project
     networks:
-        - elk
         - backend
         - frontend
     environment:
@@ -191,220 +104,12 @@ services:
       DB_PASSWORD:  ${DB_PASSWORD}
       DB_HOST:      db
       DB_PORT:      ${DB_PORT}
-    logging:
-      driver: gelf
-      options:
-        gelf-address: udp://localhost:12201
   #********************************************************************************
-  es01:
-    container_name: es01
-    restart:        always
-    depends_on:
-      es_setup:
-        condition: service_healthy
-    image: elasticsearch:8.14.3
-    # labels:
-    #   co.elastic.logs/module: elasticsearch
-    volumes:
-      - es_archive:/mnt/es_archive
-      - certs_data:/usr/share/elasticsearch/config/certs
-      - es01_data:/usr/share/elasticsearch/data
-    networks:
-      - elk
-      - es_network
-    ports:
-      - 9200:9200
-    environment:
-      - node.name=es01
-      - cluster.name=transcendence-cluster
-      - discovery.seed_hosts=es02,es03
-      - cluster.initial_master_nodes=es01,es02,es03
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=true
-      - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.key=certs/es01/es01.key
-      - xpack.security.http.ssl.certificate=certs/es01/es01.crt
-      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
-      - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.key=certs/es01/es01.key
-      - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
-      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
-      - xpack.security.transport.ssl.verification_mode=certificate
-      - xpack.license.self_generated.type=basic
-      - path.repo=/mnt/es_archive
-    mem_limit: 2g
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
-        ]
-      interval: 10s
-      start_period: 20s
-      timeout: 10s
-      retries: 120
-  es02:
-    container_name: es02
-    restart:        always
-    depends_on:
-      es_setup:
-        condition: service_healthy
-    image: elasticsearch:8.14.3
-    # labels:
-    #   co.elastic.logs/module: elasticsearch
-    volumes:
-      - es_archive:/mnt/es_archive
-      - certs_data:/usr/share/elasticsearch/config/certs
-      - es02_data:/usr/share/elasticsearch/data
-    networks:
-      - elk
-      - es_network
-    # ports:
-    #   - 9200:9200
-    environment:
-      - node.name=es02
-      - cluster.name=transcendence-cluster
-      - discovery.seed_hosts=es01,es03
-      - cluster.initial_master_nodes=es01,es02,es03
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=true
-      - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.key=certs/es01/es01.key
-      - xpack.security.http.ssl.certificate=certs/es01/es01.crt
-      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
-      - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.key=certs/es01/es01.key
-      - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
-      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
-      - xpack.security.transport.ssl.verification_mode=certificate
-      - xpack.license.self_generated.type=basic
-      - path.repo=/mnt/es_archive
-    mem_limit: 2g
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    # healthcheck:
-    #   test:
-    #     [
-    #       "CMD-SHELL",
-    #       "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
-    #     ]
-    #   interval: 10s
-    #   start_period: 20s
-    #   timeout: 10s
-    #   retries: 120
-  es03:
-    container_name: es03
-    restart:        always
-    depends_on:
-      es_setup:
-        condition: service_healthy
-    image: elasticsearch:8.14.3
-    # labels:
-    #   co.elastic.logs/module: elasticsearch
-    volumes:
-      - es_archive:/mnt/es_archive
-      - certs_data:/usr/share/elasticsearch/config/certs
-      - es03_data:/usr/share/elasticsearch/data
-    networks:
-      - elk
-      - es_network
-    # ports:
-    #   - 9200:9200
-    environment:
-      - node.name=es03
-      - cluster.name=transcendence-cluster
-      - discovery.seed_hosts=es01,es02
-      - cluster.initial_master_nodes=es01,es02,es03
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=true
-      - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.key=certs/es01/es01.key
-      - xpack.security.http.ssl.certificate=certs/es01/es01.crt
-      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
-      - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.key=certs/es01/es01.key
-      - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
-      - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
-      - xpack.security.transport.ssl.verification_mode=certificate
-      - xpack.license.self_generated.type=basic
-      - path.repo=/mnt/es_archive
-    mem_limit: 2g
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    # healthcheck:
-    #   test:
-    #     [
-    #       "CMD-SHELL",
-    #       "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
-    #     ]
-    #   interval: 10s
-    #   start_period: 20s
-    #   timeout: 10s
-    #   retries: 120
-  #********************************************************************************
-  kibana:
-    container_name: kibana
-    restart:        always
-    depends_on:
-      es01:
-        condition: service_healthy
-    image: kibana:8.14.3
-    # labels:
-    #   co.elastic.logs/module: kibana
-    volumes:
-      - certs_data:/usr/share/kibana/config/certs
-      - kibana_data:/usr/share/kibana/data
-    networks:
-      - elk
-    ports:
-      - 5601:5601
-    environment:
-      - SERVERNAME=kibana
-      - ELASTICSEARCH_HOSTS=https://es01:9200
-      - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
-      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
-      - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
-      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
-      - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
-      - XPACK_SECURITY_SECURECOOKIES=true
-      #TODO: bin/kibana-encryption-keys generate replace 3 keys for prod
-    mem_limit: 1g
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
-
 
 volumes:
   postgres01_data:
-  certs_data:
-  es01_data:
-  es02_data:
-  es03_data:
-  kibana_data:
-  logstash_data:
-  es_archive:
 
 
 networks:
   backend:
   frontend:
-  elk:
-  es_network:
