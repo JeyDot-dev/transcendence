@@ -340,7 +340,7 @@ export class Game {
                 this.camera.position,
                 this.p2Text.glowTextMesh.position);
         }
-        this.composer.render();
+        // this.composer.render();
     }
 
     update() {

@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_email, ValidationError
-from database.models import Game
+from django.db import models
 
 class UserInfos(AbstractUser):
     profile_pic = models.ImageField(
@@ -21,7 +21,7 @@ class UserInfos(AbstractUser):
     is_3d = models.BooleanField(default=False)
     friends = models.ManyToManyField("self", blank=True)
     friends_requests = models.ManyToManyField("self", blank=True)
-    match_history = models.ManyToManyField(Game, blank=True)
+    match_history = models.ManyToManyField('database.Game', blank=True)
 
     REQUIRED_FIELDS = ["email", "password"]
 
