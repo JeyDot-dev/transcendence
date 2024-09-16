@@ -37,20 +37,17 @@ def newGame(request):
                     user = request.user
                     user.match_history.add(game)
             return JsonResponse({'status': 'success', 'game_ws_id': game.game_ws_id})
-        # elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        #     if not form.is_valid:
-        #         for form_errors in form.errors:
-        #             if form_errors:
-        #                 first_field = next(iter(form_errors))
-        #                 break
-        #         return JsonResponse({'status': 'failure', 'reason': form_errors[first_field]})
-            # if not Sform.is_valid():
-            #     for form_errors in Sform.errors:
-            #         if form_errors:
-            #             first_field = next(iter(form_errors))
-            #             break
-            #     return JsonResponse({'status': 'failure', 'reason': form_errors[first_field]})
-                
+        elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if not form.is_valid:
+                for form_errors in form.errors:
+                    if form_errors:
+                        first_field = next(iter(form_errors))
+                        return JsonResponse({'status': 'failure', 'reason': form_errors[first_field]})
+            if not Sform.is_valid():
+                all_errors = []
+                for field_errors in Sform.errors.values():
+                    all_errors.extend(field_errors)
+                return JsonResponse({'status': 'failure', 'reason': all_errors[0]})           
     else:
         raise Http404()
         
@@ -98,14 +95,14 @@ def newTournament(request):
                 response = JsonResponse({'status': 'failure', 'reason': error_message})
             elif not Tform.is_valid():
                 response = JsonResponse({'status': 'failure', 'reason': "Tournament title is required"})
-            # elif not Sform.is_valid():
-            #     for form_errors in Sform.errors:
-            #         if form_errors:
-            #             first_field = next(iter(form_errors))
-            #             error_message = form_errors[first_field]
-            #             break
-            #     response = JsonResponse({'status': 'failure', 'reason': error_message})
-            # return response
+            elif not Sform.is_valid*():
+                all_errors = []
+                for field_errors in Sform.errors.values():
+                    all_errors.extend(field_errors)
+                response = JsonResponse({'status': 'failure', 'reason': all_errors[0]})
+            else:
+                response = JsonResponse({'status': 'failure', 'reason': "unknown error"})
+            return response
     else:
         raise Http404()
 
