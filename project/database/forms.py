@@ -26,7 +26,7 @@ class UniquePlayerFormSet(forms.BaseModelFormSet):
                 name = form.cleaned_data.get('name')
                 if name:
                     if name in names:
-                        form.add_error('name', 'Name must be unique within the formset.')
+                        form.add_error('name', 'All player names must be unique.')
                     names.append(name)
 
 PlayerFormSet = forms.modelformset_factory(Player, form=addPlayer, formset=UniquePlayerFormSet, fields=['name'], extra=1)

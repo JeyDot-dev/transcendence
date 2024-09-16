@@ -23,12 +23,13 @@ class Player(models.Model):
 class Tournament(models.Model):
     name = models.CharField(max_length=100, default = "Tournament")
     players = models.ManyToManyField(Player, blank=True)
-    winner = models.IntegerField(blank=True)
+    winner = models.IntegerField(default=1)
     round_number = models.IntegerField(default=1)
     timer = models.IntegerField(default=180)
     score = models.IntegerField(default=5)
     top_spin = models.BooleanField(default=False)
     back_spin = models.BooleanField(default=False)
+    side_spin = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -95,6 +96,7 @@ class Game(models.Model):
     score = models.IntegerField(default=5)
     top_spin = models.BooleanField(default=False)
     back_spin = models.BooleanField(default=False)
+    side_spin = models.BooleanField(default=False)
 
     def __str__(self):
         return self.player1.name + " VS " + self.player2.name 
