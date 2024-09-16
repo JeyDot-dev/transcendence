@@ -31,7 +31,7 @@ class Tournament(models.Model):
         player.is_winner = True
         self.players.add(player)
 
-    def make_games(self):
+    def make_games(self, user):
         winners = [player for player in list(self.players.all()) if player.is_winner]
         random.shuffle(winners)
         """if len(winners) == 3:
@@ -40,7 +40,9 @@ class Tournament(models.Model):
             self.games.create(player1=winners[2], player2=winners[1], game_ws_id=generate_unique_id(), pool=self.round_number)
         else:"""
         while len(winners) >= 2:
-            self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number)
+            game = self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number)
+        if user.is_authenticated:
+            user.match_history.add(game)
         self.round_number = models.F('round_number') + 1
         self.save()
 

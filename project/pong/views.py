@@ -63,7 +63,6 @@ def index(request):
     formset = PlayerFormSet(queryset=Player.objects.none())
     return render(request, "pong/pong.html", {'form': form, 'formset': formset, 'formGame': formGame, 'user':request.user})
 
-
 def pong2d(request):
     return render(request, "pong/pong2d.html")
 
