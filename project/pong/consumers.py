@@ -41,11 +41,16 @@ class PongConsumer(AsyncWebsocketConsumer):
                     # Récupérer les joueurs depuis la base de données
                     player1 = await sync_to_async(lambda: GameDB.player1)()
                     player2 = await sync_to_async(lambda: GameDB.player2)()
+                    timer, maxScore, topspin, backspin, sidespin = await sync_to_async(lambda: (
+                        GameDB.timer, GameDB.score, GameDB.top_spin, GameDB.back_spin, GameDB.side_spin
+                    ))()
                     logger.info(f"Player 1: {player1.name}, ID: {player1.id}")
                     logger.info(f"Player 2: {player2.name}, ID: {player2.id}")
+
                     # Créer une nouvelle instance de game avec les joueurs de la base de données
                     self.game = Game(
-                        self.game_id, [], 2, 1280, 720, self.notifyEvent, "dbGame"
+                        self.game_id, [], 2, 1280, 720, self.notifyEvent,
+                        "dbGame", timer, maxScore, topspin, backspin, sidespin
                     )
                     self.game.addPlayer(
                         Player(id=1, skin="skin1", name=player1.name), 0
@@ -131,9 +136,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         logger.info(f"Received message: {text_data_json}, Game Type: {game_type}")
 
         if game_type == "local":
-            if text_data_json["key"] in ["w", "s", "space"]:
+            if text_data_json["key"] in ["w", "s", "space", "a", "d"]:
                 who = 0
-            elif text_data_json["key"] in ["arrowup", "arrowdown"]:
+            elif text_data_json["key"] in ["arrowup", "arrowdown", "arrowleft", "arrowright"]:
                 who = 1
             else:
                 logger.warning(f"Invalid key pressed: {text_data_json['key']}")
@@ -141,7 +146,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             if text_data_json["type"] == "keydown" or text_data_json["type"] == "keyup":
                 logger.info(f"Handling local game key press: {text_data_json['key']} for player {who}")
-                await handle_key(self.game, text_data_json["type"], text_data_json["key"], who)
+                await handle_key(self.game, text_data_json["type"], text_data_json["key"], who, self)
 
         elif game_type == "remote":
             user_name = self.scope["user"].username
@@ -158,9 +163,9 @@ class PongConsumer(AsyncWebsocketConsumer):
                 logger.warning(f"User {user_name} does not control any paddle in this game")
                 return
 
-            if text_data_json["key"] in ["w", "s", "arrowup", "arrowdown"]:
+            if text_data_json["key"] in ["w", "s", "arrowup", "arrowdown", "a", "d", "arrowleft", "arrowright"]:
                 logger.info(f"Handling remote game key press: {text_data_json['key']} for player {who}")
-                await handle_key(self.game, text_data_json["type"], text_data_json["key"], who)
+                await handle_key(self.game, text_data_json["type"], text_data_json["key"], who, self)
 
 
 
@@ -196,7 +201,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             logger.info(f"Current games_pool state after cleanup: {games_pool}")
 
 
-async def handle_key(game, types, key, who):
+async def handle_key(game, types, key, who, consumer):
     if types not in ["keydown", "keyup"]:
         return
 
@@ -212,34 +217,75 @@ async def handle_key(game, types, key, who):
         game.pause_handled = False
 
     action = None
+
     if key in ["w", "arrowup"]:
         action = "up"
     elif key in ["s", "arrowdown"]:
         action = "down"
+
+    if game.allowBackspin and key in ["a", "arrowright"]:
+        action = "backspin"
+    elif game.allowTopspin and key in ["d", "arrowleft"]:
+        action = "topspin"
 
     if action is None:
         return
 
     paddle = game.paddles[who]
 
-    # Mettre à jour l'état de la touche dans le dictionnaire
-    if types == "keydown":
-        paddle.keys_pressed[action] = True
-    elif types == "keyup":
-        paddle.keys_pressed[action] = False
+    if action in ["up", "down"]:
+        if types == "keydown":
+            paddle.keys_pressed[action] = True
+        elif types == "keyup":
+            paddle.keys_pressed[action] = False
 
-    # Gestion des mouvements en fonction des touches pressées
-    if paddle.keys_pressed["up"] and not paddle.keys_pressed["down"]:
-        paddle.velocity = -1  # Monter
-    elif paddle.keys_pressed["down"] and not paddle.keys_pressed["up"]:
-        paddle.velocity = 1  # Descendre
-    else:
-        paddle.velocity = (
-            0  # Aucun mouvement si les deux touches sont relâchées ou pressées
-        )
-    # logger.debug(f"Paddle update - Player: {who}, Action: {action}, Type: {types}, New Velocity: {game.paddles[who].velocity}")
-    # logger.debug(f"New Paddle0 Position: x={game.paddles[0].x} y={game.paddles[0].y}")
-    # logger.debug(f"New Paddle1 Position: x={game.paddles[1].x} y={game.paddles[1].y}")
+        # Update paddle movement based on keys pressed
+        if paddle.keys_pressed["up"] and not paddle.keys_pressed["down"]:
+            paddle.velocity = -1  # Move up
+        elif paddle.keys_pressed["down"] and not paddle.keys_pressed["up"]:
+            paddle.velocity = 1  # Move down
+        else:
+            paddle.velocity = 0  # No movement
+
+    spin_changed = False
+    if action in ["backspin", "topspin"]:
+        if types == "keydown":
+            paddle.keys_pressed[action] = True
+        elif types == "keyup":
+            paddle.keys_pressed[action] = False
+        if paddle.keys_pressed["backspin"] and not paddle.keys_pressed["topspin"]:
+            if not paddle.backspin:
+                paddle.backspin = True
+                paddle.topspin = False
+                spin_changed = True
+                await consumer.notifyEvent({
+                    'type': 'spinChange',
+                    'paddle': who,
+                    'glow': 'black'
+                })
+        elif paddle.keys_pressed["topspin"] and not paddle.keys_pressed["backspin"]:
+            if not paddle.topspin:
+                paddle.topspin = True
+                paddle.backspin = False
+                spin_changed = True
+                await consumer.notifyEvent({
+                    'type': 'spinChange',
+                    'paddle': who,
+                    'glow': 'red'
+                })
+        else:
+            if paddle.backspin or paddle.topspin:
+                paddle.backspin = False
+                paddle.topspin = False
+                spin_changed = True
+                await consumer.notifyEvent({
+                    'type': 'spinChange',
+                    'paddle': who,
+                    'glow': 'none'
+                })
+
+    if spin_changed:
+        logger.debug(f"Spin state changed for paddle {who} - Backspin: {paddle.backspin}, Topspin: {paddle.topspin}")
 
 
 async def build_game_state(game):
@@ -273,6 +319,11 @@ async def build_game_state(game):
         "score": game.score,
         "isPlayed": game.isPlayed,
         "isPaused": game.isPaused,
+        "options": {
+            "topspin": game.allowTopspin,
+            "backspin": game.allowBackspin,
+            "sidespin": game.allowSidespin,
+        }
     }
 
 async def update_game_state(game):
@@ -305,4 +356,9 @@ async def update_game_state(game):
         "score": game.score,
         "isPlayed": game.isPlayed,
         "isPaused": game.isPaused,
+        "options": {
+            "topspin": game.allowTopspin,
+            "backspin": game.allowBackspin,
+            "sidespin": game.allowSidespin,
+        }
     }
