@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ ! -e /ssl/cert.crt ]]; then
-	mkdir /ssl
+	mkdir -p /ssl
 	openssl req -newkey rsa:4096 \
 		-x509 -keyout /ssl/key.key \
 		-out /ssl/cert.crt -sha256 \
