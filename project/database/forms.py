@@ -71,13 +71,15 @@ class GameSettingsForm(forms.Form):
     timer = forms.IntegerField(
         label='Timer', 
         initial=120, 
-        max_value=600, 
+        max_value=600,
+        min_value=1,
         widget=forms.NumberInput(attrs={'class': 'form-control'})
     )
     score = forms.IntegerField(
         label='Total Score', 
         initial=5, 
         max_value=10, 
+        min_value=1,
         widget=forms.NumberInput(attrs={'class': 'form-control'})
     )
     top_spin = forms.BooleanField(
