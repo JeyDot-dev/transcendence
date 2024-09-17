@@ -52,16 +52,16 @@
     const username = '{{ user.username|escapejs }}';
 
     document.getElementById('add_players').addEventListener('click', function() {
-        console.log('added players');
+        // console.log('added players');
         let formCount = document.querySelectorAll('#formsetContainer .form-group').length;
 
         const formsetContainer = document.getElementById('formsetContainer');
         const numPlayersToReach = parseInt(document.getElementById('num-players').value);  // Get the number of forms from input
-        console.log(formCount);
-        console.log(numPlayersToReach);
+        // console.log(formCount);
+        // console.log(numPlayersToReach);
         if (formCount < numPlayersToReach){
             for (let i = formCount; i < numPlayersToReach; i++) {
-                console.log(i);
+                // console.log(i);
                 const newFormHtml = `
                     <div class="form-group">
                         <label for="id_form-${i}-name">Player Name:</label>
