@@ -41,7 +41,7 @@
 	{% load static %}
 	<div class="profile-container">
 		<h1>{{ user.username }}</h1>
-		<img src="{% static user.profile_pic.url %}" alt="Profile Picture" class="profile-pic">
+		<img src="{{ user.profile_pic.url }}" alt="Profile Picture" class="profile-pic">
 		<p class="status">Status: {{ user.status }}</p>
 		<p class="online-status">Online: {{ user.is_online }}</p>
 		<p class="playing-status">Playing: {{ user.is_playing }}</p>

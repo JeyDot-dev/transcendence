@@ -7,7 +7,7 @@ import re
 class UserInfos(AbstractUser):
 	profile_pic = models.ImageField(
 		upload_to="profile_pics/",
-		default="profile_pics/default.jpg",
+		default="/default.jpg",
 		blank=True,
 		null=True,
 	)

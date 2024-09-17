@@ -18,7 +18,7 @@
 
 	<label for="profile_pic" id="profile_pic_label">
 		<div id="pp-div">
-			<img src="{% static user.profile_pic.url %}" alt="Profile Picture" id="pp">
+			<img src="{{ user.profile_pic.url }}" alt="Profile Picture" id="pp">
 			<div class="img-overlay"></div>
 		</div>
 	</label>
@@ -136,7 +136,7 @@
 				</div>
 			</li>
 			<li class="list-group-item flex-fill">
-				<button class="btn" onclick="changeUserValue('new_password', document.getElementById('new_password_to_send').value, '{{ user.username }}')">Update password</button>
+				<button class="btn" onclick="changeUserValue('new_password', document.getElementById('new_password_input').value, '{{ user.username }}')">Update password</button>
 		</ul>
 	</form>
 	<ul class="list-group list-group-horizontal-sm">

@@ -160,6 +160,10 @@ def change_value(request, field):
 				return Response({'message': 'Invalid characters in username'}, status=status.HTTP_400_BAD_REQUEST)
 			user.set_username(request.data["new_value"])
 		elif field == "new_email":
+			if not check_characters(request.data['new_value'], 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@._'):
+				return Response({'message': 'Invalid characters in email'}, status=status.HTTP_400_BAD_REQUEST)
+			if "@" not in request.data['new_value']:
+				return Response({'message': 'Invalid email'}, status=status.HTTP_400_BAD_REQUEST)
 			user.set_email(request.data["new_value"])
 		elif field == "new_password":
 			if user.username != request.user.username:
