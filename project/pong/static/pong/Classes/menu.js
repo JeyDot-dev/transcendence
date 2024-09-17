@@ -117,7 +117,7 @@ export class Menu {
     async handleNewGameSubmit(event) {
         let form = document.getElementById('newGameForm');
         let formData = new FormData(form);
-        console.log('formData: ', formData);
+        // console.log('formData: ', formData);
 
         let jsonObject = {};
         for (const [key, value] of formData.entries()) {
@@ -125,7 +125,7 @@ export class Menu {
         }
 
         const response = await sendJSON('/database/newGame', jsonObject);
-        console.log("Response: ", response);
+        // console.log("Response: ", response);
 
         const obj = JSON.parse(response);
         if (obj.status.localeCompare('success') == 0) {
@@ -151,7 +151,7 @@ export class Menu {
             //this.newLocalGame();
         });
         this.matchmakingMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 0), () => {
-            console.log("Clicked On: Matchmaking");
+            // console.log("Clicked On: Matchmaking");
             if (!(this.user_auth)){
                 navigateTo('userManager');
             }
@@ -163,7 +163,7 @@ export class Menu {
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -200), () => {
             this.formSubmittedSuccessfully = false;
-            console.log("Clicked On: Tournament");
+            // console.log("Clicked On: Tournament");
             this.disableEventListener();
             this.modalManager.openModal('modalNewTournament', this.handleTournamentSubmit.bind(this), this);
         });

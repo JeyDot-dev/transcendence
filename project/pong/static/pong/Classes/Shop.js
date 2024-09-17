@@ -124,9 +124,9 @@ export class Shop {
         this.directionalLight.visible = false;
     }
     handleEscape(event) {
-        console.log('Hello:' , event);
+       // console.log('Hello:' , event);
         if (event.key === 'Escape') {
-            console.log('Hello bg');
+           // console.log('Hello bg');
             this.menu.tweenCameraToItem();
             this.menu.show();
             this.hide();
@@ -166,7 +166,7 @@ class ShopPaddle {
     }
 
     onClick() {
-        console.log(`Paddle ${this.id} clicked!`);
+       // console.log(`Paddle ${this.id} clicked!`);
     }
     onHover() {
         if (!this.isHovering) {

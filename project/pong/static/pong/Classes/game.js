@@ -295,7 +295,7 @@ export class Game {
     }
 
     wsMessageManager(data) {
-        console.log(data);
+        // console.log(data);
         switch (data.type) {
             case 'scoreChange0':
                 this.p1Text.updateText(data.score[0].toString(), this.gameGroup);
