@@ -3,7 +3,7 @@ import { FontLoader } from '../FontLoader.js';
 import { TWEEN } from '../three.module.js';
 
 export class Shop {
-    constructor(threeRoot, socketManager) {
+    constructor(threeRoot, socketManager, menu) {
         this.threeRoot = threeRoot;
         this.socketManager = socketManager;
         this.canvasBounds = this.threeRoot.renderer.domElement.getBoundingClientRect();
@@ -14,6 +14,8 @@ export class Shop {
         this.fontLoader = new FontLoader();
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseClick = this.onMouseClick.bind(this);
+        this.escListenerBound = this.handleEscape.bind(this);
+        this.menu = menu;
 
         this.shopSize = 1500;
         this.paddleWidth = 50;
@@ -59,8 +61,9 @@ export class Shop {
         );
     }
     enableInteraction() {
-        window.addEventListener('mousemove', this.onMouseMove, false);
-        window.addEventListener('click', this.onMouseClick, false);
+        document.addEventListener('mousemove', this.onMouseMove, false);
+        document.addEventListener('click', this.onMouseClick, false);
+        document.addEventListener('keydown', this.escListenerBound, false);
     }
     calculatePaddlePositions(numPaddles) {
         const positions = [];
@@ -101,18 +104,33 @@ export class Shop {
     }
 
     show() {
-        window.addEventListener('mousemove', this.onMouseMove, false);
-        window.addEventListener('click', this.onMouseClick, false);
+        document.addEventListener('mousemove', this.onMouseMove, false);
+        document.addEventListener('click', this.onMouseClick, false);
+        document.addEventListener('keydown', this.escListenerBound, false);
         this.paddles.forEach(paddle => {
             paddle.setVisibility(true);
         });
+        this.ambientLight.visible = true;
+        this.directionalLight.visible = true;
     }
     hide() {
-        window.removeEventListener('mousemove', this.onMouseMove, false);
-        window.removeEventListener('click', this.onMouseClick, false);
+        document.removeEventListener('mousemove', this.onMouseMove, false);
+        document.removeEventListener('click', this.onMouseClick, false);
+        document.removeEventListener('keydown', this.escListenerBound, false);
         this.paddles.forEach(paddle => {
             paddle.setVisibility(false);
         });
+        this.ambientLight.visible = false;
+        this.directionalLight.visible = false;
+    }
+    handleEscape(event) {
+        console.log('Hello:' , event);
+        if (event.key === 'Escape') {
+            console.log('Hello bg');
+            this.menu.tweenCameraToItem();
+            this.menu.show();
+            this.hide();
+        }
     }
 }
 
