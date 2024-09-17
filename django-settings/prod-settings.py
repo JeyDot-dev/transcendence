@@ -31,7 +31,7 @@ ALLOWED_HOSTS = ["c3r5s5.42lausanne.ch", "localhost"]
 CSRF_TRUSTED_ORIGINS = [
     "https://transcendence.jjorge.ch",
     "https://195.15.214.88",
-    "https://localhost",
+    "https://localhost:8443",
 ]
 
 
