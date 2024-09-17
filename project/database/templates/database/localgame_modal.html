@@ -38,6 +38,7 @@
                 </div>
             </div>
             <div class="modal-footer">
+                {% csrf_token %}
                 <button type="submit" id="submitNewGameForm" class="btn btn-primary" form="newGameForm">Start Game</button>
             </div>
         </div>

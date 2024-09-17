@@ -29,7 +29,7 @@ class TDSLoader extends Loader {
 
 		super( manager );
 
-		this.debug = false;
+		this.debug = true;
 
 		this.group = null;
 
