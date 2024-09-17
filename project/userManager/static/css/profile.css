@@ -14,7 +14,7 @@ main textarea, label, {
     max-width: 400px;
     min-width: 200px;
     height: 10vh;
-    font-family: 'Staatliches';
+    font-family: 'Lemon/Milk', sans-serif;
 }
 .form-control{
     background-color: rgba(0, 0, 0, 0.5);

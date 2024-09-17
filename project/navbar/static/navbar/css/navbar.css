@@ -13,7 +13,7 @@
 }
 .navbar-brand {
     font-size: 2rem;
-    font-family: 'Staatliches';
+    font-family: 'Lemon/Milk', sans-serif;
     color: #FFFFFF;
 }
 .navbar-toggler-icon{
@@ -23,7 +23,7 @@
 }
 .navbar .nav-link {
     font-size: 1.5rem;
-    font-family: 'Staatliches';
+    font-family: 'Lemon/Milk light';
     color: #FFFFFF;
 }
 #userLink:link, #userLink:visited {
