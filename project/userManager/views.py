@@ -36,7 +36,6 @@ def login_view(request):
 			{"message": "Login successful", "token": token.key, "user": user.to_dict()},
 			status=status.HTTP_200_OK,
 		)
-	request.user.set_online(False)
 	return Response({"message": "Login failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
@@ -160,6 +159,10 @@ def change_value(request, field):
 				return Response({'message': 'Invalid characters in username'}, status=status.HTTP_400_BAD_REQUEST)
 			user.set_username(request.data["new_value"])
 		elif field == "new_email":
+			if not check_characters(request.data['new_value'], 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@._'):
+				return Response({'message': 'Invalid characters in email'}, status=status.HTTP_400_BAD_REQUEST)
+			if "@" not in request.data['new_value']:
+				return Response({'message': 'Invalid email'}, status=status.HTTP_400_BAD_REQUEST)
 			user.set_email(request.data["new_value"])
 		elif field == "new_password":
 			if user.username != request.user.username:
@@ -173,7 +176,7 @@ def change_value(request, field):
 			user.set_password(request.data['new_value'])
 			user.save()
 		elif field == "new_status":
-			if not check_characters(request.data['new_value'], 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789éàèöäü_!@#$%^&*() '):
+			if not check_characters(request.data['new_value'], '\'"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789éàèöäü_!@#$%^&*(), '):
 				return Response({'message': 'Invalid characters in status'}, status=status.HTTP_400_BAD_REQUEST)
 			user.set_status(request.data["new_value"])
 		elif field == "set_online":
@@ -239,7 +242,6 @@ def get_user(request, field):
 
 # ALL HTML VIEWS GO HERE
 
-
 def index(request):
 	user = request.user
 	ten_games = []
@@ -256,7 +258,10 @@ def index(request):
 
 def profile(request, username):
 	user = get_object_or_404(UserInfos, username=username)
-	return render(request, "profile.html", {"user": user})
+	if not user:
+		return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+	ten_games = UserInfos.objects.get(username=username).match_history.all().order_by("-date")[:10]
+	return render(request, "profile.html", {"user": user, "game_history": ten_games})
 
 def check_characters(str, allowed_characters): # Check if a string contains only allowed characters returns True if it does, False otherwise
 	return all(char in allowed_characters for char in str)

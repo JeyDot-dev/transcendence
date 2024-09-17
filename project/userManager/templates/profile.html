@@ -41,7 +41,7 @@
 	{% load static %}
 	<div class="profile-container">
 		<h1>{{ user.username }}</h1>
-		<img src="{% static user.profile_pic.url %}" alt="Profile Picture" class="profile-pic">
+		<img src="{{ user.profile_pic.url }}" alt="Profile Picture" class="profile-pic">
 		<p class="status">Status: {{ user.status }}</p>
 		<p class="online-status">Online: {{ user.is_online }}</p>
 		<p class="playing-status">Playing: {{ user.is_playing }}</p>
@@ -50,5 +50,21 @@
 		<p>Total Victories: {{ user.total_victories }}</p>
 		<p>Skin: {{ user.skin }}</p>
 	</div>
+	<ul class="list-group mx-auto col-lg me-auto-lg mt-4" id="gameStatsContainer" style="max-width: 400px; max-height: 46vh; min-height: 46vh;">
+		<li class="list-group-item list-title">
+			<h4>Played games: {{ user.total_games }}  Won: {{ user.total_victories }} </h4>
+			<h5>last ten games</h5>
+		</li>
+		{% for game in game_history %}
+		<li class="list-group-item 
+		{% if game.winner.user == user %} 
+			text-success
+		{% else %}
+			text-danger
+		{% endif %}">{{ game }} {{game.points1}}|{{game.points2}} {{ game.date|date:"d.m.y H:i" }}</li>
+		{% empty %}
+		<li>Play games to show history.</li>
+		{% endfor %}
+	</ul>
 </body>
 </html>
