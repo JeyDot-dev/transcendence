@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>User Profile</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+		}
+		.profile-container {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			max-width: 600px;
+			margin: 0 auto;
+			padding: 20px;
+			border: 1px solid #ccc;
+			border-radius: 10px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+		.profile-pic {
+			width: 150px;
+			height: 150px;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+		.status {
+			font-weight: bold;
+		}
+		.online-status {
+			color: green;
+		}
+		.offline-status {
+			color: red;
+		}
+	</style>
+</head>
+<body>
+	{% load static %}
+	<div class="profile-container">
+		<h1>{{ user.username }}</h1>
+		<img src="{% static user.profile_pic.url %}" alt="Profile Picture" class="profile-pic">
+		<p class="status">Status: {{ user.status }}</p>
+		<p class="online-status">Online: {{ user.is_online }}</p>
+		<p class="playing-status">Playing: {{ user.is_playing }}</p>
+		<p>Grade: {{ user.grade }}</p>
+		<p>Total Games: {{ user.total_games }}</p>
+		<p>Total Victories: {{ user.total_victories }}</p>
+		<p>Skin: {{ user.skin }}</p>
+	</div>
+</body>
+</html>

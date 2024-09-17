@@ -36,7 +36,7 @@ function checkInput(data, to_check, to_alert = null) {
         alert(data.message);
     } else {
         if (to_alert) {
-            alert(data.message);
+            	alert(data.message);
         }
         navigateTo("userManager");
         resetBody();
@@ -95,7 +95,7 @@ function createAccount(formData) {
                 errorInModal(data, "signupSpan");
             }
             else {
-                checkInput(data, "User created successfully");
+            	checkInput(data, "User created successfully");
             }
         })
 }
@@ -140,6 +140,14 @@ function logout() {
         })
 }
 
+window.addEventListener('beforeunload', function () {
+	changeUserValue("set_online", false, local_user.username);
+});
+
+window.addEventListener('load', function () {
+	changeUserValue("set_online", true, local_user.username);
+});
+
 function changeUserValue(url_key, value, username) {
     const url = `api/userManager/change_value/${url_key}/`;
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -157,6 +165,9 @@ function changeUserValue(url_key, value, username) {
     })
         .then(response => response.json())
         .then(data => {
+			if (url_key === "set_online") {
+				return ;
+			}
             checkInput(data, url_key + " changed successfully", true);
         })
 }

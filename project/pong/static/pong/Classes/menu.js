@@ -8,13 +8,15 @@ import { ModalManager } from './ModalManager.js'
 import { TWEEN } from '../three.module.js';
 
 export class Menu {
-    constructor(threeRoot, socketManager) {
+    constructor(threeRoot, socketManager, user_auth) {
         this.threeRoot = threeRoot;
         this.scene = threeRoot.scene;
         this.camera = threeRoot.camera;
         this.renderer = threeRoot.renderer;
         this.socketManager = socketManager;
         this.menuGroup = new THREE.Group();
+
+        this.user_auth = user_auth;
 
         this.modalManager = new ModalManager();
         this.formSubmittedSuccessfully = false;
@@ -107,7 +109,7 @@ export class Menu {
             this.newLocalTournament(obj.t_id);
         }
         else if (obj.status.localeCompare('failure') == 0) {
-            const newDiv = document.getElementById('form_error');
+            const newDiv = document.getElementById('Tform_error');
             newDiv.innerHTML = obj.reason;
             newDiv.style.color = "red";
         }
@@ -132,7 +134,7 @@ export class Menu {
             this.newLocalGame(obj.game_ws_id);
         }
         else if (obj.status.localeCompare('failure') == 0) {
-            const newDiv = document.getElementById('form_error');
+            const newDiv = document.getElementById('Gform_error');
             newDiv.innerHTML = obj.reason;
             newDiv.style.color = "red";
         }
@@ -150,9 +152,14 @@ export class Menu {
         });
         this.matchmakingMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 180), () => {
             console.log("Clicked On: Matchmaking");
-            this.hideText();
-            this.matchmakingAnimation.show();
-            this.socketManager.setType('matchmaking');
+            if (!(this.user_auth)){
+                navigateTo('userManager');
+            }
+            else{
+                this.hideText();
+                this.matchmakingAnimation.show();
+                this.socketManager.setType('matchmaking');
+            }
         });
         this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
             this.formSubmittedSuccessfully = false;

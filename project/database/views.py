@@ -21,6 +21,7 @@ def tournamentWinner(request, t_id):
 
 def newGame(request):
     if request.method == 'POST':
+        logger.info("_____POST METHODE________")
         form = newGameForm(request.POST)
         Sform = GameSettingsForm(request.POST)
         if form.is_valid() and Sform.is_valid():
@@ -38,16 +39,19 @@ def newGame(request):
                     user.match_history.add(game)
             return JsonResponse({'status': 'success', 'game_ws_id': game.game_ws_id})
         elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            if not form.is_valid:
+            logger.info("_____UNKWON FORMS NOT VALID________ ")
+            if not form.is_valid():
+                logger.info("_____FORMS NOT VALID________ {form.errors}")
                 for field, message in form.errors.items():
                     if message:
-                        return JsonResponse({'status': 'failure', 'reason': field + ": " + message[0]})
+                        return JsonResponse({'status': 'failure', 'reason': field + ": "+ message[0]})
             if not Sform.is_valid():
+                logger.info("_____SFORMS NOT VALID________ {form.errors}")
                 for field, message in Sform.errors.items():
                     if message:
-                        return JsonResponse({'status': 'failure', 'reason': field + ": " + message[0]})
-    else:
-        raise Http404()
+                        return JsonResponse({'status': 'failure', 'reason': field + ": "+ message[0]})
+        logger.info("request header wierd thing")
+    raise Http404()
         
 def newTournament(request):
     if request.method == "POST":
@@ -93,7 +97,7 @@ def newTournament(request):
                 response = JsonResponse({'status': 'failure', 'reason': error_message})
             elif not Tform.is_valid():
                 response = JsonResponse({'status': 'failure', 'reason': "Tournament title is required"})
-            elif not Sform.is_valid*():
+            elif not Sform.is_valid():
                 for field, message in Sform.errors.items():
                     if message:
                         return JsonResponse({'status': 'failure', 'reason': field + ": " + message[0]})
