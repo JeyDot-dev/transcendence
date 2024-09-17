@@ -21,33 +21,46 @@ def tournamentWinner(request, t_id):
 
 def newGame(request):
     if request.method == 'POST':
+        logger.info("_____POST METHODE________")
         form = newGameForm(request.POST)
-        if form.is_valid():
+        Sform = GameSettingsForm(request.POST)
+        if form.is_valid() and Sform.is_valid():
             logger.info("_____FORMS VALID________")
             player1_name = form.cleaned_data['player1_name']
             player2_name = form.cleaned_data['player2_name']
             player1, new1= Player.objects.get_or_create(name=player1_name)
             player2, new1 = Player.objects.get_or_create(name=player2_name)
-            player1.is_winner = False
-            player2.is_winner = False
             game_ws_id = generate_unique_id()
             player1.save()
             player2.save()
-            game = Game.objects.create(player1=player1, player2=player2, game_ws_id=game_ws_id)
+            game = Game.objects.create(player1=player1, player2=player2, game_ws_id=game_ws_id, timer=Sform.cleaned_data['timer'], score=Sform.cleaned_data['score'], top_spin=Sform.cleaned_data['top_spin'], back_spin=Sform.cleaned_data['back_spin'], side_spin=Sform.cleaned_data['side_spin'])
             if request.user.is_authenticated:
                     user = request.user
                     user.match_history.add(game)
             return JsonResponse({'status': 'success', 'game_ws_id': game.game_ws_id})
-        return JsonResponse({'status': 'failure'})
-    else:
-        raise Http404()
+        elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            logger.info("_____UNKWON FORMS NOT VALID________ ")
+            if not form.is_valid():
+                logger.info("_____FORMS NOT VALID________ {form.errors}")
+                for field, message in form.errors.items():
+                    if message:
+                        return JsonResponse({'status': 'failure', 'reason': field + ": "+ message[0]})
+            if not Sform.is_valid():
+                logger.info("_____SFORMS NOT VALID________ {form.errors}")
+                for field, message in Sform.errors.items():
+                    if message:
+                        return JsonResponse({'status': 'failure', 'reason': field + ": "+ message[0]})
+        logger.info("request header wierd thing")
+    raise Http404()
         
 def newTournament(request):
     if request.method == "POST":
         Tform = newTournamentForm(request.POST)
         formset = PlayerFormSet(request.POST)
-        if Tform.is_valid() and formset.is_valid():
-            tournament = Tournament(name=Tform.cleaned_data["tournament_title"])
+        Sform = GameSettingsForm(request.POST)
+        if Tform.is_valid() and formset.is_valid() and Sform.is_valid():
+            logger.info(f"______Forms valid_______")
+            tournament = Tournament(name=Tform.cleaned_data['tournament_title'], timer=Sform.cleaned_data['timer'], score=Sform.cleaned_data['score'], top_spin=Sform.cleaned_data['top_spin'], back_spin=Sform.cleaned_data['back_spin'], side_spin=Sform.cleaned_data['side_spin'])
             tournament.save()
             for form in formset:
                 player_name = form.cleaned_data.get("name")
@@ -72,19 +85,26 @@ def newTournament(request):
                     {"status": "success", "t_id": tournament.id, "players": players}
                 )
                 return response
-        else:
+        elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             logger.info(f"Form errors: {Tform.errors}")
             logger.info(f"Form errors: {formset.errors}")
-            if Tform.is_valid() and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if not formset.is_valid():
                 for form_errors in formset.errors:
                     if form_errors:
                         first_field = next(iter(form_errors))
                         error_message = form_errors[first_field]
+                        break 
                 response = JsonResponse({'status': 'failure', 'reason': error_message})
-                return response
-            elif request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            elif not Tform.is_valid():
                 response = JsonResponse({'status': 'failure', 'reason': "Tournament title is required"})
-                return response
+            elif not Sform.is_valid():
+                for field, message in Sform.errors.items():
+                    if message:
+                        return JsonResponse({'status': 'failure', 'reason': field + ": " + message[0]})
+            else:
+                response = JsonResponse({'status': 'failure', 'reason': "unknown error"})
+            return response
+    else:
         raise Http404()
 
 def nextPool(request, t_id):

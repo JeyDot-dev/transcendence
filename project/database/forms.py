@@ -26,7 +26,7 @@ class UniquePlayerFormSet(forms.BaseModelFormSet):
                 name = form.cleaned_data.get('name')
                 if name:
                     if name in names:
-                        form.add_error('name', 'Name must be unique within the formset.')
+                        form.add_error('name', 'All player names must be unique.')
                     names.append(name)
 
 PlayerFormSet = forms.modelformset_factory(Player, form=addPlayer, formset=UniquePlayerFormSet, fields=['name'], extra=1)
@@ -40,3 +40,10 @@ class GameResultForm(forms.Form):
 
 class tournamentIdForm(forms.Form):
     tournamentId = forms.CharField(label='Tournament Id', max_length=100)
+    
+class GameSettingsForm(forms.Form):
+    timer = forms.IntegerField(label='Timer', initial=120, max_value=600)
+    score = forms.IntegerField(label='Total Score', initial=5, max_value=10)
+    top_spin = forms.BooleanField(label='Top Spin', required=False)
+    back_spin = forms.BooleanField(label='Back Spin', required=False)
+    side_spin = forms.BooleanField(label='Side Spin', required=False)

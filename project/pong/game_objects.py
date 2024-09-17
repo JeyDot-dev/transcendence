@@ -10,7 +10,7 @@ from userManager.models import UserInfos
 from pong.logger import logger
 
 class Paddle:
-    def __init__(self, x, color, userId, arenaWidth, arenaHeight, updateCallBack=None):
+    def __init__(self, x, color, userId, arenaWidth, arenaHeight, updateCallBack=None, sidespin=False):
         self.keys_pressed = {'up': False, 'down': False}
         self.width = 20
         self.height = 200
@@ -20,10 +20,18 @@ class Paddle:
         self.speed = 800
         self.velocity = 0
         self.bounce = 1
-        self.keys = {"up": 0, "down": 0}
+        self.keys_pressed = {
+            "up": False,
+            "down": False,
+            "backspin": False,
+            "topspin": False
+        }
         self.side = 0 if x <= arenaWidth / 2 else 1  # 0 = gauche, 1 = droite
         self.user_id = userId
         self.updateCallBack = updateCallBack
+        self.backspin = False
+        self.topspin = False
+        self.sidespin = True
 
     def move(self, delta_time):
         self.y += self.speed * self.velocity * delta_time
@@ -55,6 +63,7 @@ class Ball:
         self.x = arenaWidth / 2
         self.y = arenaHeight / 2
         self.speed = 400
+        self.maxSpeed = 2000
         self.initialSpeed = self.speed
         self.vel_x = -1
         self.vel_y = 0
@@ -124,17 +133,40 @@ class Ball:
     def _handle_collision(self, paddle, paddle_bounds):
         self.vel_x = -self.vel_x
 
-        impact_factor = 0.6  # Facteur d'influence, ajustable
-        self.vel_y += paddle.velocity * impact_factor
+        # Logique du sidespin
+        if paddle.sidespin:
+            impact_factor = 0.6
+            self.vel_y += paddle.velocity * impact_factor
 
-        speed_influence = 1 + abs(paddle.velocity) * 0.17
-        self.vel_x *= speed_influence
-        self.vel_y *= speed_influence
+            speed_influence = 1 + abs(paddle.velocity) * 0.17
+            self.vel_x *= speed_influence
+            self.vel_y *= speed_influence
+        else:
+            # Logique du OG Pong
+            paddle_center_y = paddle.y
+            distance_from_center = self.y - paddle_center_y
+            max_distance = paddle.height / 2
+
+            normalized_distance = distance_from_center / max_distance
+
+            self.vel_y = normalized_distance
 
         if self.vel_x > 0:
             self.x = paddle_bounds['right'] + self.size / 2 + 1
         else:
             self.x = paddle_bounds['left'] - self.size / 2 - 1
+
+        MAX_SPEED = 4
+        self.vel_x = min(self.vel_x, MAX_SPEED)
+        self.vel_y = min(self.vel_y, MAX_SPEED)
+
+        if paddle.topspin:
+            self.vel_y /= 3
+            self.vel_x = min(self.vel_x * 1.2, MAX_SPEED)
+
+        if paddle.backspin:
+            self.vel_y *= 0.8
+            self.vel_x *= 0.8
 
     def wall_collision(self, score):
         if self.y - self.size / 2 <= 0:
@@ -198,13 +230,27 @@ class Ball:
         self.y += self.speed * self.vel_y * delta_time
 
 class Game:
-    def __init__(self, id, players, nb_max_players=100, width=1280, height=720, updateCallBack=None, type='localGame'):
+    def __init__(
+        self, 
+        id, 
+        players, 
+        nb_max_players=100, 
+        width=1280, 
+        height=720, 
+        updateCallBack=None, 
+        type='localGame', 
+        timer=0, 
+        maxScore=3, 
+        topspin=False, 
+        backspin=False, 
+        sidespin=False
+    ):
         self.id = id
         self.type = type
         self.timer = 0
-        self.maxTimer = 180
+        self.maxTimer = timer
         self.score = [0, 0]
-        self.maxScore = 3
+        self.maxScore = maxScore
         self.running = False
         self.isPlayed = False
         self.isPaused = True
@@ -217,6 +263,9 @@ class Game:
         self.players = players
         self.paddles = []
         self.ball = Ball((255, 255, 255), width, height, updateCallBack)
+        self.allowTopspin = topspin
+        self.allowBackspin = backspin
+        self.allowSidespin = sidespin
 
     async def countdown_before_start(self):
         """Envoie un décompte de 3 secondes avant le début de la partie."""
@@ -264,7 +313,7 @@ class Game:
         if len(self.players) < self.nb_max_players:
             self.players.append(player)
             paddle_x = 100 if side == 0 else self.width - 100
-            paddle = Paddle(paddle_x, player.skin, player.id, self.width, self.height, self.updateCallBack)
+            paddle = Paddle(paddle_x, player.skin, player.id, self.width, self.height, self.updateCallBack, self.allowSidespin)
             self.paddles.append(paddle)
         else:
             raise ValueError("Le jeu est complet")
@@ -323,7 +372,7 @@ class Game:
 
             if self.timer >= self.maxTimer + 1:
                 self.running = False
-                self.determine_winner_and_loser()
+                await self.determine_winner_and_loser()
 
     async def update_physics(self, delta_time):
         if self.isPaused:
@@ -341,22 +390,22 @@ class Game:
 
         if self.score[0] >= self.maxScore or self.score[1] >= self.maxScore:
             self.running = False
-            self.determine_winner_and_loser()
+            await self.determine_winner_and_loser()
 
-    def determine_winner_and_loser(self):
+    async def determine_winner_and_loser(self):
         if self.score[0] > self.score[1]:
             self.winner = self.players[0]
             self.loser = self.players[1]
         else:
             self.winner = self.players[1]
             self.loser = self.players[0]
+        if self.type == 'dbGame':
+            await self.save_scores_to_db()
         if self.updateCallBack:
             asyncio.create_task(self.updateCallBack({
                 'type': 'clearGameId',
                 'gameType': self.type
             }))
-        if self.type == 'dbGame':
-            asyncio.create_task(self.save_scores_to_db())
 
         self.isPlayed = True
         logger.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")

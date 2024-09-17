@@ -9,12 +9,26 @@
             </div>
             <div class="modal-body">
                 <div class="container">
-                    <div id="form_error"></div>
+                    <div id="Tform_error"></div>
                     <form id="newTournamentForm" method="post">
                         {% csrf_token %}
                         <div class="form-group">
                             <label id="top" for="id_tournament_title">Tournament Title</label>
                             {{ form.tournament_title }}
+                        </div>
+                        <div>
+                            <label for="Time">Timer</label>
+                            {{ formSettings.timer }}
+                            <br>
+                            <label for="Score">Points to Win</label>
+                            {{ formSettings.score }}
+                            <br>
+                            <label for="Top_spin">Top Spin</label>
+                            {{ formSettings.top_spin }}
+                            <label for="Back_spin">Back Spin</label>
+                            {{ formSettings.back_spin }}
+                            <label for="Side_spin">Side Spin</label>
+                            {{ formSettings.side_spin }}
                         </div>
                         <div id="formsetContainer">
                             {{ formset.management_form }}  
