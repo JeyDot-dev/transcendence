@@ -20,6 +20,7 @@ services:
     ports:
       - 8443:443
     volumes:
+      - nginx_ssl:/ssl
       - ./project/static_production:/static
       - ${PWD}/containers/scripts/nginx.sh:/nginx.sh
       - ${PWD}/containers/nginx/nginx.conf:/etc/nginx/nginx.conf
@@ -62,7 +63,7 @@ services:
   daphne:
     container_name: daphne
     build:
-      dockerfile:     ./containers/daphne/Dockerfile
+      dockerfile:     ./daphne/Dockerfile
       context:        ./containers 
     restart:        always
     depends_on:
@@ -107,6 +108,7 @@ services:
 
 volumes:
   postgres01_data:
+  nginx_ssl:
 
 
 networks:
