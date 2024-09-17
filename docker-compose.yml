@@ -86,6 +86,7 @@ services:
       SUPER_USER:   ${SUPER_USER}
       SUPER_PASSWORD:   ${SUPER_PASSWORD}
       SUPER_MAIL:   ${SUPER_MAIL}
+      SECRET_KEY: ${SECRET_KEY}
   #********************************************************************************
   gunicorn:
     container_name: gunicorn
@@ -105,6 +106,7 @@ services:
       DB_PASSWORD:  ${DB_PASSWORD}
       DB_HOST:      db
       DB_PORT:      ${DB_PORT}
+      SECRET_KEY: ${SECRET_KEY}
   #********************************************************************************
 
 volumes:
