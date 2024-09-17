@@ -31,7 +31,7 @@ class Paddle:
         self.updateCallBack = updateCallBack
         self.backspin = False
         self.topspin = False
-        self.sidespin = True
+        self.sidespin = sidespin
 
     def move(self, delta_time):
         self.y += self.speed * self.velocity * delta_time
@@ -289,7 +289,7 @@ class Game:
 
     def pause(self):
         self.isPaused = True
-        logger.info("Le jeu est en pause.")
+        # logger.info("Le jeu est en pause.")
         if self.updateCallBack:
             asyncio.create_task(self.updateCallBack({
                 'type': 'gamePaused',
@@ -302,7 +302,7 @@ class Game:
 
     def resume(self):
         self.isPaused = False
-        logger.info("Le jeu reprend.")
+        # logger.info("Le jeu reprend.")
         if self.updateCallBack:
             asyncio.create_task(self.updateCallBack({
                 'type': 'gamePaused',
@@ -408,7 +408,7 @@ class Game:
             }))
 
         self.isPlayed = True
-        logger.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")
+        # logger.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")
 
     async def save_scores_to_db(self):
         """Update the scores in the database for dbGame games and manage tournament progression."""
@@ -424,10 +424,11 @@ class Game:
             await sync_to_async(game_db.finalize_game)()
 
             await sync_to_async(game_db.save)()
-            logger.info(f"Scores saved to database for game {self.id}: {self.score[0]} - {self.score[1]}")
+            # logger.info(f"Scores saved to database for game {self.id}: {self.score[0]} - {self.score[1]}")
 
         except GameDB.DoesNotExist:
-            logger.error(f"Game with ID {self.id} not found in the database.")
+            pass
+            # logger.error(f"Game with ID {self.id} not found in the database.")
 
 class Player:
     def __init__(self, id, skin, name):

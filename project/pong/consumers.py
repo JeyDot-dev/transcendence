@@ -19,16 +19,16 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.group_name = f"game_{self.game_id}"
         self.game_type = self.scope['url_route']['kwargs']['type']
 
-        logger.info(f"Game Type: {self.game_type}, Game ID: {self.game_id}")
+        # logger.info(f"Game Type: {self.game_type}, Game ID: {self.game_id}")
 
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
         # Vérifier si le jeu est déjà en mémoire
         async with physics_lock:
             if self.game_id in games_pool:
-                logger.info(
-                    f"Connecting to an existing game instance for game {self.game_id}"
-                )
+                # logger.info(
+                #    f"Connecting to an existing game instance for game {self.game_id}"
+                #)
                 games_pool[self.game_id]["connections"] += 1
                 self.game = games_pool[self.game_id]["game"]
                 self.log_game_state("Existing Game param")
@@ -37,16 +37,16 @@ class PongConsumer(AsyncWebsocketConsumer):
                 GameDB = await sync_to_async(self.get_game_from_db)(self.game_id)
 
                 if GameDB is not None:
-                    logger.info(f"Game found in the database for game {self.game_id}")
+                    # logger.info(f"Game found in the database for game {self.game_id}")
                     # Récupérer les joueurs depuis la base de données
                     player1 = await sync_to_async(lambda: GameDB.player1)()
                     player2 = await sync_to_async(lambda: GameDB.player2)()
                     timer, maxScore, topspin, backspin, sidespin = await sync_to_async(lambda: (
                         GameDB.timer, GameDB.score, GameDB.top_spin, GameDB.back_spin, GameDB.side_spin
                     ))()
-                    logger.info(f"Player 1: {player1.name}, ID: {player1.id}")
-                    logger.info(f"Player 2: {player2.name}, ID: {player2.id}")
-                    logger.info(f"Timer: {timer}, Max Score: {maxScore}, Topspin: {topspin}, Backspin: {backspin}, Sidespin: {sidespin}")
+                    # logger.info(f"Player 1: {player1.name}, ID: {player1.id}")
+                    # logger.info(f"Player 2: {player2.name}, ID: {player2.id}")
+                    # logger.info(f"Timer: {timer}, Max Score: {maxScore}, Topspin: {topspin}, Backspin: {backspin}, Sidespin: {sidespin}")
 
                     # Créer une nouvelle instance de game avec les joueurs de la base de données
                     self.game = Game(
@@ -60,9 +60,9 @@ class PongConsumer(AsyncWebsocketConsumer):
                         Player(id=2, skin="skin2", name=player2.name), 1
                     )
                 else:
-                    logger.info(
-                        f"No game in the database, creating a new local game instance for game {self.game_id}"
-                    )
+                    # logger.info(
+                    #    f"No game in the database, creating a new local game instance for game {self.game_id}"
+                    #)
                     # Créer un jeu local si aucun jeu DB n'existe
                     self.game = Game(
                         self.game_id, [], 2, 1280, 720, self.notifyEvent, "localGame"
@@ -114,13 +114,13 @@ class PongConsumer(AsyncWebsocketConsumer):
         ball_speed = self.game.ball.speed
         scores = self.game.score
 
-        logger.info(
-            f"Game {self.game_id} state - Context: {context} - "
-            f"Paddles: {paddle_positions}, "
-            f"Ball Position: {ball_position}, "
-            f"Ball Speed: {ball_speed}, "
-            f"Scores: {scores}"
-        )
+        # logger.info(
+        #     f"Game {self.game_id} state - Context: {context} - "
+        #     f"Paddles: {paddle_positions}, "
+        #     f"Ball Position: {ball_position}, "
+        #     f"Ball Speed: {ball_speed}, "
+        #     f"Scores: {scores}"
+        # )
 
     async def notifyEvent(self, eventData):
         await self.channel_layer.group_send(
@@ -134,7 +134,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         game_type = self.scope["url_route"]["kwargs"].get("type", "local")
 
-        logger.info(f"Received message: {text_data_json}, Game Type: {game_type}")
+        # logger.info(f"Received message: {text_data_json}, Game Type: {game_type}")
 
         if game_type == "local":
             if text_data_json["key"] in ["w", "s", "space", "a", "d"]:
@@ -142,30 +142,30 @@ class PongConsumer(AsyncWebsocketConsumer):
             elif text_data_json["key"] in ["arrowup", "arrowdown", "arrowleft", "arrowright"]:
                 who = 1
             else:
-                logger.warning(f"Invalid key pressed: {text_data_json['key']}")
+                # logger.warning(f"Invalid key pressed: {text_data_json['key']}")
                 return
 
             if text_data_json["type"] == "keydown" or text_data_json["type"] == "keyup":
-                logger.info(f"Handling local game key press: {text_data_json['key']} for player {who}")
+                # logger.info(f"Handling local game key press: {text_data_json['key']} for player {who}")
                 await handle_key(self.game, text_data_json["type"], text_data_json["key"], who, self)
 
         elif game_type == "remote":
             user_name = self.scope["user"].username
 
-            logger.info(f"Remote game: Checking user {user_name} for game {self.game_id}")
+            # logger.info(f"Remote game: Checking user {user_name} for game {self.game_id}")
 
             if user_name == self.game.players[0].name:
                 who = 0
-                logger.info(f"User {user_name} controls paddle 0")
+                # logger.info(f"User {user_name} controls paddle 0")
             elif user_name == self.game.players[1].name:
                 who = 1
-                logger.info(f"User {user_name} controls paddle 1")
+                # logger.info(f"User {user_name} controls paddle 1")
             else:
-                logger.warning(f"User {user_name} does not control any paddle in this game")
+                # logger.warning(f"User {user_name} does not control any paddle in this game")
                 return
 
             if text_data_json["key"] in ["w", "s", "arrowup", "arrowdown", "a", "d", "arrowleft", "arrowright"]:
-                logger.info(f"Handling remote game key press: {text_data_json['key']} for player {who}")
+                # logger.info(f"Handling remote game key press: {text_data_json['key']} for player {who}")
                 await handle_key(self.game, text_data_json["type"], text_data_json["key"], who, self)
 
 
@@ -176,7 +176,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(await update_game_state(self.game)))
 
     async def disconnect(self, close_code):
-        logger.info(f"Client disconnected from game {self.game_id}")
+        # logger.info(f"Client disconnected from game {self.game_id}")
 
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
@@ -187,19 +187,20 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             # Vérifier s'il reste des connexions après le délai
         if self.game_id in games_pool and games_pool[self.game_id]["connections"] <= 0:
-            logger.info(f"No more connections for game {self.game_id}. Cleaning up.")
+            # logger.info(f"No more connections for game {self.game_id}. Cleaning up.")
 
             if hasattr(self, "physics_task") and not self.physics_task.done():
                 self.physics_task.cancel()
                 try:
                     await self.physics_task
                 except asyncio.CancelledError:
-                    logger.info(
-                        f"Physics task for game {self.game_id} has been cancelled."
-                    )
+                    pass
+                    # logger.info(
+                    #     f"Physics task for game {self.game_id} has been cancelled."
+                    # )
 
             games_pool.pop(self.game_id, None)
-            logger.info(f"Current games_pool state after cleanup: {games_pool}")
+            # logger.info(f"Current games_pool state after cleanup: {games_pool}")
 
 
 async def handle_key(game, types, key, who, consumer):
@@ -285,8 +286,8 @@ async def handle_key(game, types, key, who, consumer):
                     'glow': 'none'
                 })
 
-    if spin_changed:
-        logger.debug(f"Spin state changed for paddle {who} - Backspin: {paddle.backspin}, Topspin: {paddle.topspin}")
+    # if spin_changed:
+        # logger.debug(f"Spin state changed for paddle {who} - Backspin: {paddle.backspin}, Topspin: {paddle.topspin}")
 
 
 async def build_game_state(game):

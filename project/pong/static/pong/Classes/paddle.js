@@ -20,11 +20,11 @@ export class Paddle {
     }
 
     logMeshData() {
-        console.log('Mesh Data:');
-        console.log('Dimensions (Width, Height, Depth):', this.geometry.parameters.width, this.geometry.parameters.height, this.geometry.parameters.depth);
-        console.log('Position:', this.mesh.position);
-        console.log('Rotation:', this.mesh.rotation);
-        console.log('Scale:', this.mesh.scale);
+        // console.log('Mesh Data:');
+        // console.log('Dimensions (Width, Height, Depth):', this.geometry.parameters.width, this.geometry.parameters.height, this.geometry.parameters.depth);
+        // console.log('Position:', this.mesh.position);
+        // console.log('Rotation:', this.mesh.rotation);
+        // console.log('Scale:', this.mesh.scale);
     }
 
     createGlowMesh(color) {

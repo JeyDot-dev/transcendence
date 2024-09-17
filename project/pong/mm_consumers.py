@@ -19,7 +19,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         if not self.user.is_authenticated:
-            logger.warning(f"Anonymous user tried to join matchmaking: {self.user}.")
+            # logger.warning(f"Anonymous user tried to join matchmaking: {self.user}.")
             await self.send(text_data=json.dumps({
                 'type': 'Matchmaking',
                 'action': 'close',
@@ -28,10 +28,10 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             await self.close()
 
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        logger.info(f"User {self.user.username} added to group {self.group_name}")
+        # logger.info(f"User {self.user.username} added to group {self.group_name}")
 
         await self.set_user_online(True)
-        logger.info(f"User {self.user.username} has been set to online and added to matchmaking queue.")
+        # logger.info(f"User {self.user.username} has been set to online and added to matchmaking queue.")
 
         matchmaking_queue.append(self.user)
         await self.send(text_data=json.dumps({
@@ -39,7 +39,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             'message': f'You have joined the matchmaking queue, {self.user.username}'
         }))
 
-        logger.debug(f"Matchmaking queue: {[user.username for user in matchmaking_queue]}")
+        # logger.debug(f"Matchmaking queue: {[user.username for user in matchmaking_queue]}")
         
         asyncio.create_task(self.match_players())
 
@@ -48,13 +48,13 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         from database.models import Game, Player, generate_unique_id
         if self.user in matchmaking_queue:
             matchmaking_queue.remove(self.user)
-            logger.info(f"User {self.user.username} has been removed from the matchmaking queue.")
+            # logger.info(f"User {self.user.username} has been removed from the matchmaking queue.")
 
         await self.set_user_online(False)
-        logger.info(f"User {self.user.username} set to offline.")
+        # logger.info(f"User {self.user.username} set to offline.")
 
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
-        logger.info(f"User {self.user.username} removed from group {self.group_name}")
+        # logger.info(f"User {self.user.username} removed from group {self.group_name}")
 
     async def match_players(self):
         from userManager.models import UserInfos
@@ -63,7 +63,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             await asyncio.sleep(5) # Change time here for how much you have to wait before paiiring players
             queue_info = [user.username for user in matchmaking_queue]
 
-            logger.info(f"Matchmaking check: queue contains {len(matchmaking_queue)} players.")
+            # logger.info(f"Matchmaking check: queue contains {len(matchmaking_queue)} players.")
             await self.send(text_data=json.dumps({
                 'type': 'Matchmaking',
                 'message': f'Searching for other players... , {self.user.username}',
@@ -75,16 +75,16 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
                 if len(matchmaking_queue) >= 2:
                     player1 = matchmaking_queue.pop(0)
                     player2 = matchmaking_queue.pop(0)
-                    logger.info(f"Match found: {player1.username} vs {player2.username}")
+                    # logger.info(f"Match found: {player1.username} vs {player2.username}")
 
                     game_ws_id = await database_sync_to_async(generate_unique_id)()
-                    logger.debug(f"Generated game_ws_id: {game_ws_id}")
+                    # logger.debug(f"Generated game_ws_id: {game_ws_id}")
 
                     await self.create_game(player1, player2, game_ws_id)
-                    logger.info(f"Game created between {player1.username} and {player2.username}, game_ws_id={game_ws_id}")
+                    # logger.info(f"Game created between {player1.username} and {player2.username}, game_ws_id={game_ws_id}")
 
                     await self.set_players_playing(player1, player2, True)
-                    logger.info(f"Players {player1.username} and {player2.username} are now marked as playing.")
+                    # logger.info(f"Players {player1.username} and {player2.username} are now marked as playing.")
 
                     # Send match found message ONLY to both players via their respective groups
                     await self.channel_layer.group_send(
@@ -120,7 +120,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         user = UserInfos.objects.get(username=self.user.username)
         user.is_online = is_online
         user.save()
-        logger.info(f"User {user.username} status set to {'online' if is_online else 'offline'}.")
+        # logger.info(f"User {user.username} status set to {'online' if is_online else 'offline'}.")
 
     @database_sync_to_async
     def create_game(self, player1, player2, game_ws_id):
@@ -132,7 +132,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         game = Game.objects.create(player1=player1_instance, player2=player2_instance, game_ws_id=game_ws_id)
         player1_instance.user.match_history.add(game)
         player2_instance.user.match_history.add(game)
-        logger.info(f"Game object created between {player1.username} and {player2.username} with game_ws_id={game_ws_id}.")
+        # logger.info(f"Game object created between {player1.username} and {player2.username} with game_ws_id={game_ws_id}.")
         return game
 
     @database_sync_to_async
@@ -145,4 +145,4 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         player2_instance.is_playing = is_playing
         player1_instance.save()
         player2_instance.save()
-        logger.info(f"Players {player1.username} and {player2.username} set to {'playing' if is_playing else 'not playing'}.")
+        # logger.info(f"Players {player1.username} and {player2.username} set to {'playing' if is_playing else 'not playing'}.")

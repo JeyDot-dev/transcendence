@@ -37,7 +37,7 @@ export class SocketManager {
 
     connect() {
         if (this.type !== 'matchmaking' && !this.gameId) {
-            console.warn("Le type de connexion ou l'ID du jeu doivent être définis avant la connexion.");
+            // console.warn("Le type de connexion ou l'ID du jeu doivent être définis avant la connexion.");
             return;
         }
         this.ws = new WebSocket(this.getWebSocketUrl());
@@ -50,8 +50,8 @@ export class SocketManager {
         };
         this.ws.onclose = () => {
             this.reconnectTimeout = setTimeout(() => {
-                console.log("Connexion WebSocket fermée, reconnexion...", this.gameId, this.customGameId);
-                console.log(this.reconnectTimeout);
+               // console.log("Connexion WebSocket fermée, reconnexion...", this.gameId, this.customGameId);
+               // console.log(this.reconnectTimeout);
                 // Si le WebSocket a changé avant la reconnexion, on ne fait rien
                 if (this.ws === null || this.ws.readyState === WebSocket.CLOSED) {
                     this.connect();
@@ -70,7 +70,7 @@ export class SocketManager {
 
     close() {
         if (this.reconnectTimeout) {
-            console.log('Clear Timout');
+           // console.log('Clear Timout');
             clearTimeout(this.reconnectTimeout);
         }
         if (this.ws) {
@@ -156,7 +156,7 @@ export class SocketManager {
         // this.connect();
     }
     connectRemoteGame(customGameId) {
-        console.log('Connnecting to custom game id: ', customGameId);
+       // console.log('Connnecting to custom game id: ', customGameId);
         this.customGameId = customGameId;
         // this.setType('customGame');
         // // this.type = 'customGame';
@@ -172,11 +172,11 @@ export class SocketManager {
     }
 
     defaultOnMessageCallback(data) {
-        console.log('WS DATA: ', data);
+       // console.log('WS DATA: ', data);
     }
     // Implémentation par défaut pour le onMessageCallback
     gameOnMessageCallback(data) {
-        console.log(data);
+       // console.log(data);
         let gameData = data.game ? data.game : data;
         if (gameData.type == "initGame" && !this.gameInitilized) {
             this.game = new Game(this.threeRoot, gameData, this);
@@ -206,13 +206,13 @@ export class SocketManager {
         }
     }
     matchmakingOnMessageCallBack(data) {
-        console.log(data);
+       // console.log(data);
         switch (data.type) {
             case 'match_created':
-                console.log('FrontEnd connect custom game');
+               // console.log('FrontEnd connect custom game');
                 this.lastMenu.hide();
                 this.close();
-                console.log('FrontEnd connect custom game id: ', data.game_ws_id);
+               // console.log('FrontEnd connect custom game id: ', data.game_ws_id);
                 this.lastMenu.matchmakingAnimation.hide();
                 this.connectRemoteGame(data.game_ws_id);
                 break;
