@@ -46,6 +46,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     ))()
                     logger.info(f"Player 1: {player1.name}, ID: {player1.id}")
                     logger.info(f"Player 2: {player2.name}, ID: {player2.id}")
+                    logger.info(f"Timer: {timer}, Max Score: {maxScore}, Topspin: {topspin}, Backspin: {backspin}, Sidespin: {sidespin}")
 
                     # Créer une nouvelle instance de game avec les joueurs de la base de données
                     self.game = Game(

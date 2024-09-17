@@ -372,7 +372,7 @@ class Game:
 
             if self.timer >= self.maxTimer + 1:
                 self.running = False
-                self.determine_winner_and_loser()
+                await self.determine_winner_and_loser()
 
     async def update_physics(self, delta_time):
         if self.isPaused:
@@ -390,22 +390,22 @@ class Game:
 
         if self.score[0] >= self.maxScore or self.score[1] >= self.maxScore:
             self.running = False
-            self.determine_winner_and_loser()
+            await self.determine_winner_and_loser()
 
-    def determine_winner_and_loser(self):
+    async def determine_winner_and_loser(self):
         if self.score[0] > self.score[1]:
             self.winner = self.players[0]
             self.loser = self.players[1]
         else:
             self.winner = self.players[1]
             self.loser = self.players[0]
+        if self.type == 'dbGame':
+            await self.save_scores_to_db()
         if self.updateCallBack:
             asyncio.create_task(self.updateCallBack({
                 'type': 'clearGameId',
                 'gameType': self.type
             }))
-        if self.type == 'dbGame':
-            asyncio.create_task(self.save_scores_to_db())
 
         self.isPlayed = True
         logger.debug(f"Le gagnant est {self.winner}, le perdant est {self.loser}.")
