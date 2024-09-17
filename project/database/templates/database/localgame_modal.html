@@ -13,11 +13,12 @@
                     <form id="newGameForm" method="post">
                         {% csrf_token %}
                         <label for="player1_name">Player 1</label>
-                        <input type="text" id="player1_name" name="player1_name"
-                            {% if user.is_authenticated %}
-                                value="{{ user.username }}"
-                            {% endif %}
-                        >
+                        {{ formGame.player1_name }}
+                        {% if user.is_authenticated %}
+                            <script>
+                                document.getElementById("id_player1_name").value = "{{ user.username }}";
+                            </script>
+                        {% endif %}
                         <br>
                         <label for="player2_name">Player 2</label>
                         {{ formGame.player2_name }}

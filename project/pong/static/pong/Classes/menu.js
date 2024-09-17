@@ -363,7 +363,7 @@ export class Menu {
             lookAt: { x: 0, y: 0, z: 0 }
         }, 2000);
         if (!this.shop) {
-            this.shop = new Shop(this.threeRoot, this.socketManager);
+            this.shop = new Shop(this.threeRoot, this.socketManager, this);
         } else {
             this.shop.show();
         }
