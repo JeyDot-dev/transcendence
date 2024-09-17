@@ -77,6 +77,7 @@ export class SocketManager {
             this.ws.close();
         }
         this.ws = null;
+        this.type = null;
     }
 
     setType(type) {
