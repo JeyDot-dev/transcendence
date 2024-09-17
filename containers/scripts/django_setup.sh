@@ -18,5 +18,5 @@ if not User.objects.filter(username='$SUPER_USER').exists():
 EOF
 	echo "Django and superuser are  setup."
 fi
-
+yes yes | python manage.py collectstatic
 exec "$@"
