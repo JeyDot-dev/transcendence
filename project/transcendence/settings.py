@@ -27,11 +27,12 @@ SECRET_KEY = "django-insecure-47+cfy5ik+#v4zze7ww3aq-mmw=mq_ju$5tl1w+#p$ad)_e&os
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["c3r5s5.42lausanne.ch", "localhost"]
+ALLOWED_HOSTS = ["c2r7s8.42lausanne.ch", "localhost"]
 CSRF_TRUSTED_ORIGINS = [
     "https://transcendence.jjorge.ch",
     "https://195.15.214.88",
     "https://localhost:8443",
+    "https://c2r7s8.42lausanne.ch:8443",
 ]
 
 
