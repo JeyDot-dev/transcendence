@@ -67,7 +67,7 @@
 			</li>
 			{% for friend in user.friends.all %}
 				<li class="list-group-item">
-					<a href="/userManager/profile/{{ friend.username }}" style="text-decoration: none;">
+					<a href="/userManager/profile/{{ friend.username }}" style="text-decoration: none;" data-link>
 						{% if friend.is_online %}
 							<span class="badge bg-success">online</span>
 						{% else %}
@@ -89,7 +89,7 @@
 					<button class="btn" onclick="changeUserValue('accept_friend_request', '{{ friend_req.username }}', '{{ user.username }}')">
 						<span class="badge bg-success">Accept</span>
 					</button>
-					<a href="/userManager/profile/{{ friend_req.username }}" style="text-decoration: none;">
+					<a href="/userManager/profile/{{ friend_req.username }}" style="text-decoration: none;" data-link>
 						{{ friend_req.username }}
 					</a>
 					<button class="btn" onclick="changeUserValue('deny_friend_request', '{{ friend_req.username }}', '{{ user.username }}')">
