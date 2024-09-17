@@ -98,6 +98,7 @@
 				</li>
 			{% endfor %}
 		</ul>
+		{% include "searchBar.html" %}
 	</div>
 </div>
 
@@ -138,6 +139,17 @@
 				<button class="btn" onclick="changeUserValue('new_password', document.getElementById('new_password_to_send').value, '{{ user.username }}')">Update password</button>
 		</ul>
 	</form>
+	<ul class="list-group list-group-horizontal-sm">
+		<li class="list-group-item flex-fill">
+			<div class="form-floating" id="floatingSkin" placeholder="change skin">
+				<input type="color" class="form-control" id="new_skin" placeholder="change skin" value="{{ user.skin }}" required>
+				<label for="new_skin">Change skin color</label>
+			</div>
+		</li>
+		<li class="list-group-item flex-fill">
+			<button class="btn" onclick="changeUserValue('set_skin', document.getElementById('new_skin').value, '{{ user.username }}')">Update skin</button>
+		</li>
+	</ul>
 </div>
 {% else %}
 <h1>Something went wrong</h1>

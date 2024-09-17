@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import validate_email, ValidationError
 from django.db import models
+import re
 
 class UserInfos(AbstractUser):
 	profile_pic = models.ImageField(
@@ -62,10 +63,6 @@ class UserInfos(AbstractUser):
 	def set_username(self, username: str):
 		if len(username) < 3 or len(username) > 100:
 			raise ValueError("Le nom d'utilisateur doit faire entre 3 et 100 caractères.")
-		if not username.isalnum():
-			raise ValueError("Le nom d'utilisateur ne doit contenir que des caractères alphanumériques.")
-		if len(username) < 3 or len(username) > 100:
-			raise ValueError("Le nom d'utilisateur doit faire entre 3 et 100 caractères.")
 		self.username = username
 		self.save()
 
@@ -86,10 +83,6 @@ class UserInfos(AbstractUser):
 		self.save()
 
 	def set_status(self, status: str):
-		if len(status) < 3 or len(status) > 100:
-			raise ValueError("Le statut doit faire entre 3 et 100 caractères.")
-		if not status.isalnum():
-			raise ValueError("Le statut ne doit contenir que des caractères alphanumériques.")
 		if len(status) < 3 or len(status) > 142:
 			raise ValueError("Le statut doit faire entre 3 et 142 caractères.")
 		self.status = status
