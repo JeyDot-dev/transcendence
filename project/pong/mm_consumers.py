@@ -50,7 +50,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             matchmaking_queue.remove(self.user)
             # logger.info(f"User {self.user.username} has been removed from the matchmaking queue.")
 
-        await self.set_user_online(False)
+        # await self.set_user_online(False)
         # logger.info(f"User {self.user.username} set to offline.")
 
         await self.channel_layer.group_discard(self.group_name, self.channel_name)

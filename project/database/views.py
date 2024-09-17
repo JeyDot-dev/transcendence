@@ -30,6 +30,10 @@ def newGame(request):
             player2_name = form.cleaned_data['player2_name']
             player1, new1= Player.objects.get_or_create(name=player1_name)
             player2, new1 = Player.objects.get_or_create(name=player2_name)
+            if request.user.is_authenticated and request.user.username == player1_name:
+                player1.user = request.user
+            elif request.user.is_authenticated and request.user.username == player2_name:
+                player2.user = request.user
             game_ws_id = generate_unique_id()
             player1.save()
             player2.save()
@@ -66,6 +70,8 @@ def newTournament(request):
                 player_name = form.cleaned_data.get("name")
                 if player_name:
                     player, created = Player.objects.get_or_create(name=player_name)
+                    if request.user.is_authenticated and request.user.username == player_name:
+                        player.user = request.user
                     player.is_winner = True
                     player.save()
                     tournament.players.add(player)
