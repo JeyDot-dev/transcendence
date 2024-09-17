@@ -48,7 +48,7 @@ class Tournament(models.Model):
         else:"""
         while len(winners) >= 2:
             game = self.games.create(player1=winners.pop(), player2=winners.pop(), game_ws_id=generate_unique_id(), pool=self.round_number, timer=self.timer, score=self.score, top_spin=self.top_spin, back_spin=self.back_spin, side_spin = self.side_spin)
-        if user.is_authenticated:
+        if user.is_authenticated and (game.player1.name == user.username or game.player2.name == user.username):
             user.match_history.add(game)
         self.round_number = models.F('round_number') + 1
         self.save()
