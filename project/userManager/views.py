@@ -36,7 +36,6 @@ def login_view(request):
 			{"message": "Login successful", "token": token.key, "user": user.to_dict()},
 			status=status.HTTP_200_OK,
 		)
-	request.user.set_online(False)
 	return Response({"message": "Login failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
