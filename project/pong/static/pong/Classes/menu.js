@@ -144,13 +144,13 @@ export class Menu {
         let farmData = new FormData(form);
     }
     createMenuItems() {
-        this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 380), () => {
+        this.localMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local', this.colorPalette[0], new THREE.Vector3(0, 0, 200), () => {
             this.formSubmittedSuccessfully = false;
             this.disableEventListener();
             this.modalManager.openModal('modalNewGame', this.handleNewGameSubmit.bind(this), this);
             //this.newLocalGame();
         });
-        this.matchmakingMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 180), () => {
+        this.matchmakingMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Matchmaking', this.colorPalette[1], new THREE.Vector3(0, 0, 0), () => {
             console.log("Clicked On: Matchmaking");
             if (!(this.user_auth)){
                 navigateTo('userManager');
@@ -161,28 +161,28 @@ export class Menu {
                 this.socketManager.setType('matchmaking');
             }
         });
-        this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Local Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -20), () => {
+        this.localTournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[2], new THREE.Vector3(0, 0, -200), () => {
             this.formSubmittedSuccessfully = false;
-            console.log("Clicked On: Local Tournament");
+            console.log("Clicked On: Tournament");
             this.disableEventListener();
             this.modalManager.openModal('modalNewTournament', this.handleTournamentSubmit.bind(this), this);
         });
-        this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
-        });
-        this.shopMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Shop', this.colorPalette[4], new THREE.Vector3(0, 0, -440), () => {
+        // this.tournamentMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Tournament', this.colorPalette[3], new THREE.Vector3(0, 0, -220), () => {
+        // });
+        this.shopMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Shop', this.colorPalette[4], new THREE.Vector3(0, 0, -400), () => {
             this.newShop();
         });
-        this.optionsMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[5], new THREE.Vector3(0, 0, -640), () => {
+        // this.optionsMenuMain = new MenuItem(this.menuGroup, this.scene, this.camera, this.font, 'Options', this.colorPalette[5], new THREE.Vector3(0, 0, -440), () => {
 
-        });
+        // });
 
         this.menuItems = [
             this.localMenuMain,
             this.matchmakingMenuMain,
             this.localTournamentMenuMain,
-            this.tournamentMenuMain,
-            this.shopMenuMain,
-            this.optionsMenuMain
+            // this.tournamentMenuMain,
+            this.shopMenuMain
+            // this.optionsMenuMain
         ];
     }
 

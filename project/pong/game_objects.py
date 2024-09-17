@@ -156,7 +156,7 @@ class Ball:
         else:
             self.x = paddle_bounds['left'] - self.size / 2 - 1
 
-        MAX_SPEED = 10
+        MAX_SPEED = 4
         self.vel_x = min(self.vel_x, MAX_SPEED)
         self.vel_y = min(self.vel_y, MAX_SPEED)
 
