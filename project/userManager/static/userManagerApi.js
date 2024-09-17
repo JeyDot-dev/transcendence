@@ -141,11 +141,15 @@ function logout() {
 }
 
 window.addEventListener('beforeunload', function () {
-	changeUserValue("set_online", false, local_user.username);
+	if (local_user && local_user.username) {
+		changeUserValue("set_online", false, local_user.username);
+	}
 });
 
 window.addEventListener('load', function () {
-	changeUserValue("set_online", true, local_user.username);
+	if (local_user && local_user.username) {
+		changeUserValue("set_online", true, local_user.username);
+	}
 });
 
 function changeUserValue(url_key, value, username) {
