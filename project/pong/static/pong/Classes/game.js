@@ -151,7 +151,9 @@ export class Game {
                 0xffffff,
                 element.position[0] - this.offSet.x,
                 element.position[1] - this.offSet.y,
-                element.id
+                new THREE.Vector2(0, 0),
+                element.id,
+                this.threeRoot
             );
             newPaddle.addToGroup(this.gameGroup);
             this.paddles.push(newPaddle);
