@@ -7,7 +7,6 @@ export class ModalManager {
     openModal(modalId, onSubmitCallback, menuInstance) {
         const modalElement = document.getElementById(modalId);
         if (!modalElement) {
-            console.error(`Modal with ID ${modalId} not found`);
             return;
         }
 
