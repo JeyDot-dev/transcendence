@@ -27,12 +27,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["c2r7s8.42lausanne.ch", "localhost"]
+ALLOWED_HOSTS = ["localhost"]
 CSRF_TRUSTED_ORIGINS = [
-    "https://transcendence.jjorge.ch",
-    "https://195.15.214.88",
     "https://localhost:8443",
-    "https://c2r7s8.42lausanne.ch:8443",
 ]
 
 
