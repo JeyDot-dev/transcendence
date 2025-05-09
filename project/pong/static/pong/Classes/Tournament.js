@@ -182,6 +182,7 @@ export class TournamentMenu {
         try {
             const url = '/database/nextPool/' + this.tournamentId;
             const response = await fetchJSON(url);
+            console.log('Response: ', response);
             this.totalWidth = response.games.length * 200;
             this.initializeTournamentPool(response.games);
             this.enableClicks();
